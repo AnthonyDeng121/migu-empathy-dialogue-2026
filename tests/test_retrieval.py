@@ -125,12 +125,44 @@ class RetrievalBaselineTests(unittest.TestCase):
         prediction = model.predict(sample)
         self.assertEqual(prediction["response_text"], self.target_b["response_text"])
 
+    def test_predict_content_overlap_tie_returns_first_candidate(self) -> None:
+        """Lock the tie contract: equal-length candidates share only the role prefix,
+        cosines tie exactly, and predict returns the first candidate in training order."""
+        training = [
+            make_conversation("train_conv_a", self.target_a, "甲" * 20),
+            make_conversation("train_conv_b", self.target_b, "乙" * 20),
+        ]
+        model = RetrievalBaseline(training, ngram=3)
+        sample = {
+            "id": "test1_000003_t1",
+            "conversation_id": "test1_conv_000003",
+            "target_user_turn_id": 1,
+            "history": [{"turn_id": 1, "role": "user", "content": "丙" * 20}],
+        }
+        prediction = model.predict(sample)
+        validate_prediction(prediction, sample["id"])
+        self.assertEqual(prediction["response_text"], self.target_a["response_text"])
+
+    def test_predict_empty_training_library_raises(self) -> None:
+        """An empty retrieval library has no candidate to return; predict must fail loudly."""
+        model = RetrievalBaseline([], ngram=3)
+        sample = {
+            "id": "test1_000004_t1",
+            "conversation_id": "test1_conv_000004",
+            "target_user_turn_id": 1,
+            "history": [{"turn_id": 1, "role": "user", "content": "随便说什么"}],
+        }
+        with self.assertRaises(ValueError):
+            model.predict(sample)
+
     def test_candidate_holds_target_and_features(self) -> None:
         model = RetrievalBaseline(self.training, ngram=3)
         self.assertEqual(len(model.candidates), 2)
-        for candidate in model.candidates:
+        for index, candidate in enumerate(model.candidates):
             self.assertIsInstance(candidate, Candidate)
             self.assertTrue(candidate.features)
+            expected = history_until(self.training[index]["turns"], 1)
+            self.assertEqual(candidate.text, expected)
 
 
 if __name__ == "__main__":
