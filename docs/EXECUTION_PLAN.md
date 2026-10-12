@@ -61,7 +61,7 @@
 | 10/12 | A | 官方资料归档、入口契约、项目骨架 | Integration Gate | `docs/OFFICIAL_REQUIREMENTS.md`、验收记录 | Docker daemon 未启动；A | 启动 Docker 并完成容器回归 | 待验收 | 待复核 |
 | 10/12 | B | 全量数据审计、Schema、指标框架 | Done | `docs/DATA_AUDIT.md`、`reports/data_audit.json` | 无 | 建立 conversation 级训练清单 | 不适用 | 已完成 |
 | 10/12 | C | 标签映射和多数类分类 baseline | Integration Gate | `src/data/schema.py`、`src/classification/majority.py`、`scripts/evaluate_majority_classifier.py`、`reports/CLASSIFICATION_BASELINE.md`、`reports/classification_baseline.json`、PR #1 | 已用官方 train/val JSONL 完成全量评测；等待 D 审查与 A 集成、B 独立复核 | D 完成代码审查后接入统一配置与评测接口 | 待验收 | 待复核 |
-| 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | `results/baseline/`、`reports/baseline_val100_metrics.json` | 分数仅为保底；D | 建立生成 baseline | 待验收 | 指标已记录 |
+| 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | `results/baseline/`、`reports/baseline_val100_metrics.json`、`reports/baseline_val_full_metrics.json`、`tests/test_retrieval.py` | 分数仅为保底；官方数据已就位 `data/raw/`；D | 建立生成 baseline；D 负责验收 C 的 PR | 待验收 | 指标已记录 |
 | 10/13 | A | GitHub 保护规则、CI、实验模板 |  |  |  |  |  |  |
 | 10/13 | B | conversation 分组数据、指标回归 |  |  |  |  |  |  |
 | 10/13 | C | 情感分类 baseline |  |  |  |  |  |  |
