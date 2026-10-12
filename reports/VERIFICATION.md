@@ -68,3 +68,13 @@ docker run --rm --network none --mount "type=bind,source=$repoPath\data\raw,targ
 python scripts/validate_io.py --input data/raw/test_inference_data.jsonl --submission results/docker_day1_sample/submission.jsonl
 ```
 
+## PR 审查修复：Shell 脚本固定 LF（2026-10-12）
+
+- 审查指出 Windows 上 `core.autocrlf=true` 会在未配置属性时将 Shell 脚本 checkout 为 CRLF，Linux 直接执行入口时可能因 shebang 含 CR 而失败。
+- 新增 `.gitattributes`：`*.sh text eol=lf`，以仓库属性强制所有 `.sh` 使用 LF，不修改用户的全局 Git 设置。
+- 同步最新 `origin/main`（`0645d0b`）后验证；`git check-attr text eol -- start.sh` 返回 `text: set`、`eol: lf`，`git ls-files --eol` 显示索引与工作区均为 LF。
+- 使用 `git checkout-index` 向忽略的临时目录重新 checkout `start.sh`，逐字节确认无 CR，且首行是 `#!/usr/bin/env sh\n`。`git add --renormalize -- start.sh` 未产生脚本内容改动。
+- 重新构建开发镜像成功，镜像 ID 为 `sha256:5be8046504eb051c1f2cd5d0313f411cc589fd4661aa9f7f526d38132b9bca28`。
+- 不覆盖 ENTRYPOINT，使用默认 `/root/participant/start.sh` 在 `--network none` 下运行官方样例，退出码 0，3/3 输出合法；这是 shebang 直接启动验收，与此前显式使用 bash 的测试不同。
+- 输出位于 `results/docker_lf_review/`，不提交生成数据。正式官方基础镜像验收仍待完成。
+
