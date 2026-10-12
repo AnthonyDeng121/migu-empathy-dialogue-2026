@@ -58,7 +58,7 @@
 
 | 日期 | 成员 | 计划交付 | 状态 | 证据链接或文件 | 阻塞项与负责人 | 下一步 | A集成结果 | B复核结果 |
 |---|---|---|---|---|---|---|---|---|
-| 10/12 | A | 官方资料归档、入口契约、项目骨架 | Integration Gate | `docs/OFFICIAL_REQUIREMENTS.md`、验收记录 | Docker daemon 未启动；A | 启动 Docker 并完成容器回归 | 待验收 | 待复核 |
+| 10/12 | A | 官方资料归档、入口契约、项目骨架 | Integration Gate | `docs/OFFICIAL_REQUIREMENTS.md`、`reports/VERIFICATION.md`、`reports/day1_docker_val100_metrics.json` | 开发镜像工程验收已通过；待 B 独立复核与 PR 合并 | B 复核断网容器证据，确认官方基础镜像后推进正式镜像 | 样例 3/3、验证 100/100 断网通过 | 待复核 |
 | 10/12 | B | 全量数据审计、Schema、指标框架 | Done | `docs/DATA_AUDIT.md`、`reports/data_audit.json` | 无 | 建立 conversation 级训练清单 | 不适用 | 已完成 |
 | 10/12 | C | 标签映射和分类输入契约检查 | Ready | `docs/OFFICIAL_REQUIREMENTS.md` | 等 B 冻结第一版训练清单；B | 建立多数类与 encoder baseline | 待集成 | 待复核 |
 | 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | `results/baseline/`、`reports/baseline_val100_metrics.json` | 分数仅为保底；D | 建立生成 baseline | 待验收 | 指标已记录 |
