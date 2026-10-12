@@ -1,0 +1,224 @@
+{
+  "audit_version": 1,
+  "seed": 20261012,
+  "splits": {
+    "train": {
+      "path": "official_materials\\训练-验证-数据集\\train\\train_public.jsonl",
+      "file_size_bytes": 69575005,
+      "sha256": "184a47471f8d6f70fa21b9265b0a4d4e51c3748ba25af39a801884a2da35341a",
+      "conversations": 8338,
+      "unique_conversation_ids": 8338,
+      "users": null,
+      "users_note": "No user_id field exists in the supplied schema; user count cannot be measured.",
+      "prediction_samples": 18657,
+      "turns_per_conversation": {
+        "count": 8338,
+        "min": 2,
+        "mean": 14.14,
+        "p50": 12.0,
+        "p95": 34.0,
+        "max": 50
+      },
+      "context_length_chars": {
+        "count": 18657,
+        "min": 23,
+        "mean": 1473.445,
+        "p50": 877.0,
+        "p95": 4672.6,
+        "max": 40416
+      },
+      "response_length_chars": {
+        "count": 18657,
+        "min": 2,
+        "mean": 218.471,
+        "p50": 129.0,
+        "p95": 805.2,
+        "max": 1809
+      },
+      "emotion_distribution": {
+        "anxiety": 6340,
+        "relaxed": 2819,
+        "helplessness": 1575,
+        "fear": 1388,
+        "sadness": 1085,
+        "mixed": 945,
+        "loneliness": 876,
+        "anger": 855,
+        "shame": 752,
+        "gratitude": 695,
+        "neutral": 654,
+        "pride": 234,
+        "joy": 171,
+        "disgust": 125,
+        "care": 79,
+        "surprise": 64
+      },
+      "profile_distribution": {
+        "personality_traits": {
+          "<empty>": 10492,
+          "sensitive": 5165,
+          "high_conscientiousness": 2281,
+          "conservative": 1364,
+          "introverted": 717,
+          "assertive": 675,
+          "agreeable": 361,
+          "emotionally_stable": 336,
+          "open": 59,
+          "extroverted": 37,
+          "casual": 27
+        },
+        "interests": {
+          "<empty>": 12919,
+          "career_development": 1472,
+          "social": 764,
+          "study_exam": 746,
+          "pets": 744,
+          "games": 704,
+          "sports_fitness": 625,
+          "art_design": 341,
+          "reading_writing": 316,
+          "travel_outdoor": 144,
+          "music": 133,
+          "film_animation": 108,
+          "programming_technology": 82
+        },
+        "style": {
+          "<empty>": 8731,
+          "rational": 4418,
+          "direct": 2603,
+          "brief": 1166,
+          "detailed": 1121,
+          "high_emotional_expression": 945,
+          "colloquial": 654,
+          "indirect": 516,
+          "formal": 128,
+          "humorous": 81,
+          "emoji_user": 27,
+          "low_emotional_expression": 3
+        }
+      },
+      "missing_or_empty": {
+        "memory_refs_empty": 437
+      },
+      "duplicate_context_groups": 508,
+      "duplicate_context_samples": 1016,
+      "duplicate_response_groups": 555,
+      "duplicate_last_user_groups": 511,
+      "replacement_characters": 0,
+      "unexpected_control_characters": 0,
+      "validation_errors": {
+        "prediction point does not reference adjacent user/assistant turns": 4
+      }
+    },
+    "val": {
+      "path": "official_materials\\训练-验证-数据集\\val\\val_public.jsonl",
+      "file_size_bytes": 6078596,
+      "sha256": "097c0639ef7370a18a54670ec3c8390ce5dc87c1ed95f436cef07b68dfed7668",
+      "conversations": 900,
+      "unique_conversation_ids": 900,
+      "users": null,
+      "users_note": "No user_id field exists in the supplied schema; user count cannot be measured.",
+      "prediction_samples": 2354,
+      "turns_per_conversation": {
+        "count": 900,
+        "min": 4,
+        "mean": 13.036,
+        "p50": 10.0,
+        "p95": 34.0,
+        "max": 50
+      },
+      "context_length_chars": {
+        "count": 2354,
+        "min": 31,
+        "mean": 1145.245,
+        "p50": 808.5,
+        "p95": 3254.7,
+        "max": 14437
+      },
+      "response_length_chars": {
+        "count": 2354,
+        "min": 3,
+        "mean": 158.24,
+        "p50": 98.5,
+        "p95": 508.7,
+        "max": 1754
+      },
+      "emotion_distribution": {
+        "anxiety": 751,
+        "relaxed": 409,
+        "mixed": 177,
+        "helplessness": 142,
+        "sadness": 131,
+        "fear": 124,
+        "gratitude": 118,
+        "shame": 118,
+        "loneliness": 115,
+        "anger": 115,
+        "neutral": 53,
+        "pride": 40,
+        "disgust": 21,
+        "joy": 20,
+        "care": 11,
+        "surprise": 9
+      },
+      "profile_distribution": {
+        "personality_traits": {
+          "<empty>": 1456,
+          "sensitive": 487,
+          "conservative": 253,
+          "high_conscientiousness": 205,
+          "assertive": 74,
+          "agreeable": 53,
+          "introverted": 52,
+          "emotionally_stable": 9,
+          "casual": 4,
+          "open": 4,
+          "extroverted": 2
+        },
+        "interests": {
+          "<empty>": 1763,
+          "career_development": 128,
+          "pets": 106,
+          "study_exam": 95,
+          "sports_fitness": 84,
+          "games": 81,
+          "reading_writing": 40,
+          "art_design": 32,
+          "social": 23,
+          "travel_outdoor": 21,
+          "music": 19,
+          "film_animation": 13,
+          "programming_technology": 1
+        },
+        "style": {
+          "<empty>": 1218,
+          "rational": 585,
+          "direct": 281,
+          "detailed": 147,
+          "brief": 120,
+          "indirect": 59,
+          "high_emotional_expression": 57,
+          "colloquial": 54,
+          "formal": 22,
+          "humorous": 8
+        }
+      },
+      "missing_or_empty": {
+        "memory_refs_empty": 41
+      },
+      "duplicate_context_groups": 0,
+      "duplicate_context_samples": 0,
+      "duplicate_response_groups": 5,
+      "duplicate_last_user_groups": 0,
+      "replacement_characters": 0,
+      "unexpected_control_characters": 0,
+      "validation_errors": {}
+    }
+  },
+  "cross_split_overlap": {
+    "conversation_ids": 0,
+    "contexts": 0,
+    "responses": 18,
+    "last_user_texts": 0
+  }
+}

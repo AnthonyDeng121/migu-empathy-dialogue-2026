@@ -1,0 +1,50 @@
+# 初赛技术方案
+
+## 决策摘要
+
+先保证官方入口可运行和四项输出都有分，再用本地验证决定是否替换组件。目标方案采用一个轻量中文 encoder 完成情感与画像，多轮检索增强的小型中文生成模型完成回复；记忆引用在官方未提供 memory bank 时输出空数组。字符 n-gram 检索 baseline 是无 GPU 保底方案，不作为最终上限。
+
+## 数据流
+
+原始 JSONL 只读加载 → Schema 与异常检查 → 按 prediction point 展开 → 以 conversation_id 分组隔离 → 截止 target_user_turn_id 构造上下文 → 生成分类输入、回复输入和监督目标 → 固定 seed 训练 → 本地指标与延迟 → 导出权重 → 官方 participant 统一入口组装输出。
+
+处理数据只写 `team_project/data/processed/`，每次产物附源文件 SHA-256、转换配置、Git commit 和 seed。4 条反向 assistant 引用异常以 target 对象为监督并记录异常标记。
+
+## 模型架构
+
+- 情感：MacBERT/RoBERTa 同级轻量中文 encoder + 16 类 softmax。以官方 Acc 为选择目标，Macro-F1 与混淆矩阵用于诊断；尝试类别加权交叉熵和 focal loss。
+- 画像：与情感共享 encoder，三个独立多标签 sigmoid head；按维度做 BCE，空数组是有效全负标签，不能误 mask。阈值在验证集逐维校准。
+- 回复：并行比较字符 n-gram 检索、纯生成、小模型 LoRA/SFT、检索增强生成。输入只含截止当前 user turn 的历史，注入预测情感/画像前必须做消融，防止错误传播。
+- 记忆：当前测试 Schema 没有 memory bank，baseline 输出 `[]`。若官方确认隐藏测试提供记忆库，再实现最近轮次、长期画像、关键事件摘要和相关历史片段的本地检索。
+
+## 训练与验证
+
+- 数据单位是 prediction point，任何二次划分必须按 conversation_id 分组；禁止预测点级随机划分。
+- 统一 seed 20261012，保存数据哈希、配置、依赖、训练日志、最佳 checkpoint 和停止原因。
+- 先跑小样本冒烟，再全量训练；每个候选只改变一个主要变量并记录消融。
+- 模型选择遵循：输出合法率 100% → 官方近似主指标 → 端到端延迟 → 镜像体积。更大模型不自动获选。
+
+## 指标
+
+- 情感：accuracy；辅助 Macro-F1、每类召回和混淆矩阵。
+- 画像：三个维度分别做集合完全匹配 accuracy 后取平均；官方口径未确认前同时记录 micro/macro F1，但不冒充官方分数。
+- 回复：本地字符级 BLEU-4 与 ROUGE-L F1，加可选 BERTScore。官方分词、平滑、BERTScore checkpoint 和权重未发布，因此只做同环境相对比较。
+- 性能：模型只加载一次，warm-up 与正式 100 条分开记录；同时保存均值、P50、P95、峰值显存。最终以官方反馈口径为准。
+
+## 性能与部署
+
+- 单进程初始化一次模型与 tokenizer；批量编码分类，生成按显存选择 batch。
+- 优先 BF16/FP16；只有验证指标允许才使用 INT8/INT4。固定最大上下文和最大生成长度，缓存重复历史前缀。
+- 强制 Hugging Face 离线模式，模型、tokenizer、配置和 wheels 全部入镜像；禁止运行时网络下载。
+- 基于官方基础镜像，把最终工程放回 `/root/participant`，保持 `start.sh TEST_FILE RESULT_DIR` 契约。为单卡/双卡分别提供配置，不能把 `tensor-parallel-size 2` 当作未知评测机的事实。
+
+## 三档方案
+
+| 档位 | 组成 | 使用条件 |
+|---|---|---|
+| 保底 | n-gram 检索回复 + 多数类情感 + 空画像/空记忆 | GPU/模型不可用或最终镜像故障；必须保持合法输出与可提交 |
+| Baseline | 轻量 encoder 情感/画像 + 检索回复 | 10月15日前必须稳定跑通，作为官方首次探针 |
+| 目标 | 共享 encoder + 经验证的 LoRA 小生成模型 + 可选检索增强 | 只有本地指标提升、断网回归和延迟均通过才替换 baseline |
+
+降级顺序：关闭检索增强生成 → 换纯检索回复 → 画像退回验证集阈值/空数组 → 情感退回轻量 encoder/多数类。任何降级都保持 Schema 与入口不变。
+

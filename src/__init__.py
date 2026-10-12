@@ -1,0 +1,2 @@
+"""Competition project package."""
+

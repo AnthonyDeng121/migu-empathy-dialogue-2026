@@ -1,0 +1,8 @@
+{
+  "seed": 20261012,
+  "max_history_chars": 4000,
+  "retrieval_ngram": 3,
+  "candidate_limit": 300,
+  "default_emotion": "neutral"
+}
+

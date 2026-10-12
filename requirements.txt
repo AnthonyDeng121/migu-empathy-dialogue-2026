@@ -1,0 +1,4 @@
+# Baseline and audit tools use Python 3.10+ standard library only.
+# Optional official-style semantic scoring:
+bert-score==0.3.13
+

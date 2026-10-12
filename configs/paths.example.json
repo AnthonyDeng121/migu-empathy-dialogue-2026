@@ -1,0 +1,8 @@
+{
+  "train_file": "data/raw/训练-验证-数据集/train/train_public.jsonl",
+  "val_file": "data/raw/训练-验证-数据集/val/val_public.jsonl",
+  "test_file": "data/raw/test_inference_data.jsonl",
+  "weights_dir": "weights",
+  "logs_dir": "logs",
+  "results_dir": "results"
+}
