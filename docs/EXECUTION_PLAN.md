@@ -40,7 +40,7 @@
 - B 向 C/D 提供按 conversation_id 隔离的训练清单和统一 JSONL 转换器；C 输出情感字符串与三维画像数组；D 输出 response_text 与 memory_refs；A 只负责组合和官方格式落盘。
 - 合并顺序固定：B schema/数据变更 → C 分类 → D 回复 → A 入口/镜像。接口测试未通过不得合并下游。
 - 依赖关系不是简单的 A→B→C→D 单链。A 与 B 是共同上游：A 提供运行、配置和集成契约，B 提供数据与评测契约；C、D 在这两份契约上并行开发；A 最后集成，B最后独立复核指标和数据完整性。
-- 审查责任采用交叉审查，不要求“下游只审上游”：A 的 Docker/入口由 B 审；B 的数据/指标由 C 审；C 的分类由 D 审；D 的回复由 C 审。A 负责最终测试的执行与发布判断，B 必须共同签署最终验收，避免 A 同时作为实现者和唯一验收者。
+- 日常 PR 固定采用闭环验收：`A → B → C → D → A`，箭头表示“前者的 PR 由后者验收”，即 B 验收 A、C 验收 B、D 验收 C、A 验收 D。验收人负责拉取 PR 分支、本地运行测试、提交 `Approve` 或 `Request changes`，通过后可执行 `Squash and merge`。涉及公共 Schema、统一入口或最终候选时，相关模块负责人仍需追加复核；最终提交继续由 A 执行、B 独立复核。
 - 进度落后接管：A 落后由 B 接管提交；B 落后由 A 接管数据脚本；C 落后由 B 启用多数类/规则分类；D 落后由 A 启用检索 baseline。任何接管先保留可运行旧版本。
 
 ## 状态定义
@@ -54,44 +54,46 @@
 
 ## 每日任务完成清单
 
-使用方法：每天收工前由每位成员更新一行，状态填写 `Ready`、`Blocked`、`Integration Gate` 或 `Done`。证据必须是 PR、commit、报告、日志或模型哈希之一；只写“已完成”不算验收。下一步必须能在第二天直接执行。
+使用方法：每天收工前由负责人更新自己的执行状态和证据；固定验收人更新验收状态与结论。执行状态填写 `Ready`、`Blocked`、`Integration Gate` 或 `Done`。验收状态只填写 `待提交`、`待验收`、`Request changes` 或 `Approved`。证据必须是 PR、commit、报告、日志或模型哈希之一；没有证据不能标记 `Done`。
 
-| 日期 | 成员 | 计划交付 | 状态 | 证据链接或文件 | 阻塞项与负责人 | 下一步 | A集成结果 | B复核结果 |
+固定验收闭环：A 的交付由 B 验收，B 的交付由 C 验收，C 的交付由 D 验收，D 的交付由 A 验收。验收人必须先拉取对应 PR 分支并运行复现命令，不能只看网页 diff 就批准。
+
+| 日期 | 负责人 | 计划交付 | 执行状态 | 证据或 PR | 固定验收人 | 验收状态 | 验收结论或待修改问题 | 下一步 |
 |---|---|---|---|---|---|---|---|---|
-| 10/12 | A | 官方资料归档、入口契约、项目骨架 | Integration Gate | `docs/OFFICIAL_REQUIREMENTS.md`、`reports/VERIFICATION.md`、`reports/day1_docker_val100_metrics.json` | 开发镜像工程验收已通过；待 B 独立复核与 PR 合并 | B 复核断网容器证据，确认官方基础镜像后推进正式镜像 | 样例 3/3、验证 100/100 断网通过 | 待复核 |
-| 10/12 | B | 全量数据审计、Schema、指标框架 | Done | `docs/DATA_AUDIT.md`、`reports/data_audit.json` | 无 | 建立 conversation 级训练清单 | 不适用 | 已完成 |
-| 10/12 | C | 标签映射和多数类分类 baseline | Integration Gate | `src/data/schema.py`、`src/classification/majority.py`、`scripts/evaluate_majority_classifier.py`、`reports/CLASSIFICATION_BASELINE.md`、`reports/classification_baseline.json`、PR #1 | 已用官方 train/val JSONL 完成全量评测；等待 D 审查与 A 集成、B 独立复核 | D 完成代码审查后接入统一配置与评测接口 | 待验收 | 待复核 |
-| 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | `results/baseline/`、`reports/baseline_val100_metrics.json` | 分数仅为保底；D | 建立生成 baseline | 待验收 | 指标已记录 |
-| 10/13 | A | GitHub 保护规则、CI、实验模板 |  |  |  |  |  |  |
-| 10/13 | B | conversation 分组数据、指标回归 |  |  |  |  |  |  |
-| 10/13 | C | 情感分类 baseline |  |  |  |  |  |  |
-| 10/13 | D | 检索与生成 baseline 对比 |  |  |  |  |  |  |
-| 10/14 | A | 统一配置、mock 集成和资源基准 |  |  |  |  |  |  |
-| 10/14 | B | 错误分析切片与实验表 |  |  |  |  |  |  |
-| 10/14 | C | 画像多任务 head 与导出接口 |  |  |  |  |  |  |
-| 10/14 | D | LoRA/SFT 首轮与记忆策略 |  |  |  |  |  |  |
-| 10/15 | A | 完整 baseline 镜像 |  |  |  |  |  |  |
-| 10/15 | B | 端到端字段和指标回归 |  |  |  |  |  |  |
-| 10/15 | C | 分类权重候选 v1 |  |  |  |  |  |  |
-| 10/15 | D | 回复权重或检索候选 v1 |  |  |  |  |  |  |
-| 10/16 | A | 第一次官方兼容性提交 |  |  |  |  |  |  |
-| 10/16 | B | 官方反馈与本地差异记录 |  |  |  |  |  |  |
-| 10/16 | C | 分类兼容性修复 |  |  |  |  |  |  |
-| 10/16 | D | 生成和解析兼容性修复 |  |  |  |  |  |  |
-| 10/17 | A | 候选镜像和资源对比 |  |  |  |  |  |  |
-| 10/17 | B | 全部消融和候选排名 |  |  |  |  |  |  |
-| 10/17 | C | 分类候选 v2 |  |  |  |  |  |  |
-| 10/17 | D | 回复候选 v2 |  |  |  |  |  |  |
-| 10/18 | A | 第二次提交与代码冻结 |  |  |  |  |  |  |
-| 10/18 | B | 全量回归与泄漏复查 |  |  |  |  |  |  |
-| 10/18 | C | 最终分类导出候选 |  |  |  |  |  |  |
-| 10/18 | D | 最终回复导出候选 |  |  |  |  |  |  |
-| 10/19 | A | 最终集成、镜像冻结与可选第3次提交 |  |  |  |  |  |  |
-| 10/19 | B | 最终独立复核与双签 |  |  |  |  |  |  |
-| 10/19 | C | 权重哈希和分类回归支持 |  |  |  |  |  |  |
-| 10/19 | D | 权重哈希和回复回归支持 |  |  |  |  |  |  |
-| 10/20 | A | 最终提交、状态截图和提交记录 |  |  |  |  |  |  |
-| 10/20 | B | 提交内容与结果复核 |  |  |  |  |  |  |
-| 10/20 | C | 仅处理确定性分类故障 |  |  |  |  |  |  |
-| 10/20 | D | 仅处理确定性回复故障 |  |  |  |  |  |  |
+| 10/12 | A | 官方资料归档、入口契约、项目骨架 | Integration Gate | `docs/OFFICIAL_REQUIREMENTS.md`、`reports/VERIFICATION.md`、`reports/day1_docker_val100_metrics.json` | B | 待验收 | 样例 3/3、验证 100/100 断网通过；待 B 拉取复核 | B 复现容器证据并提交 review |
+| 10/12 | B | 全量数据审计、Schema、指标框架 | Done | `docs/DATA_AUDIT.md`、`reports/data_audit.json` | C | Approved | 历史基线已完成；后续改动按新闭环走 PR | 建立 conversation 级训练清单 |
+| 10/12 | C | 标签映射和多数类分类 baseline | Done | PR #1、merge commit `e7b251e`、`reports/CLASSIFICATION_BASELINE.md` | D | Approved | 已完成本地验收并合并 `main`；多数类分类 baseline 和公共 Schema 改动通过 | 开始情感分类 encoder baseline |
+| 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | `results/baseline/`、`reports/baseline_val100_metrics.json` | A | 待验收 | 分数仅为保底；A 需复现运行与输出 Schema | 建立生成 baseline |
+| 10/13 | A | GitHub 协作规则、CI、实验模板 | Ready |  | B | 待提交 |  |  |
+| 10/13 | B | conversation 分组数据、指标回归 | Ready |  | C | 待提交 |  |  |
+| 10/13 | C | 情感分类 encoder baseline | Ready |  | D | 待提交 |  |  |
+| 10/13 | D | 检索与生成 baseline 对比 | Ready |  | A | 待提交 |  |  |
+| 10/14 | A | 统一配置、mock 集成和资源基准 | Ready |  | B | 待提交 |  |  |
+| 10/14 | B | 错误分析切片与实验表 | Ready |  | C | 待提交 |  |  |
+| 10/14 | C | 画像多任务 head 与导出接口 | Ready |  | D | 待提交 |  |  |
+| 10/14 | D | LoRA/SFT 首轮与记忆策略 | Ready |  | A | 待提交 |  |  |
+| 10/15 | A | 完整 baseline 镜像 | Ready |  | B | 待提交 |  |  |
+| 10/15 | B | 端到端字段和指标回归 | Ready |  | C | 待提交 |  |  |
+| 10/15 | C | 分类权重候选 v1 | Ready |  | D | 待提交 |  |  |
+| 10/15 | D | 回复权重或检索候选 v1 | Ready |  | A | 待提交 |  |  |
+| 10/16 | A | 第一次官方兼容性提交 | Ready |  | B | 待提交 |  |  |
+| 10/16 | B | 官方反馈与本地差异记录 | Ready |  | C | 待提交 |  |  |
+| 10/16 | C | 分类兼容性修复 | Ready |  | D | 待提交 |  |  |
+| 10/16 | D | 生成和解析兼容性修复 | Ready |  | A | 待提交 |  |  |
+| 10/17 | A | 候选镜像和资源对比 | Ready |  | B | 待提交 |  |  |
+| 10/17 | B | 全部消融和候选排名 | Ready |  | C | 待提交 |  |  |
+| 10/17 | C | 分类候选 v2 | Ready |  | D | 待提交 |  |  |
+| 10/17 | D | 回复候选 v2 | Ready |  | A | 待提交 |  |  |
+| 10/18 | A | 第二次提交与代码冻结 | Ready |  | B | 待提交 |  |  |
+| 10/18 | B | 全量回归与泄漏复查 | Ready |  | C | 待提交 |  |  |
+| 10/18 | C | 最终分类导出候选 | Ready |  | D | 待提交 |  |  |
+| 10/18 | D | 最终回复导出候选 | Ready |  | A | 待提交 |  |  |
+| 10/19 | A | 最终集成、镜像冻结与可选第3次提交 | Ready |  | B | 待提交 |  |  |
+| 10/19 | B | 最终独立复核与双签 | Ready |  | C | 待提交 | C 验收 B 的复核过程；最终提交仍由 A+B 双签 |  |
+| 10/19 | C | 权重哈希和分类回归支持 | Ready |  | D | 待提交 |  |  |
+| 10/19 | D | 权重哈希和回复回归支持 | Ready |  | A | 待提交 |  |  |
+| 10/20 | A | 最终提交、状态截图和提交记录 | Ready |  | B | 待提交 | 最终发布需 A+B 双签 |  |
+| 10/20 | B | 提交内容与结果复核 | Ready |  | C | 待提交 | C 验收 B 的复核记录；不替代 A+B 双签 |  |
+| 10/20 | C | 仅处理确定性分类故障 | Ready |  | D | 待提交 |  |  |
+| 10/20 | D | 仅处理确定性回复故障 | Ready |  | A | 待提交 |  |  |
 
