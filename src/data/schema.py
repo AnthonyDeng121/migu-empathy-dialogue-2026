@@ -47,6 +47,21 @@ def validate_test_row(row: dict[str, Any]) -> None:
         raise ValueError("history must end at target_user_turn_id with a user turn")
 
 
+def validate_classification_labels(emotion_label: Any, profile: Any) -> None:
+    if not isinstance(emotion_label, str) or emotion_label not in EMOTIONS:
+        raise ValueError("invalid emotion_label")
+    if not isinstance(profile, dict) or set(profile) != set(PROFILE_LABELS):
+        raise ValueError("user_profile must contain exactly the three official dimensions")
+    for dimension, allowed in PROFILE_LABELS.items():
+        values = profile[dimension]
+        if (
+            not isinstance(values, list)
+            or len(values) != len(set(values))
+            or not set(values) <= allowed
+        ):
+            raise ValueError(f"invalid user_profile.{dimension}")
+
+
 def validate_prediction(row: dict[str, Any], expected_id: str | None = None) -> None:
     required = {"id", "response_text", "emotion_label", "user_profile", "memory_refs"}
     if set(row) != required:
@@ -55,15 +70,7 @@ def validate_prediction(row: dict[str, Any], expected_id: str | None = None) -> 
     if expected_id is not None and row["id"] != expected_id:
         raise ValueError(f"prediction id {row['id']!r} does not match input {expected_id!r}")
     _string(row["response_text"], "response_text", nonempty=True)
-    if row["emotion_label"] not in EMOTIONS:
-        raise ValueError("invalid emotion_label")
-    profile = row["user_profile"]
-    if not isinstance(profile, dict) or set(profile) != set(PROFILE_LABELS):
-        raise ValueError("user_profile must contain exactly the three official dimensions")
-    for dimension, allowed in PROFILE_LABELS.items():
-        values = profile[dimension]
-        if not isinstance(values, list) or len(values) != len(set(values)) or not set(values) <= allowed:
-            raise ValueError(f"invalid user_profile.{dimension}")
+    validate_classification_labels(row["emotion_label"], row["user_profile"])
     refs = row["memory_refs"]
     if not isinstance(refs, list) or len(refs) != len(set(refs)) or not all(isinstance(v, str) and MEMORY_RE.fullmatch(v) for v in refs):
         raise ValueError("invalid memory_refs")
