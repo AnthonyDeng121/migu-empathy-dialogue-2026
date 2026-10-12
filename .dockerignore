@@ -1,4 +1,5 @@
 .git/
+.codex_tmp/
 .cache/
 .pytest_cache/
 __pycache__/
