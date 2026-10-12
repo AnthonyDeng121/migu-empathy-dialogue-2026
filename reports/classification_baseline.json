@@ -1,0 +1,30 @@
+{
+  "version": "majority_classifier_v1",
+  "train_samples": 18657,
+  "validation_samples": 2354,
+  "majority": {
+    "emotion_label": "anxiety",
+    "user_profile": {
+      "personality_traits": [],
+      "interests": [],
+      "style": []
+    }
+  },
+  "majority_support": {
+    "emotion_label": 6340,
+    "user_profile": {
+      "personality_traits": 10492,
+      "interests": 12919,
+      "style": 8731
+    }
+  },
+  "metrics": {
+    "emotion_accuracy": 0.319031,
+    "profile_exact_match_accuracy": {
+      "personality_traits": 0.618522,
+      "interests": 0.748938,
+      "style": 0.517417
+    },
+    "profile_macro_accuracy": 0.628292
+  }
+}
