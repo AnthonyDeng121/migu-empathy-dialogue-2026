@@ -1,31 +1,32 @@
 # 多数类分类 baseline
 
-**状态：Integration Gate。** 情感标签和三维画像枚举复用 `src/data/schema.py`。多数类分类器从训练集 prediction points 统计情感类别和每个画像维度的完整标签集合；空数组作为合法类别，平票按标签字典序稳定裁决。
+**状态：Integration Gate。** 情感标签和三维画像枚举复用 `src/data/schema.py`。
+多数类分类器按训练集 prediction points 统计情感类别，以及每个画像维度的完整标签集合；空数组作为合法类别，平票按标签字典序稳定裁决。
 
-## 基于已提交审计计数的结果
+## 官方 train/val 全量实跑
 
-下面的计数取自 `reports/data_audit.json`，验证准确率按验证集审计计数计算。当前工作区没有官方原始 JSONL，因此尚未实际运行新评测脚本。
+训练 prediction points：18657；验证 prediction points：2354。
 
-| 任务 | 多数类预测 | 训练支持数 / 18,657 | 验证集正确数 / 2,354 | 验证准确率 |
-|---|---|---:|---:|---:|
-| 情感 | `anxiety` | 6,340 | 751 | 31.90% |
-| personality_traits | `[]` | 10,492 | 1,456 | 61.85% |
-| interests | `[]` | 12,919 | 1,763 | 74.89% |
-| style | `[]` | 8,731 | 1,218 | 51.74% |
-| 画像三维平均 | — | — | — | 62.83% |
+情感多数类：`anxiety`，支持数 6340；验证集 Accuracy 31.90%。
 
-审计报告只统计各画像标签边际频次，但这足以证明空集合是每个维度的完整集合多数类：空集合频次分别高于该维度出现次数最多的单个标签；任一非空集合都至少包含一个标签，其频次不可能超过其中任一标签的边际频次。
+画像按完整标签集合计算 exact-match，空数组按合法类别处理：
 
-## 复算
+| 维度 | 多数类预测 | 训练支持数 | 验证 exact-match accuracy |
+|---|---|---:|---:|
+| personality_traits | `[]` | 10492 | 61.85% |
+| interests | `[]` | 12919 | 74.89% |
+| style | `[]` | 8731 | 51.74% |
 
-成员将官方数据放入仓库约定路径后，从仓库根目录运行：
+画像三维平均 exact-match accuracy：62.83%。
+
+画像指标按每个维度的完整标签集合 exact-match 计算，空数组视为合法集合；情感指标为单标签 Accuracy。该结果用于本地 baseline 对比，官方评分实现和权重仍以赛方说明为准。
+
+使用方法：
 
 ```bash
 python scripts/evaluate_majority_classifier.py \
-  --train "data/raw/训练-验证-数据集/train/train_public.jsonl" \
-  --val "data/raw/训练-验证-数据集/val/val_public.jsonl" \
+  --train data/raw/训练-验证-数据集/train/train_public.jsonl \
+  --val data/raw/训练-验证-数据集/val/val_public.jsonl \
   --output-json reports/classification_baseline.json \
   --output-md reports/CLASSIFICATION_BASELINE.md
 ```
-
-此报告是本地分类 baseline，不代表官方指标已经确认。官方画像评分实现仍需以赛方说明为准。

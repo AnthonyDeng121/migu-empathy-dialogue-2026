@@ -73,7 +73,12 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines = [
         "# 多数类分类 baseline",
         "",
-        f"训练样本：{report['train_samples']}；验证样本：{report['validation_samples']}。",
+        "**状态：Integration Gate。** 情感标签和三维画像枚举复用 `src/data/schema.py`。",
+        "多数类分类器按训练集 prediction points 统计情感类别，以及每个画像维度的完整标签集合；空数组作为合法类别，平票按标签字典序稳定裁决。",
+        "",
+        "## 官方 train/val 全量实跑",
+        "",
+        f"训练 prediction points：{report['train_samples']}；验证 prediction points：{report['validation_samples']}。",
         "",
         (
             f"情感多数类：`{report['majority']['emotion_label']}`，"
@@ -96,6 +101,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         [
             "",
             f"画像三维平均 exact-match accuracy：{metrics['profile_macro_accuracy']:.2%}。",
+            "",
+            "画像指标按每个维度的完整标签集合 exact-match 计算，空数组视为合法集合；情感指标为单标签 Accuracy。该结果用于本地 baseline 对比，官方评分实现和权重仍以赛方说明为准。",
             "",
             "使用方法：",
             "",
