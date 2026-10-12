@@ -7,8 +7,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     BASELINE_TRAIN_FILE=/opt/data/train.jsonl
 
 WORKDIR /root/participant
-COPY team_project/ /root/participant/
-COPY official_materials/训练-验证-数据集/train/train_public.jsonl /opt/data/train.jsonl
+COPY . /root/participant/
+COPY data/raw/训练-验证-数据集/train/train_public.jsonl /opt/data/train.jsonl
 RUN chmod +x /root/participant/start.sh
 
 ENTRYPOINT ["/root/participant/start.sh"]

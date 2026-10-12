@@ -8,22 +8,39 @@
 
 克隆仓库后，`data/raw/README.md`、`data/processed/README.md`、`weights/README.md` 等文件会保留完整目录结构和放置规则。成员把本机已有数据放到约定的相对路径即可。需要共享的冻结模型通过私有仓库 GitHub Release 或 Git LFS 分发，并用 SHA-256 校验。
 
+## 放置官方数据
+
+仓库里不包含官方数据和模型权重。大家把已经下载的官方数据放到：
+
+```text
+data/raw/
+└─ 训练-验证-数据集/
+   ├─ train/
+   │  ├─ train_public.jsonl
+   │  └─ train_public.schema.json
+   └─ val/
+      ├─ val_public.jsonl
+      └─ val_public.schema.json
+```
+
+测试样例 `test_inference_data.jsonl` 放在 `data/raw/` 根目录。放置后可根据 `docs/OFFICIAL_MATERIALS_MANIFEST.md` 核对 SHA-256。
+
 ## 快速运行
 
-从仓库根目录执行：
+从克隆后的仓库根目录执行：
 
 ```bash
-python team_project/scripts/audit_dataset.py --train "official_materials/训练-验证-数据集/train/train_public.jsonl" --val "official_materials/训练-验证-数据集/val/val_public.jsonl" --output-json team_project/reports/data_audit.json --output-md team_project/docs/DATA_AUDIT.md
-python team_project/scripts/run_baseline.py "official_materials/test_inference_data.jsonl" team_project/results/baseline --train "official_materials/训练-验证-数据集/train/train_public.jsonl"
-python team_project/scripts/validate_io.py --input "official_materials/test_inference_data.jsonl" --submission team_project/results/baseline/submission.jsonl
-python -m unittest discover -s team_project/tests -v
+python scripts/audit_dataset.py --train "data/raw/训练-验证-数据集/train/train_public.jsonl" --val "data/raw/训练-验证-数据集/val/val_public.jsonl" --output-json reports/data_audit.json --output-md docs/DATA_AUDIT.md
+python scripts/run_baseline.py "data/raw/test_inference_data.jsonl" results/baseline --train "data/raw/训练-验证-数据集/train/train_public.jsonl"
+python scripts/validate_io.py --input "data/raw/test_inference_data.jsonl" --submission results/baseline/submission.jsonl
+python -m unittest discover -s tests -v
 ```
 
 开发用离线镜像可从仓库根目录构建：
 
 ```bash
-docker build -f team_project/Dockerfile -t emotion-dialogue-baseline:dev .
-docker run --rm -v "$PWD/official_materials:/input:ro" -v "$PWD/team_project/results/docker:/output" emotion-dialogue-baseline:dev /input/test_inference_data.jsonl /output
+docker build -t emotion-dialogue-baseline:dev .
+docker run --rm -v "$PWD/data/raw:/input:ro" -v "$PWD/results/docker:/output" emotion-dialogue-baseline:dev /input/test_inference_data.jsonl /output
 ```
 
 该 Dockerfile 是可运行的标准库检索保底镜像，不是最终提交镜像。正式提交必须在官方基础镜像名称和 digest 确认后重新基于官方镜像构建，并把最终模型替换进官方 `participant/` 框架。

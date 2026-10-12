@@ -1,0 +1,12 @@
+.git/
+.cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+logs/*
+results/*
+weights/*
+artifacts/*
+data/processed/*
+explain.md
+
