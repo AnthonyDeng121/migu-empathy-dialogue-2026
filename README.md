@@ -25,6 +25,39 @@ data/raw/
 
 测试样例 `test_inference_data.jsonl` 放在 `data/raw/` 根目录。放置后可根据 `docs/OFFICIAL_MATERIALS_MANIFEST.md` 核对 SHA-256。
 
+## 团队分支与工作规则
+
+四位成员从最新的 `main` 分支分别建立自己的开发分支：
+
+```bash
+# A 只执行这一条
+git switch -c feature/a-mlops
+
+# B 只执行这一条
+git switch -c feature/b-data-eval
+
+# C 只执行这一条
+git switch -c feature/c-emotion-profile
+
+# D 只执行这一条
+git switch -c feature/d-response-memory
+```
+
+每个人只执行属于自己的那一条命令，不要一次创建四个分支。创建前先运行 `git switch main` 和 `git pull --ff-only origin main`，保证新分支基于最新主分支。
+
+工作规则：
+
+- 不直接修改或推送 `main`。
+- 每项工作通过 Pull Request 合并。
+- 数据、模型权重、checkpoint、完整日志不提交普通 Git。
+- 每天收工前在 `docs/EXECUTION_PLAN.md` 更新任务状态和证据。
+- `Ready`：依赖满足，可以开始或正在做，不表示已经完成。
+- `Blocked`：被明确问题阻塞，并写明阻塞原因、责任人、预计解除时间和降级方案。
+- `Integration Gate`：个人工作完成，正在等待代码审查、接口测试或集成验收。
+- `Done`：已经合并 `main` 且测试通过，证据已记录。
+- 可以提前做后续任务，但不能绕过尚未满足的依赖或 `Integration Gate`。
+- PR 至少由指定审查人检查；最终发布由 A 执行、B 独立复核并与 A 双签。
+
 ## 快速运行
 
 从克隆后的仓库根目录执行：
