@@ -1,0 +1,11 @@
+{
+  "model_name": "hfl/chinese-macbert-base",
+  "model_revision": "a986e004d2a7f2a1c2f5a3edef4e20604a974ed1",
+  "max_length": 256,
+  "epochs": 1,
+  "batch_size": 32,
+  "learning_rate": 0.00002,
+  "weight_decay": 0.01,
+  "warmup_ratio": 0.1,
+  "seed": 20261012
+}

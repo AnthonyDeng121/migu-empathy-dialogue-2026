@@ -53,6 +53,10 @@ class RetrievalBaseline:
         for token, count in query.items():
             for index in self.postings.get(token, ()):
                 votes[index] += count
+        # Queries share at least the "user:" role prefix, so votes are rarely empty;
+        # the fallback covers an empty library or all-empty candidate features. Within
+        # the pool the highest cosine wins; on ties the pool order decides, i.e. the
+        # higher-vote candidate, and equal votes fall back to the earlier training index.
         pool = [idx for idx, _ in votes.most_common(candidate_limit)] or list(range(min(candidate_limit, len(self.candidates))))
         best = max(pool, key=lambda idx: cosine(query, self.candidates[idx].features))
         target = self.candidates[best].target

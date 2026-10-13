@@ -78,7 +78,7 @@ Ready=实际依赖满足才可开始；Blocked=写明阻塞人、缺什么、预
 | 10/12 | A | 官方资料归档、入口契约、项目骨架 | Integration Gate | `docs/OFFICIAL_REQUIREMENTS.md`、`reports/VERIFICATION.md`、`reports/day1_docker_val100_metrics.json` | B | 待验收 | 样例 3/3、验证 100/100 断网通过；待 B 拉取复核 | B 复现容器证据并提交 review |
 | 10/12 | B | 全量数据审计、Schema、指标框架 | Done | `docs/DATA_AUDIT.md`、`reports/data_audit.json` | C | Approved | 历史基线已完成；后续改动按新闭环走 PR | 建立 conversation 级训练清单 |
 | 10/12 | C | 标签映射和多数类分类 baseline | Done | PR #1、merge commit `e7b251e`、`reports/CLASSIFICATION_BASELINE.md` | D | Approved | 已完成本地验收并合并 `main`；多数类分类 baseline 和公共 Schema 改动通过 | 开始情感分类 encoder baseline |
-| 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | `results/baseline/`、`reports/baseline_val100_metrics.json` | A | 待验收 | 分数仅为保底；A 需复现运行与输出 Schema | 建立生成 baseline |
+| 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | PR #4、分支 `feature/d-retrieval-baseline`、全量单测 18/18（`tests/test_retrieval.py` 锁定检索契约）、`reports/baseline_val_full_metrics.json`、`reports/RETRIEVAL_BASELINE.md`、`results/baseline/`（全量 2354 校验通过） | A | 待验收 | PR #4 待 A 审查；分数仅为保底；A 需复现运行与输出 Schema | A 审查通过后合并；建立生成 baseline |
 
 ### 10/13当前状态（只记录已知事实）
 
@@ -87,9 +87,9 @@ Ready=实际依赖满足才可开始；Blocked=写明阻塞人、缺什么、预
 | 协作CI与实验流程 | A | Integration Gate | PR #5、commit 3af555a；远程checks已通过 | B复核；检索实验脚本不是神经网络训练脚本 |
 | GPU/账户额度/存储到账/人员时段确认 | A | Ready | 用户提供无卡券及存储通知；GPU与余额未确认 | T0+1h公布结论；费用动作需具体授权 |
 | 数据v1及分类/生成样本 | B | Ready | 既有数据审计；开始前核对队友Day2已有产物 | 小样本2h、全量4h；C验收 |
-| 分类选型与CPU准备 | C | Ready | 既有多数类/标签与官方训练数据 | 跑小样本，等待B数据v1与GPU；D验收 |
+| 分类选型与CPU准备 | C | Integration Gate | `reports/C_DAY2_CLASSIFIER_PREP.md`、`reports/C_DAY2_EMOTION_SMOKE.md`、`reports/c_day2_emotion_smoke.json`；Mac M5 MPS 冒烟 1,600/18,657 点、50 steps、全量 val 2,354 点；未使用 B1 v1 | D待验收；B1 数据 v1 到位后重跑，GPU训练仍待 A 核实资源 |
 | 回复选型与CPU准备 | D | Ready | 检索baseline与官方训练数据 | 跑模板/训练脚本，等待B数据v1与GPU；A验收 |
-| 分类/生成GPU训练 | C/D | Blocked | 资源未核实；阻塞协调人A；需GPU、卡时、环境与B数据v1 | 预计T0+1h明确资源、+4h数据；逾期按资源门槛降级，不虚构解阻 |
+| 分类/生成GPU训练 | C/D | Blocked | 平台 GPU/卡时/环境未核实；B1 数据 v1 未落地；本机 MPS 冒烟不是平台 GPU 训练 | A核实资源、B交付v1后按实测短跑估ETA；不将本机MPS记录为平台卡时 |
 
 未来日期不预先填写Ready或Done；每个任务按TRAINING_WORKPLAN ID记录开始/结束、实际人工/GPU小时、ETA、报告/权重哈希、review和下一步。成员已有工作须先核验再更新，不因计划重排抹掉完成证据。
 
@@ -97,4 +97,5 @@ Ready=实际依赖满足才可开始；Blocked=写明阻塞人、缺什么、预
 
 | 任务ID/负责人 | 状态 | 实际开始/结束 | 人工h/GPU卡时 | ETA/依赖/阻塞人 | 配置/commit/报告/权重哈希 | 验收人/review | 下一步 |
 |---|---|---|---|---|---|---|---|
+| C1 / C | Integration Gate | 起始墙钟时间未记录；结束 2026-10-13 11:29:59 +08；脚本计时 215.266s | 人工时未单独计；平台 GPU 卡时 0；本机 MPS | 等待 B1 数据 v1 与 A 的 GPU/卡时确认；正式 GPU 训练仍 Blocked | seed `20261012`；batch 32；max length 256；50/50 steps；脚本 SHA-256 `ba3db44cbc5a9ab755881eb90390d0805bc786a15ab45e1c486b30d3564ebd84`；smoke checkpoint SHA-256 `d0d604247c05657942dec865a3a5eadacebc4b1a2ea8d5271dfb66ff9ddadfc3`；`reports/C_DAY2_CLASSIFIER_PREP.md` | D待验收 | B1 v1到位后重跑小样本；A确认平台资源后再启动正式训练 |
 | 待执行时填写 | 按真实依赖填写 | 待实测 | 待实测 | 待核实 | 有交付才填写 | 待验收 | 当日更新 |
