@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  45%|████▌     | 131/290 [00:00<00:00, 1304.57it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2497.78it/s]
+PASS: 100 samples in 147.2s (1.472s/sample, 43.1 tok/s)

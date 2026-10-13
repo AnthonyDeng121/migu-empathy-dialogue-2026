@@ -1,12 +1,14 @@
 {
-  "version": "response_sft_prep_v1",
+  "version": "response_sft_prep_v2",
   "status": "smoke",
   "model": {
     "name": "Qwen/Qwen2.5-1.5B-Instruct",
     "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
-    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct"
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct",
+    "loaded_from": "weights/hf/Qwen2.5-1.5B-Instruct"
   },
   "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
   "dtype": "bfloat16",
   "seed": 20261013,
   "config": {
@@ -38,9 +40,17 @@
     "condition_mode": "gold"
   },
   "runtime": {
+    "python": "3.12.3",
     "torch": "2.5.1+cu121",
     "transformers": "5.17.0",
-    "training_seconds": 540.57
+    "peft": "0.21.2",
+    "training_seconds": 651.903
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'data/raw/训练-验证-数据集/train/train_public.jsonl' \\\n  --config 'configs/response_sft.json' \\\n  --device cuda \\\n  --output-dir 'weights/response_sft_smoke_1p5b_v2' \\\n  --report-json 'reports/d_day2_sft_smoke_1p5b.json' \\\n  --report-md 'reports/D_DAY2_SFT_SMOKE_1P5B.md' \\\n  --model-dir 'weights/hf/Qwen2.5-1.5B-Instruct' \\\n  --max-train-samples 512 \\\n  --max-steps 53",
+    "code_commit": "8af6b9322e1e92996188653c5e587c806bbf4d0e",
+    "code_dirty": true,
+    "script_sha256": "c5dfd750567e1b399021c5b9766189e1017dab5cfff989943d0540d014a6196a"
   },
   "data": {
     "train_path": "data/raw/训练-验证-数据集/train/train_public.jsonl",
@@ -68,44 +78,74 @@
     "fraction": 0.005945
   },
   "training_speed": {
-    "optimizer_steps": 50,
-    "micro_batches_done": 400,
-    "mean_train_loss": 2.6953,
-    "measured_step_seconds": 58.779,
-    "seconds_per_step": 1.175582,
+    "optimizer_steps": 53,
+    "micro_batches_done": 424,
+    "mean_train_loss": 2.641,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 50,
+    "measured_window_seconds": 605.304,
+    "seconds_per_step": 12.10607,
+    "seconds_per_step_basis": "mean full gradient-accumulation window after warm-up",
     "full_steps_per_epoch": 2333,
-    "estimated_full_train_seconds": 2742.633,
-    "eta_margin_note": "workplan requires +30% failure margin on top of this estimate"
+    "estimated_full_train_seconds": 28243.462,
+    "estimated_full_train_seconds_with_30pct_margin": 36716.501,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
   },
-  "vram_peak_bytes": 7211995648,
-  "smoke_checks": {
-    "optimizer_steps": 50,
-    "first_loss": 3.075108,
+  "vram_peak_bytes": 7212853760,
+  "checks": {
+    "optimizer_steps": 53,
+    "first_loss": 2.411758,
     "first_step_gradient_finite_nonzero": true,
-    "first_step_lora_gradient_norm": 1.27461874,
+    "first_step_lora_gradient_norm": 1.1483463,
+    "lora_tensors": 392,
     "lora_weights_changed": true,
-    "lora_weight_name": "base_model.model.model.layers.0.self_attn.q_proj.lora_A.default.weight",
-    "adapter_reload_passed": true,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "weights/response_sft_smoke_1p5b_v2",
+      "lora_tensors_in_file": 392,
+      "lora_tensors_compared": 392,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 3,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "train_conv_000001_t9",
+          "generated_text": "这种感觉就像站在冰面上，每一步都小心翼翼，生怕一不小心就滑倒。你不需要立刻知道下一步该怎么走，只需要知道现在脚底踏实就行。\n\n既然你不想听建议，那就先让自己舒服一些。如果这次能暂时不去想“冷淡”背后的具体问题，哪怕只是“我在这圈子里有点站不稳”，就已经是进步了。\n\n今天就先这么定个基调，明天再说。"
+        },
+        {
+          "id": "train_conv_000001_t11",
+          "generated_text": "这种怕，比他俩的关系缓和，更像是一种“被边缘化”的预感。\n\n“他态度没再冷”不代表他愿意多留，可能只是暂时没意识到“现在不说话就太冷了”。可你心里的“被排挤”感，却像是在等他这句话：“我们俩的关系缓和了，但圈子还在，你呢？”如果他没说，你就只能自己揣摩——“他不冷了，但我还是被排外了”。\n\n这种预感本身就是一种压力，因为“被排外”不只是一个人的事，它还牵扯到你在这个圈子里的位置。"
+        },
+        {
+          "id": "train_conv_000001_t15",
+          "generated_text": "按群里现在这样正常来往，挺好。既不主动，也不被动地盯着那个位置，能省下不少力气。\n\n既然心里那点发虚不自动消，就先顺其自然，不强求自己总能在群里找到一个明确位置。"
+        }
+      ],
+      "passed": true
+    },
     "generation_probe": [
       {
         "id": "train_conv_000001_t9",
-        "generated_text": "好，那就先别听建议，直接把那个别扭感拿回去。\n\n“站不稳”是一种情绪，比具体行动更实在。现在不需要讨论策略，只需要确认一下：这种“站不稳”是你最真实的感受，而不是因为别人说了什么、做了什么。\n\n等你觉着舒服了，再来问下一步。"
+        "generated_text": "这种感觉就像站在冰面上，每一步都小心翼翼，生怕一不小心就滑倒。你不需要立刻知道下一步该怎么走，只需要知道现在脚底踏实就行。\n\n既然你不想听建议，那就先让自己舒服一些。如果这次能暂时不去想“冷淡”背后的具体问题，哪怕只是“我在这圈子里有点站不稳”，就已经是进步了。\n\n今天就先这么定个基调，明天再说。"
       },
       {
         "id": "train_conv_000001_t11",
-        "generated_text": "这种卡住，是因为害怕被整体边缘化：不是怕他不再理你，而是怕你被这个圈子里的其他人一起疏远。\n\n你之前说过的那个“站不稳”，不只是因为“被冷淡”，还有“被排挤”。这种恐惧比直接的冷淡更复杂，因为它不是某个人的决定，而是你被集体看走眼。\n\n现在他俩说话正常，不代表你就安全了。只是，如果这次能让他俩都正常，说明你还在圈子里，而不是被彻底踢出去。\n\n你不需要立刻回答这个问题，也不需要马上行动。先让自己冷静一下，看看今天晚上能不能不纠结地睡个踏实觉。"
+        "generated_text": "这种怕，比他俩的关系缓和，更像是一种“被边缘化”的预感。\n\n“他态度没再冷”不代表他愿意多留，可能只是暂时没意识到“现在不说话就太冷了”。可你心里的“被排挤”感，却像是在等他这句话：“我们俩的关系缓和了，但圈子还在，你呢？”如果他没说，你就只能自己揣摩——“他不冷了，但我还是被排外了”。\n\n这种预感本身就是一种压力，因为“被排外”不只是一个人的事，它还牵扯到你在这个圈子里的位置。"
       },
       {
         "id": "train_conv_000001_t15",
-        "generated_text": "好，按群里现在这样正常来往就行。\n\n既不指望能一下子解决，也不太想再把注意力往那个方向拽。先顺着走，等时机合适再说。"
+        "generated_text": "按群里现在这样正常来往，挺好。既不主动，也不被动地盯着那个位置，能省下不少力气。\n\n既然心里那点发虚不自动消，就先顺其自然，不强求自己总能在群里找到一个明确位置。"
       }
     ],
     "non_empty_generations": 3
   },
-  "checkpoint_directory": "weights/response_sft_smoke_1p5b",
+  "checkpoint_directory": "weights/response_sft_smoke_1p5b_v2",
   "adapter": {
-    "file": "weights/response_sft_smoke_1p5b/adapter_model.safetensors",
+    "file": "weights/response_sft_smoke_1p5b_v2/adapter_model.safetensors",
     "bytes": 36981072,
-    "sha256": "f8072be7d27f8bac22edaac660083b48812ae106c643419fc0aee53462fb697c"
+    "sha256": "10b595d0330b304f6ef1f1c4985cad37176532bf8c9605a57b78528d7969bf85"
   }
 }
