@@ -64,7 +64,7 @@
 | 10/12 | B | 全量数据审计、Schema、指标框架 | Done | `docs/DATA_AUDIT.md`、`reports/data_audit.json` | C | Approved | 历史基线已完成；后续改动按新闭环走 PR | 建立 conversation 级训练清单 |
 | 10/12 | C | 标签映射和多数类分类 baseline | Done | PR #1、merge commit `e7b251e`、`reports/CLASSIFICATION_BASELINE.md` | D | Approved | 已完成本地验收并合并 `main`；多数类分类 baseline 和公共 Schema 改动通过 | 开始情感分类 encoder baseline |
 | 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | `results/baseline/`、`reports/baseline_val100_metrics.json` | A | 待验收 | 分数仅为保底；A 需复现运行与输出 Schema | 建立生成 baseline |
-| 10/13 | A | GitHub 协作规则、CI、实验模板 | Ready |  | B | 待提交 |  |  |
+| 10/13 | A | GitHub 协作规则、CI、实验模板 | Integration Gate | `.github/workflows/ci.yml`、`docs/COLLABORATION.md`、`reports/EXPERIMENT_TEMPLATE.md`、`reports/DAY2_A.md` | B | 待提交与验收 | 本地单元测试、合成实验重跑、验证集 100/100 通过；远程 CI 与分支保护未确认 | 提交 A 分支 PR 后由 B 复跑并验收，确认 main 保护 |
 | 10/13 | B | conversation 分组数据、指标回归 | Ready |  | C | 待提交 |  |  |
 | 10/13 | C | 情感分类 encoder baseline | Ready |  | D | 待提交 |  |  |
 | 10/13 | D | 检索与生成 baseline 对比 | Ready |  | A | 待提交 |  |  |
