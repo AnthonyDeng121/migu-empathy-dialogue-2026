@@ -1,0 +1,111 @@
+{
+  "version": "response_sft_prep_v1",
+  "status": "smoke",
+  "model": {
+    "name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct"
+  },
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 1,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "gold"
+  },
+  "runtime": {
+    "torch": "2.5.1+cu121",
+    "transformers": "5.17.0",
+    "training_seconds": 540.57
+  },
+  "data": {
+    "train_path": "data/raw/训练-验证-数据集/train/train_public.jsonl",
+    "train_total_samples": 18657,
+    "train_used_samples": 512,
+    "skipped_long_samples": 0,
+    "train_sha256": "184a47471f8d6f70fa21b9265b0a4d4e51c3748ba25af39a801884a2da35341a",
+    "response_turn_consistency": {
+      "total": 18657,
+      "match": 18657,
+      "mismatch": 0,
+      "mismatch_examples": []
+    },
+    "condition_mode": "gold",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 141,
+      "mean": 1049.9,
+      "max": 2047
+    }
+  },
+  "parameters": {
+    "trainable": 9232384,
+    "total": 1552946688,
+    "fraction": 0.005945
+  },
+  "training_speed": {
+    "optimizer_steps": 50,
+    "micro_batches_done": 400,
+    "mean_train_loss": 2.6953,
+    "measured_step_seconds": 58.779,
+    "seconds_per_step": 1.175582,
+    "full_steps_per_epoch": 2333,
+    "estimated_full_train_seconds": 2742.633,
+    "eta_margin_note": "workplan requires +30% failure margin on top of this estimate"
+  },
+  "vram_peak_bytes": 7211995648,
+  "smoke_checks": {
+    "optimizer_steps": 50,
+    "first_loss": 3.075108,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 1.27461874,
+    "lora_weights_changed": true,
+    "lora_weight_name": "base_model.model.model.layers.0.self_attn.q_proj.lora_A.default.weight",
+    "adapter_reload_passed": true,
+    "generation_probe": [
+      {
+        "id": "train_conv_000001_t9",
+        "generated_text": "好，那就先别听建议，直接把那个别扭感拿回去。\n\n“站不稳”是一种情绪，比具体行动更实在。现在不需要讨论策略，只需要确认一下：这种“站不稳”是你最真实的感受，而不是因为别人说了什么、做了什么。\n\n等你觉着舒服了，再来问下一步。"
+      },
+      {
+        "id": "train_conv_000001_t11",
+        "generated_text": "这种卡住，是因为害怕被整体边缘化：不是怕他不再理你，而是怕你被这个圈子里的其他人一起疏远。\n\n你之前说过的那个“站不稳”，不只是因为“被冷淡”，还有“被排挤”。这种恐惧比直接的冷淡更复杂，因为它不是某个人的决定，而是你被集体看走眼。\n\n现在他俩说话正常，不代表你就安全了。只是，如果这次能让他俩都正常，说明你还在圈子里，而不是被彻底踢出去。\n\n你不需要立刻回答这个问题，也不需要马上行动。先让自己冷静一下，看看今天晚上能不能不纠结地睡个踏实觉。"
+      },
+      {
+        "id": "train_conv_000001_t15",
+        "generated_text": "好，按群里现在这样正常来往就行。\n\n既不指望能一下子解决，也不太想再把注意力往那个方向拽。先顺着走，等时机合适再说。"
+      }
+    ],
+    "non_empty_generations": 3
+  },
+  "checkpoint_directory": "weights/response_sft_smoke_1p5b",
+  "adapter": {
+    "file": "weights/response_sft_smoke_1p5b/adapter_model.safetensors",
+    "bytes": 36981072,
+    "sha256": "f8072be7d27f8bac22edaac660083b48812ae106c643419fc0aee53462fb697c"
+  }
+}

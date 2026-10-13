@@ -1,0 +1,111 @@
+{
+  "version": "response_sft_prep_v1",
+  "status": "smoke",
+  "model": {
+    "name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct"
+  },
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 1,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "gold"
+  },
+  "runtime": {
+    "torch": "2.5.1+cu121",
+    "transformers": "5.17.0",
+    "training_seconds": 421.004
+  },
+  "data": {
+    "train_path": "data/raw/训练-验证-数据集/train/train_public.jsonl",
+    "train_total_samples": 18657,
+    "train_used_samples": 512,
+    "skipped_long_samples": 0,
+    "train_sha256": "184a47471f8d6f70fa21b9265b0a4d4e51c3748ba25af39a801884a2da35341a",
+    "response_turn_consistency": {
+      "total": 18657,
+      "match": 18657,
+      "mismatch": 0,
+      "mismatch_examples": []
+    },
+    "condition_mode": "gold",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 141,
+      "mean": 1049.9,
+      "max": 2047
+    }
+  },
+  "parameters": {
+    "trainable": 4399104,
+    "total": 498431872,
+    "fraction": 0.008826
+  },
+  "training_speed": {
+    "optimizer_steps": 50,
+    "micro_batches_done": 400,
+    "mean_train_loss": 3.1871,
+    "measured_step_seconds": 46.296,
+    "seconds_per_step": 0.925917,
+    "full_steps_per_epoch": 2333,
+    "estimated_full_train_seconds": 2160.165,
+    "eta_margin_note": "workplan requires +30% failure margin on top of this estimate"
+  },
+  "vram_peak_bytes": 4929478656,
+  "smoke_checks": {
+    "optimizer_steps": 50,
+    "first_loss": 3.124727,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 1.99853778,
+    "lora_weights_changed": true,
+    "lora_weight_name": "base_model.model.model.layers.0.self_attn.q_proj.lora_A.default.weight",
+    "adapter_reload_passed": true,
+    "generation_probe": [
+      {
+        "id": "train_conv_000001_t9",
+        "generated_text": "好，那就先放一下。现在最需要的是：\n\n1. **暂时不去管**：既然觉得冷下来后容易觉得自己站不稳，就先放一放。\n2. **不急着做决定**：如果觉得冷下来后能让自己站稳，就先不急着去找对方，等心情好了再说。\n3. **不强求结果**：就算结果是站在圈子里，也不强迫自己立刻回到原来的位置。\n\n这些都不重要，因为它们只是让你暂时停下来，而不是开始新的决策过程。"
+      },
+      {
+        "id": "train_conv_000001_t11",
+        "generated_text": "你这么说，我理解。现在他说话时，你没有冷到，但周围的人可能开始疏远你，你害怕自己站在边缘，因为没人能帮你重新站稳。\n\n这种被排斥感，比单纯冷淡更重。你不想再主动找他，是因为你怕自己站不住，而不是因为他变了。你怕自己被完全孤立，而不是因为别人不在场。\n\n既然你这么想，那就先放一下。等他说话时，你再决定要不要找他。现在先放着，让他说话，然后看结果。"
+      },
+      {
+        "id": "train_conv_000001_t15",
+        "generated_text": "按群里现在这样正常来往，圈子里到底站哪儿这种事越盯越空，你先顺着他走，圈子里就先不空了。"
+      }
+    ],
+    "non_empty_generations": 3
+  },
+  "checkpoint_directory": "weights/response_sft_smoke_0p5b",
+  "adapter": {
+    "file": "weights/response_sft_smoke_0p5b/adapter_model.safetensors",
+    "bytes": 17640136,
+    "sha256": "f1d60e0362d38a2f3b5e433d93d7550b92267261f9e02ce4b3ea76151b16fccc"
+  }
+}

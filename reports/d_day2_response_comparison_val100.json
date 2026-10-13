@@ -1,0 +1,23 @@
+{
+  "slice": "first 100 prediction points of val_eval_input.jsonl",
+  "gold": "val_public.jsonl response_text",
+  "metrics_note": "char-level diagnostic BLEU-4/ROUGE-L; official tokenization not published",
+  "retrieval_char_ngram_v1": {
+    "n": 100,
+    "empty": 0,
+    "bleu4_char": 0.0267,
+    "rouge_l_char_f1": 0.1375
+  },
+  "original_qwen2p5_0p5b": {
+    "n": 100,
+    "empty": 0,
+    "bleu4_char": 0.0259,
+    "rouge_l_char_f1": 0.1377
+  },
+  "original_qwen2p5_1p5b": {
+    "n": 100,
+    "empty": 0,
+    "bleu4_char": 0.0377,
+    "rouge_l_char_f1": 0.1565
+  }
+}
