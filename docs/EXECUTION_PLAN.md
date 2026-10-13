@@ -78,7 +78,7 @@ Ready=实际依赖满足才可开始；Blocked=写明阻塞人、缺什么、预
 | 10/12 | A | 官方资料归档、入口契约、项目骨架 | Integration Gate | `docs/OFFICIAL_REQUIREMENTS.md`、`reports/VERIFICATION.md`、`reports/day1_docker_val100_metrics.json` | B | 待验收 | 样例 3/3、验证 100/100 断网通过；待 B 拉取复核 | B 复现容器证据并提交 review |
 | 10/12 | B | 全量数据审计、Schema、指标框架 | Done | `docs/DATA_AUDIT.md`、`reports/data_audit.json` | C | Approved | 历史基线已完成；后续改动按新闭环走 PR | 建立 conversation 级训练清单 |
 | 10/12 | C | 标签映射和多数类分类 baseline | Done | PR #1、merge commit `e7b251e`、`reports/CLASSIFICATION_BASELINE.md` | D | Approved | 已完成本地验收并合并 `main`；多数类分类 baseline 和公共 Schema 改动通过 | 开始情感分类 encoder baseline |
-| 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | PR #4、分支 `feature/d-retrieval-baseline`、`tests/test_retrieval.py`（17/17）、`reports/baseline_val_full_metrics.json`、`reports/RETRIEVAL_BASELINE.md`、`results/baseline/`（全量 2354 校验通过） | A | 待验收 | PR #4 待 A 审查；分数仅为保底；A 需复现运行与输出 Schema | A 审查通过后合并；建立生成 baseline |
+| 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | PR #4、分支 `feature/d-retrieval-baseline`、全量单测 18/18（`tests/test_retrieval.py` 锁定检索契约）、`reports/baseline_val_full_metrics.json`、`reports/RETRIEVAL_BASELINE.md`、`results/baseline/`（全量 2354 校验通过） | A | 待验收 | PR #4 待 A 审查；分数仅为保底；A 需复现运行与输出 Schema | A 审查通过后合并；建立生成 baseline |
 
 ### 10/13当前状态（只记录已知事实）
 

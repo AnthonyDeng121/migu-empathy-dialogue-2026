@@ -125,9 +125,10 @@ class RetrievalBaselineTests(unittest.TestCase):
         prediction = model.predict(sample)
         self.assertEqual(prediction["response_text"], self.target_b["response_text"])
 
-    def test_predict_content_overlap_tie_returns_first_candidate(self) -> None:
+    def test_predict_cosine_tie_equal_votes_returns_first_candidate(self) -> None:
         """Lock the tie contract: equal-length candidates share only the role prefix,
-        cosines tie exactly, and predict returns the first candidate in training order."""
+        cosines tie exactly, their votes tie too, and predict returns the first
+        candidate in training order."""
         training = [
             make_conversation("train_conv_a", self.target_a, "甲" * 20),
             make_conversation("train_conv_b", self.target_b, "乙" * 20),
@@ -142,6 +143,26 @@ class RetrievalBaselineTests(unittest.TestCase):
         prediction = model.predict(sample)
         validate_prediction(prediction, sample["id"])
         self.assertEqual(prediction["response_text"], self.target_a["response_text"])
+
+    def test_predict_cosine_tie_prefers_higher_vote_candidate(self) -> None:
+        """Lock the full tie contract: with cosines tied exactly, the candidate ranked
+        higher in the pre-screen (more query n-gram votes) wins even though it is later
+        in training order. Both candidates match the query with identical dot product
+        and identical norm, but candidate 1 shares one more query n-gram (7 votes vs 6)."""
+        training = [
+            make_conversation("train_conv_a", self.target_a, "abcabc"),
+            make_conversation("train_conv_b", self.target_b, "abcdefgh"),
+        ]
+        model = RetrievalBaseline(training, ngram=3)
+        sample = {
+            "id": "test1_000005_t1",
+            "conversation_id": "test1_conv_000005",
+            "target_user_turn_id": 1,
+            "history": [{"turn_id": 1, "role": "user", "content": "abcd"}],
+        }
+        prediction = model.predict(sample)
+        validate_prediction(prediction, sample["id"])
+        self.assertEqual(prediction["response_text"], self.target_b["response_text"])
 
     def test_predict_empty_training_library_raises(self) -> None:
         """An empty retrieval library has no candidate to return; predict must fail loudly."""

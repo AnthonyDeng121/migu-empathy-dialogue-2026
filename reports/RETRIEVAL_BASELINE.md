@@ -5,7 +5,7 @@
 - 官方数据已归档 `data/raw/`，SHA-256 与 `docs/OFFICIAL_MATERIALS_MANIFEST.md` 核对一致（train `184a4747…`、val `097c0639…`、test `194f824a…`）。
 - 全量端到端跑通：train 8338 会话建 n-gram 检索库（约 25s），val 2354 个 prediction points 推理（约 346s），`validate_io.py` 校验 2354/2354 通过。
 - 全量产物在 `results/baseline/`（被 .gitignore 排除，不入 Git）；指标在 `reports/baseline_val_full_metrics.json`（入 Git）。
-- 单测 17/17 通过（`tests/test_retrieval.py` 锁定检索契约：四项字段、`memory_refs=[]`、tie 取训练顺序第一个、空库抛 `ValueError`）。
+- 全量单测 18/18 通过（`tests/test_retrieval.py` 16 项锁定检索契约：四项字段、`memory_refs=[]`、tie 取初筛排序靠前者（票数高优先，票数并列取训练顺序靠前）、空库抛 `ValueError`；另含 `tests/test_core.py` 2 项）。
 
 ## 本地诊断指标（val 全量 2354 点）
 
@@ -37,6 +37,6 @@ python scripts/evaluate_local.py --gold-dataset "data/raw/训练-验证-数据�
 ## 已知契约（由 tests/test_retrieval.py 锁定）
 
 - `history_until` 拼 `role:content` 行，查询与候选至少共享 `"user:"` 前缀的 3-gram，votes 极少为空。
-- 候选池内 cosine 最高者胜出；并列时取训练顺序靠前的候选。
+- 候选池内 cosine 最高者胜出；并列时取初筛排序靠前的候选（票数高者优先，票数并列时取训练顺序靠前者）。
 - 空检索库 `predict` 抛 `ValueError`（不静默返回）。
 - `memory_refs` 恒为 `[]`；官方确认提供 memory bank 后再实现本地检索。
