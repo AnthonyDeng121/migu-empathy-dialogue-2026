@@ -1,5 +1,7 @@
 # 数字人综合情感陪伴对话模型初赛工程
 
+GitHub 协作、main 保护配置与 CI 说明见 [协作规则](docs/COLLABORATION.md)；实验字段与一条命令重跑见 [实验模板](reports/EXPERIMENT_TEMPLATE.md)。本地执行 `python scripts/ci_smoke.py` 可用合成数据检查端到端流程和重复运行一致性。
+
 本目录是与官方原始资料分离的开发区。当前版本先提供确定可运行的端到端保底链路：数据审计、输入输出校验、字符级本地指标、检索式 baseline 和单元测试。官方文件不在这里改写。
 
 ## GitHub 中保存什么
