@@ -1,0 +1,151 @@
+{
+  "version": "response_sft_prep_v2",
+  "status": "smoke",
+  "model": {
+    "name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct",
+    "loaded_from": "weights/hf/Qwen2.5-1.5B-Instruct"
+  },
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "dtype": "bfloat16",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 1,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "gold"
+  },
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "transformers": "5.17.0",
+    "peft": "0.21.2",
+    "training_seconds": 651.903
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'data/raw/训练-验证-数据集/train/train_public.jsonl' \\\n  --config 'configs/response_sft.json' \\\n  --device cuda \\\n  --output-dir 'weights/response_sft_smoke_1p5b_v2' \\\n  --report-json 'reports/d_day2_sft_smoke_1p5b.json' \\\n  --report-md 'reports/D_DAY2_SFT_SMOKE_1P5B.md' \\\n  --model-dir 'weights/hf/Qwen2.5-1.5B-Instruct' \\\n  --max-train-samples 512 \\\n  --max-steps 53",
+    "code_commit": "8af6b9322e1e92996188653c5e587c806bbf4d0e",
+    "code_dirty": true,
+    "script_sha256": "c5dfd750567e1b399021c5b9766189e1017dab5cfff989943d0540d014a6196a"
+  },
+  "data": {
+    "train_path": "data/raw/训练-验证-数据集/train/train_public.jsonl",
+    "train_total_samples": 18657,
+    "train_used_samples": 512,
+    "skipped_long_samples": 0,
+    "train_sha256": "184a47471f8d6f70fa21b9265b0a4d4e51c3748ba25af39a801884a2da35341a",
+    "response_turn_consistency": {
+      "total": 18657,
+      "match": 18657,
+      "mismatch": 0,
+      "mismatch_examples": []
+    },
+    "condition_mode": "gold",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 141,
+      "mean": 1049.9,
+      "max": 2047
+    }
+  },
+  "parameters": {
+    "trainable": 9232384,
+    "total": 1552946688,
+    "fraction": 0.005945
+  },
+  "training_speed": {
+    "optimizer_steps": 53,
+    "micro_batches_done": 424,
+    "mean_train_loss": 2.641,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 50,
+    "measured_window_seconds": 605.304,
+    "seconds_per_step": 12.10607,
+    "seconds_per_step_basis": "mean full gradient-accumulation window after warm-up",
+    "full_steps_per_epoch": 2333,
+    "estimated_full_train_seconds": 28243.462,
+    "estimated_full_train_seconds_with_30pct_margin": 36716.501,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
+  },
+  "vram_peak_bytes": 7212853760,
+  "checks": {
+    "optimizer_steps": 53,
+    "first_loss": 2.411758,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 1.1483463,
+    "lora_tensors": 392,
+    "lora_weights_changed": true,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "weights/response_sft_smoke_1p5b_v2",
+      "lora_tensors_in_file": 392,
+      "lora_tensors_compared": 392,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 3,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "train_conv_000001_t9",
+          "generated_text": "这种感觉就像站在冰面上，每一步都小心翼翼，生怕一不小心就滑倒。你不需要立刻知道下一步该怎么走，只需要知道现在脚底踏实就行。\n\n既然你不想听建议，那就先让自己舒服一些。如果这次能暂时不去想“冷淡”背后的具体问题，哪怕只是“我在这圈子里有点站不稳”，就已经是进步了。\n\n今天就先这么定个基调，明天再说。"
+        },
+        {
+          "id": "train_conv_000001_t11",
+          "generated_text": "这种怕，比他俩的关系缓和，更像是一种“被边缘化”的预感。\n\n“他态度没再冷”不代表他愿意多留，可能只是暂时没意识到“现在不说话就太冷了”。可你心里的“被排挤”感，却像是在等他这句话：“我们俩的关系缓和了，但圈子还在，你呢？”如果他没说，你就只能自己揣摩——“他不冷了，但我还是被排外了”。\n\n这种预感本身就是一种压力，因为“被排外”不只是一个人的事，它还牵扯到你在这个圈子里的位置。"
+        },
+        {
+          "id": "train_conv_000001_t15",
+          "generated_text": "按群里现在这样正常来往，挺好。既不主动，也不被动地盯着那个位置，能省下不少力气。\n\n既然心里那点发虚不自动消，就先顺其自然，不强求自己总能在群里找到一个明确位置。"
+        }
+      ],
+      "passed": true
+    },
+    "generation_probe": [
+      {
+        "id": "train_conv_000001_t9",
+        "generated_text": "这种感觉就像站在冰面上，每一步都小心翼翼，生怕一不小心就滑倒。你不需要立刻知道下一步该怎么走，只需要知道现在脚底踏实就行。\n\n既然你不想听建议，那就先让自己舒服一些。如果这次能暂时不去想“冷淡”背后的具体问题，哪怕只是“我在这圈子里有点站不稳”，就已经是进步了。\n\n今天就先这么定个基调，明天再说。"
+      },
+      {
+        "id": "train_conv_000001_t11",
+        "generated_text": "这种怕，比他俩的关系缓和，更像是一种“被边缘化”的预感。\n\n“他态度没再冷”不代表他愿意多留，可能只是暂时没意识到“现在不说话就太冷了”。可你心里的“被排挤”感，却像是在等他这句话：“我们俩的关系缓和了，但圈子还在，你呢？”如果他没说，你就只能自己揣摩——“他不冷了，但我还是被排外了”。\n\n这种预感本身就是一种压力，因为“被排外”不只是一个人的事，它还牵扯到你在这个圈子里的位置。"
+      },
+      {
+        "id": "train_conv_000001_t15",
+        "generated_text": "按群里现在这样正常来往，挺好。既不主动，也不被动地盯着那个位置，能省下不少力气。\n\n既然心里那点发虚不自动消，就先顺其自然，不强求自己总能在群里找到一个明确位置。"
+      }
+    ],
+    "non_empty_generations": 3
+  },
+  "checkpoint_directory": "weights/response_sft_smoke_1p5b_v2",
+  "adapter": {
+    "file": "weights/response_sft_smoke_1p5b_v2/adapter_model.safetensors",
+    "bytes": 36981072,
+    "sha256": "10b595d0330b304f6ef1f1c4985cad37176532bf8c9605a57b78528d7969bf85"
+  }
+}

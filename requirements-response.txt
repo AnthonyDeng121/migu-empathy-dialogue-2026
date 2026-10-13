@@ -1,0 +1,4 @@
+torch==2.5.1
+transformers==5.17.0
+peft==0.21.2
+accelerate==1.15.0

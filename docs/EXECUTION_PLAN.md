@@ -47,7 +47,7 @@ T0为10/13团队实际开始时间。若开始较晚，按TRAINING_WORKPLAN的�
 
 | 日期 | A：资源、集成、提交 | B：数据、评测 | C：分类训练 | D：回复训练 | 当天交付 |
 |---|---|---|---|---|---|
-| 10/13 | 完成卡时、存储、截止、许可、训练镜像、数字人专属镜像与提交路径调查；同步main并整理A验收PR | 提交B1全量转换PR #7 | MacBERT情感脚本、固定revision与MPS冒烟已合并PR #6 | 检索保底全量验证已合并PR #4；生成训练初版未交付 | A调查报告；B/C/D实际进度入表；按团队决定不开GPU |
+| 10/13 | 完成卡时、存储、截止、许可、训练镜像、数字人专属镜像与提交路径调查；同步main并整理A验收PR | 提交B1全量转换PR #7 | MacBERT情感脚本、固定revision与MPS冒烟已合并PR #6 | 检索保底全量验证已合并PR #4；生成训练初版 PR #8 已提交并回应 A 五条审查修复项（修复后冒烟重跑中） | A调查报告；B/C/D实际进度入表；按团队决定不开GPU |
 | 10/14 | 维护开机门槛清单；定义C分类+D回复+A组装接口和vLLM专属镜像依赖策略；复核D生成PR；门槛满足后才开1卡短跑；更新PR #5 | 请C验收PR #7并完成合并；从main全量复现B1转换和哈希；复核A PR #5平台事实与计划并提交review | 先验收B PR #7；从最新main适配B1 classification JSONL；补三维画像head；拆分训练/最终推理依赖，禁止覆盖专属镜像PyTorch；CPU/MPS dry-run后提交PR，由D验收 | 固定一个可被vLLM 0.19加载的开源生成模型及revision/许可证/体积；适配B1 response JSONL；完成LoRA/SFT脚本和CPU dry-run；提交PR，由A验收 | B PR #7合并且复现通过；C、D各有可审查PR；A PR #5含平台调查与明确开机门槛；满足后才产生平台短跑日志和ETA |
 | 10/15 | baseline正式镜像构建、断网/计时/材料检查3–4h；上传/审核准备1h | 12:00前首轮全量结论；容器全量回归与指标独立复核3–4h | 修首轮主要问题；只启动一个有假设的候选优化2–3h；支持导出/review1h | 根据首轮结论只启动一个必要优化2–3h；支持镜像/加载1–2h | 可提交baseline；首轮选择依据；下一轮训练明确预算，不能阻塞baseline发布 |
 | 10/16 | 首次官方提交/运行跟踪2–3h；只修兼容问题1–2h | 官方与本地差异、全量对照2–3h；评测优化候选1–2h | 完成优化候选并复核分类错误2–3h；必要兼容支持1h | 完成优化候选并复核回复/格式2–3h；必要兼容支持1h | 最迟当日18:00首次成功目标；候选v2或保留baseline的明确结论 |
@@ -88,8 +88,8 @@ Ready=实际依赖满足才可开始；Blocked=写明阻塞人、缺什么、预
 | GPU/账户额度/存储/截止/专属镜像/提交路径调查 | A | Integration Gate | `reports/A_DAY2_PLATFORM_INVESTIGATION.md`；40个RTX 4090卡时、10小时无卡、30GB镜像/20GB文件额度、23:59截止、vLLM 0.19专属镜像 | B按报告命令复核并review PR #5；初版就绪前不开GPU |
 | 数据v1及分类/生成样本 | B | Integration Gate | PR #7；全量转换、4条异常排除、泄漏检查与21/21测试记录 | C验收后合并main；B从main复现正式产物 |
 | 分类选型与CPU准备 | C | Integration Gate | `reports/C_DAY2_CLASSIFIER_PREP.md`、`reports/C_DAY2_EMOTION_SMOKE.md`、`reports/c_day2_emotion_smoke.json`；Mac M5 MPS 冒烟 1,600/18,657 点、50 steps、全量 val 2,354 点；未使用 B1 v1 | D待验收；B1 数据 v1 到位后重跑，GPU训练仍待 A 核实资源 |
-| 回复选型与CPU准备 | D | Ready | PR #4检索保底已合并；生成模型、LoRA/SFT和B1适配未交付 | 10/14提交生成初版PR，由A验收 |
-| 分类/生成GPU训练 | C/D | Blocked | 平台资源已确认；仍缺B1合并、C画像/B1适配与D生成初版；阻塞人为B/C/D各自交付 | 预计10/14完成代码门槛；A验收后开1卡短跑，不将MPS记录为平台GPU卡时 |
+| 回复选型与CPU准备 | D | Integration Gate | 检索baseline与官方训练数据；候选选型（Qwen2.5-1.5B/0.5B-Instruct）、LoRA SFT 训练模板与本机 4060 冒烟已交付（PR #8，A 五条审查修复项已回应并以修复后脚本重跑）：`src/response/sft_data.py`、`scripts/train_response_sft.py`、`scripts/run_response_inference.py`、`configs/response_sft.json`、`configs/response_sft_0p5b.json`、`reports/D_DAY2_RESPONSE_SFT_PREP.md`；修正后全量 1 epoch ETA：1.5B 28,243s≈7.85h、0.5B 17,971s≈4.99h（裸估，+30% 余量另计）；66/66 单测；本机 CUDA 不计平台卡时 | A复验收 PR #8；B1 v1 合并并适配后按 D2 跑冻结集首轮 |
+| 分类/生成GPU训练 | C/D | Blocked | 平台资源已确认（A PR #5）；仍缺B1合并、C画像/B1适配与D的B1 response JSONL适配；阻塞人为B/C/D各自交付 | 预计10/14完成代码门槛；A验收后开1卡短跑复测ETA，不将本机冒烟记录为平台GPU卡时 |
 
 未来日期不预先填写Ready或Done；每个任务按TRAINING_WORKPLAN ID记录开始/结束、实际人工/GPU小时、ETA、报告/权重哈希、review和下一步。成员已有工作须先核验再更新，不因计划重排抹掉完成证据。
 
@@ -99,4 +99,5 @@ Ready=实际依赖满足才可开始；Blocked=写明阻塞人、缺什么、预
 |---|---|---|---|---|---|---|---|
 | C1 / C | Integration Gate | 起始墙钟时间未记录；结束 2026-10-13 11:29:59 +08；脚本计时 215.266s | 人工时未单独计；平台 GPU 卡时 0；本机 MPS | 平台资源已确认；等待 B1 PR #7 合并、B1输入适配和画像head；正式 GPU 训练仍 Blocked | seed `20261012`；batch 32；max length 256；50/50 steps；脚本 SHA-256 `ba3db44cbc5a9ab755881eb90390d0805bc786a15ab45e1c486b30d3564ebd84`；smoke checkpoint SHA-256 `d0d604247c05657942dec865a3a5eadacebc4b1a2ea8d5271dfb66ff9ddadfc3`；`reports/C_DAY2_CLASSIFIER_PREP.md` | D待验收 | 10/14验收B PR #7，适配B1并补画像后提交PR；通过A开机门槛再训练 |
 | A1 / A | Integration Gate | 2026-10-13完成 | 平台GPU卡时0 | 等待B复核PR #5；最终镜像实测依赖C/D初版 | `reports/A_DAY2_PLATFORM_INVESTIGATION.md`、`docs/OFFICIAL_REQUIREMENTS.md`、`docs/TRAINING_WORKPLAN.md` | B待验收 | B按报告命令复现并review；10/14执行开机门槛与接口任务 |
+| D1 / D | Integration Gate | 模型落盘 14:18–14:19 +08；冒烟/对照日志 19:04–19:22 +08；修复后重跑 20:26–20:57 +08（CPU 回归 20:31、1.5B 20:45、0.5B 20:57 完成） | 人工时未单独计；平台 GPU 卡时 0；本机 RTX 4060 8GB | 修正后全量 1 epoch：1.5B 28,243s（12.1061 秒/step，+30% 余量 36,717s）、0.5B 17,971s（7.7031 秒/step，余量 23,363s）；此前 46/36 分钟为计时 bug 产物已撤回；依赖 B1 v1 合并与 A 开机门槛 | seed `20261013`；LoRA r8 α16；batch 1×累积 8；max_length 2048；18,657 样本；53 步冒烟（3 warm-up + 50 计时步）；1.5B adapter SHA-256 `10b595d0330b304f6ef1f1c4985cad37176532bf8c9605a57b78528d7969bf85`、0.5B `d8e65e72148ea090fa27873621887b4ec38b4bf284f3f7b7f8a120529322381a`；PR #8（A 五条修复项已回应）；`reports/D_DAY2_RESPONSE_SFT_PREP.md`、`reports/d_day2_response_comparison_val100.json`、`logs/D_DAY2_SFT_SMOKE_*.txt` | A复验收 | 适配 B1 response JSONL 后按 D2 跑冻结集首轮；条件注入对比经 `--condition-jsonl` 接入 |
 | 待执行时填写 | 按真实依赖填写 | 待实测 | 待实测 | 待核实 | 有交付才填写 | 待验收 | 当日更新 |

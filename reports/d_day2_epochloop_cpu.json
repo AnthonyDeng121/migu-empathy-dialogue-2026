@@ -1,0 +1,151 @@
+{
+  "version": "response_sft_prep_v2",
+  "status": "smoke",
+  "model": {
+    "name": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct",
+    "loaded_from": "weights/hf/Qwen2.5-0.5B-Instruct"
+  },
+  "device": "cpu",
+  "device_name": "cpu",
+  "dtype": "float32",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-0.5B-Instruct",
+    "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "max_length": 512,
+    "max_new_tokens": 32,
+    "epochs": 2,
+    "batch_size": 1,
+    "gradient_accumulation": 2,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": false,
+    "max_history_turns": 4,
+    "condition_mode": "gold"
+  },
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "transformers": "5.17.0",
+    "peft": "0.21.2",
+    "training_seconds": 130.51
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'data/raw/训练-验证-数据集/train/train_public.jsonl' \\\n  --config 'configs/response_sft_tiny_cpu.json' \\\n  --device cpu \\\n  --output-dir 'weights/response_sft_epochloop_cpu' \\\n  --report-json 'reports/d_day2_epochloop_cpu.json' \\\n  --report-md 'reports/D_DAY2_EPOCHLOOP_CPU.md' \\\n  --model-dir 'weights/hf/Qwen2.5-0.5B-Instruct' \\\n  --max-train-samples 16",
+    "code_commit": "bcba020dcd49c234b3deab8024df95ceb6670a5c",
+    "code_dirty": true,
+    "script_sha256": "c5dfd750567e1b399021c5b9766189e1017dab5cfff989943d0540d014a6196a"
+  },
+  "data": {
+    "train_path": "data/raw/训练-验证-数据集/train/train_public.jsonl",
+    "train_total_samples": 18657,
+    "train_used_samples": 16,
+    "skipped_long_samples": 0,
+    "train_sha256": "184a47471f8d6f70fa21b9265b0a4d4e51c3748ba25af39a801884a2da35341a",
+    "response_turn_consistency": {
+      "total": 18657,
+      "match": 18657,
+      "mismatch": 0,
+      "mismatch_examples": []
+    },
+    "condition_mode": "gold",
+    "max_history_turns": 4,
+    "prompt_plus_response_tokens": {
+      "min": 176,
+      "mean": 427.3,
+      "max": 512
+    }
+  },
+  "parameters": {
+    "trainable": 4399104,
+    "total": 498431872,
+    "fraction": 0.008826
+  },
+  "training_speed": {
+    "optimizer_steps": 16,
+    "micro_batches_done": 32,
+    "mean_train_loss": 3.1742,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 13,
+    "measured_window_seconds": 101.257,
+    "seconds_per_step": 7.788976,
+    "seconds_per_step_basis": "mean full gradient-accumulation window after warm-up",
+    "full_steps_per_epoch": 9329,
+    "estimated_full_train_seconds": 145326.713,
+    "estimated_full_train_seconds_with_30pct_margin": 188924.726,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
+  },
+  "vram_peak_bytes": null,
+  "checks": {
+    "optimizer_steps": 16,
+    "first_loss": 3.579902,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 2.66280484,
+    "lora_tensors": 336,
+    "lora_weights_changed": true,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "weights/response_sft_epochloop_cpu",
+      "lora_tensors_in_file": 336,
+      "lora_tensors_compared": 336,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 3,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "train_conv_000001_t9",
+          "generated_text": "你这么说，我倒觉得有点道理。毕竟，冷淡和僵局都是人生的一部分，它们都有其存在的价值。\n\n现在不妨先放一下，"
+        },
+        {
+          "id": "train_conv_000001_t11",
+          "generated_text": "理解你的感受，但别太执着。\n\n你确实觉得害怕的是，自己跟别人的关系可能真的已经变得不那么重要了。不过，别忘了"
+        },
+        {
+          "id": "train_conv_000001_t15",
+          "generated_text": "按群里的现状正常来往，心里那块发虚也自然能自消。不过，你要是真的觉得圈里太空，那就别"
+        }
+      ],
+      "passed": true
+    },
+    "generation_probe": [
+      {
+        "id": "train_conv_000001_t9",
+        "generated_text": "你这么说，我倒觉得有点道理。毕竟，冷淡和僵局都是人生的一部分，它们都有其存在的价值。\n\n现在不妨先放一下，"
+      },
+      {
+        "id": "train_conv_000001_t11",
+        "generated_text": "理解你的感受，但别太执着。\n\n你确实觉得害怕的是，自己跟别人的关系可能真的已经变得不那么重要了。不过，别忘了"
+      },
+      {
+        "id": "train_conv_000001_t15",
+        "generated_text": "按群里的现状正常来往，心里那块发虚也自然能自消。不过，你要是真的觉得圈里太空，那就别"
+      }
+    ],
+    "non_empty_generations": 3
+  },
+  "checkpoint_directory": "weights/response_sft_epochloop_cpu",
+  "adapter": {
+    "file": "weights/response_sft_epochloop_cpu/adapter_model.safetensors",
+    "bytes": 17640136,
+    "sha256": "88b20a0fefc679f8b84add082bf86accd8ff39f4f1fda91f72f8525f3eb6e596"
+  }
+}

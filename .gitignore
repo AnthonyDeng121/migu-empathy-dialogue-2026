@@ -20,6 +20,23 @@ __pycache__/
 .env
 .venv/
 .codex_tmp/
+.zcode/
+.zcodeignore
 explain.md
 /数字人综合情感陪伴对话模型.zip
+
+# D 岗位 Day2 审查证据：小体量日志/逐条预测，供 PR 独立核验冒烟与测速
+# （权重仍不入 Git；约定见 logs/README.md 与 results/README.md）。
+# 放在文件末尾以确保这些 negate 覆盖上面的 *.log 等通配规则。
+!logs/D_DAY2_SFT_SMOKE_0P5B.txt
+!logs/D_DAY2_SFT_SMOKE_1P5B.txt
+!logs/D_DAY2_EPOCH_LOOP_CPU.txt
+!logs/D_DAY2_ORIGINAL_0P5B_VAL100.txt
+!logs/D_DAY2_ORIGINAL_1P5B_VAL100.txt
+!results/response_gen/
+!results/response_gen/original_0p5b_val100.jsonl
+!results/response_gen/original_1p5b_val100.jsonl
+!results/response_gen/original_0p5b_val100_report.json
+!results/response_gen/original_1p5b_val100_report.json
+!results/response_gen/three_way_val100.log
 

@@ -1,0 +1,10 @@
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   5%|▍         | 16/338 [00:00<00:02, 126.14it/s]Loading weights:  12%|█▏        | 39/338 [00:00<00:01, 171.07it/s]Loading weights:  17%|█▋        | 59/338 [00:00<00:01, 182.08it/s]Loading weights:  23%|██▎       | 78/338 [00:00<00:01, 180.20it/s]Loading weights:  29%|██▊       | 97/338 [00:00<00:01, 160.41it/s]Loading weights:  34%|███▎      | 114/338 [00:00<00:01, 161.45it/s]Loading weights:  39%|███▉      | 131/338 [00:00<00:01, 162.09it/s]Loading weights:  53%|█████▎    | 178/338 [00:00<00:00, 253.00it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 375.80it/s]
+trainable params: 9,232,384 || all params: 1,552,946,688 || trainable%: 0.5945
+epoch=1/1 micro_batches=512 device=cuda
+step=10/53 train_loss=2.8016 device=cuda
+step=20/53 train_loss=2.7344 device=cuda
+step=30/53 train_loss=2.6972 device=cuda
+step=40/53 train_loss=2.6525 device=cuda
+step=50/53 train_loss=2.6494 device=cuda
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   2%|▏         | 8/338 [00:00<00:04, 75.76it/s]Loading weights:  17%|█▋        | 59/338 [00:00<00:00, 324.26it/s]Loading weights:  45%|████▍     | 152/338 [00:00<00:00, 594.80it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 1061.86it/s]
+PASS: device=cuda steps=53 sec/step=12.1061 eta_full=28243s (+30% margin 36717s) reload=True vram=7212853760

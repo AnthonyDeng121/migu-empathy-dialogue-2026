@@ -1,0 +1,19 @@
+{
+  "version": "response_generation_inference_v1",
+  "model_path": "weights/hf/Qwen2.5-1.5B-Instruct",
+  "adapter_path": null,
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "condition_mode": "none",
+  "input_path": "data/processed/val_eval_input.jsonl",
+  "samples": 100,
+  "max_new_tokens": 256,
+  "total_seconds": 241.356,
+  "mean_seconds_per_sample": 2.4136,
+  "p50_seconds_per_sample": 1.9328,
+  "generated_tokens": 8617,
+  "tokens_per_second": 35.7,
+  "full_set_estimate_seconds": 5681.5,
+  "full_set_size": 2354,
+  "empty_responses": 0
+}

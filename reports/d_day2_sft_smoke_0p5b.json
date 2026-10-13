@@ -1,0 +1,151 @@
+{
+  "version": "response_sft_prep_v2",
+  "status": "smoke",
+  "model": {
+    "name": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct",
+    "loaded_from": "weights/hf/Qwen2.5-0.5B-Instruct"
+  },
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "dtype": "bfloat16",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-0.5B-Instruct",
+    "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 1,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "gold"
+  },
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "transformers": "5.17.0",
+    "peft": "0.21.2",
+    "training_seconds": 401.93
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'data/raw/训练-验证-数据集/train/train_public.jsonl' \\\n  --config 'configs/response_sft_0p5b.json' \\\n  --device cuda \\\n  --output-dir 'weights/response_sft_smoke_0p5b_v2' \\\n  --report-json 'reports/d_day2_sft_smoke_0p5b.json' \\\n  --report-md 'reports/D_DAY2_SFT_SMOKE_0P5B.md' \\\n  --model-dir 'weights/hf/Qwen2.5-0.5B-Instruct' \\\n  --max-train-samples 512 \\\n  --max-steps 53",
+    "code_commit": "8af6b9322e1e92996188653c5e587c806bbf4d0e",
+    "code_dirty": true,
+    "script_sha256": "c5dfd750567e1b399021c5b9766189e1017dab5cfff989943d0540d014a6196a"
+  },
+  "data": {
+    "train_path": "data/raw/训练-验证-数据集/train/train_public.jsonl",
+    "train_total_samples": 18657,
+    "train_used_samples": 512,
+    "skipped_long_samples": 0,
+    "train_sha256": "184a47471f8d6f70fa21b9265b0a4d4e51c3748ba25af39a801884a2da35341a",
+    "response_turn_consistency": {
+      "total": 18657,
+      "match": 18657,
+      "mismatch": 0,
+      "mismatch_examples": []
+    },
+    "condition_mode": "gold",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 141,
+      "mean": 1049.9,
+      "max": 2047
+    }
+  },
+  "parameters": {
+    "trainable": 4399104,
+    "total": 498431872,
+    "fraction": 0.008826
+  },
+  "training_speed": {
+    "optimizer_steps": 53,
+    "micro_batches_done": 424,
+    "mean_train_loss": 3.132,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 50,
+    "measured_window_seconds": 385.153,
+    "seconds_per_step": 7.703053,
+    "seconds_per_step_basis": "mean full gradient-accumulation window after warm-up",
+    "full_steps_per_epoch": 2333,
+    "estimated_full_train_seconds": 17971.222,
+    "estimated_full_train_seconds_with_30pct_margin": 23362.589,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
+  },
+  "vram_peak_bytes": 4930542592,
+  "checks": {
+    "optimizer_steps": 53,
+    "first_loss": 2.876953,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 2.38356972,
+    "lora_tensors": 336,
+    "lora_weights_changed": true,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "weights/response_sft_smoke_0p5b_v2",
+      "lora_tensors_in_file": 336,
+      "lora_tensors_compared": 336,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 3,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "train_conv_000001_t9",
+          "generated_text": "好，那就先放一下。现在最需要的是：\n\n1. **不急**：给自己留个缓冲区，不强迫自己马上做出决定。\n2. **不问结果**：暂时不去想“如果冷下来，我会变成什么样”。专注于当下，感受那份别扭。\n3. **不强求**：给身体足够的时间来适应，不强迫自己立刻回到那个“站不稳”的位置。\n\n既然不想听这些分析，那就先放一放。"
+        },
+        {
+          "id": "train_conv_000001_t11",
+          "generated_text": "被排除在外，确实比冷淡更刺眼。但冷淡背后，可能还有其他原因：可能是对方突然变了，不再像以前那样亲热；可能是你自己的情绪波动，导致别人对你不够敏感；也可能是某种潜意识的“我太累了，需要有人陪护”……这些都不好说，也不一定能立即解决。\n\n现在最现实的是，既然他俩都在群里说话，那就让他俩继续交流，哪怕只是偶尔几句。如果他俩都愿意，你就可以暂时放下那份别扭感。"
+        },
+        {
+          "id": "train_conv_000001_t15",
+          "generated_text": "按群里现在这么正常，你先顺着他走就行了。圈子里到底站哪儿，你先不问，不靠。"
+        }
+      ],
+      "passed": true
+    },
+    "generation_probe": [
+      {
+        "id": "train_conv_000001_t9",
+        "generated_text": "好，那就先放一下。现在最需要的是：\n\n1. **不急**：给自己留个缓冲区，不强迫自己马上做出决定。\n2. **不问结果**：暂时不去想“如果冷下来，我会变成什么样”。专注于当下，感受那份别扭。\n3. **不强求**：给身体足够的时间来适应，不强迫自己立刻回到那个“站不稳”的位置。\n\n既然不想听这些分析，那就先放一放。"
+      },
+      {
+        "id": "train_conv_000001_t11",
+        "generated_text": "被排除在外，确实比冷淡更刺眼。但冷淡背后，可能还有其他原因：可能是对方突然变了，不再像以前那样亲热；可能是你自己的情绪波动，导致别人对你不够敏感；也可能是某种潜意识的“我太累了，需要有人陪护”……这些都不好说，也不一定能立即解决。\n\n现在最现实的是，既然他俩都在群里说话，那就让他俩继续交流，哪怕只是偶尔几句。如果他俩都愿意，你就可以暂时放下那份别扭感。"
+      },
+      {
+        "id": "train_conv_000001_t15",
+        "generated_text": "按群里现在这么正常，你先顺着他走就行了。圈子里到底站哪儿，你先不问，不靠。"
+      }
+    ],
+    "non_empty_generations": 3
+  },
+  "checkpoint_directory": "weights/response_sft_smoke_0p5b_v2",
+  "adapter": {
+    "file": "weights/response_sft_smoke_0p5b_v2/adapter_model.safetensors",
+    "bytes": 17640136,
+    "sha256": "d8e65e72148ea090fa27873621887b4ec38b4bf284f3f7b7f8a120529322381a"
+  }
+}

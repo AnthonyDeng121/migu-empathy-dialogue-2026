@@ -1,0 +1,10 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  41%|████      | 119/290 [00:00<00:00, 1189.83it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2785.05it/s]
+trainable params: 4,399,104 || all params: 498,431,872 || trainable%: 0.8826
+epoch=1/1 micro_batches=512 device=cuda
+step=10/53 train_loss=3.2862 device=cuda
+step=20/53 train_loss=3.2110 device=cuda
+step=30/53 train_loss=3.1840 device=cuda
+step=40/53 train_loss=3.1381 device=cuda
+step=50/53 train_loss=3.1370 device=cuda
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  36%|███▌      | 104/290 [00:00<00:00, 1036.57it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2470.32it/s]
+PASS: device=cuda steps=53 sec/step=7.7031 eta_full=17971s (+30% margin 23363s) reload=True vram=4930542592
