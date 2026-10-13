@@ -24,3 +24,7 @@ python scripts/run_experiment.py --train "data/raw/训练-验证-数据集/train
 重跑须换新的输出目录。CI 在 Linux 额外执行两参数 Shell 入口，并验证保留已有结果目录文件；该新增检查等待远程 Actions 验证，本机 Windows 合成测试跳过此步骤。本次没有重新构建模型镜像。
 
 用户已授权提交、推送并安装 GitHub CLI；交付提交到 A 分支，通过 base 为 main 的 PR 等待 B 复核。仓库文件只是规则与 CI 的交付，不能当作远程分支保护已生效。B 复核与合并前保持 Integration Gate；远程 Actions 结果以 PR 检查为准。
+
+## 平台调查追加交付
+
+2026-10-13 后续完成卡时、存储、截止时间、大赛专属镜像和平台提交路径调查，并据此修订明日四人任务。调查结论与 B 的复核命令见 `reports/A_DAY2_PLATFORM_INVESTIGATION.md`；比赛事实同步到 `docs/OFFICIAL_REQUIREMENTS.md`，训练资源与开机门槛同步到 `docs/TRAINING_WORKPLAN.md`。本次先同步最新 `origin/main`，已包含 C PR #6 与 D PR #4，未覆盖队友代码。
