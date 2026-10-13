@@ -1,0 +1,20 @@
+{
+  "model_name": "Qwen/Qwen2.5-0.5B-Instruct",
+  "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "max_length": 512,
+  "max_new_tokens": 32,
+  "epochs": 2,
+  "batch_size": 1,
+  "gradient_accumulation": 2,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.01,
+  "warmup_ratio": 0.03,
+  "seed": 20261013,
+  "lora_r": 8,
+  "lora_alpha": 16,
+  "lora_dropout": 0.05,
+  "lora_target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+  "gradient_checkpointing": false,
+  "max_history_turns": 4,
+  "condition_mode": "gold"
+}
