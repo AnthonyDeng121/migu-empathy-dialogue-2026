@@ -1,0 +1,8 @@
+{
+  "samples": 2354,
+  "emotion_accuracy": 0.15590484282073067,
+  "profile_dimension_accuracy": 0.4505805720758992,
+  "bleu4_char": 0.029366730327728467,
+  "rouge_l_char_f1": 0.14386961818840596,
+  "warning": "Official tokenization, smoothing, BERTScore model and metric weights are not published in supplied files; these scores are diagnostic only."
+}
