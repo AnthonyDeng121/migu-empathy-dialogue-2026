@@ -9,7 +9,13 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.train_emotion_encoder import _majority_comparison, _portable_path
+from scripts.train_emotion_encoder import (
+    _majority_comparison,
+    _portable_path,
+    _render_report,
+    _smoke_checks,
+    _training_speed_summary,
+)
 
 
 class EmotionEncoderTests(unittest.TestCase):
@@ -112,6 +118,76 @@ class EmotionEncoderTests(unittest.TestCase):
             self.assertEqual(comparison, {"majority_accuracy": 0.25, "accuracy_delta": 0.25})
             with self.assertRaisesRegex(ValueError, "sample counts differ"):
                 _majority_comparison(baseline_path, 3, 0.5)
+
+    def test_training_speed_summary_projects_full_epoch_from_measured_steps(self) -> None:
+        summary = _training_speed_summary(50, 125.0, 18_657, 32, 1)
+
+        self.assertEqual(summary["optimizer_steps"], 50)
+        self.assertEqual(summary["full_steps_per_epoch"], 584)
+        self.assertEqual(summary["estimated_full_train_seconds"], 1460.0)
+
+    def test_smoke_checks_require_finite_learning_and_reloadable_checkpoint(self) -> None:
+        summary = _smoke_checks(
+            optimizer_steps=50,
+            first_loss=1.2,
+            first_gradient_norm=0.8,
+            classifier_weights_changed=True,
+            checkpoint_reload_passed=True,
+        )
+
+        self.assertTrue(summary["finite_loss"])
+        self.assertTrue(summary["first_step_gradient_finite_nonzero"])
+        self.assertTrue(summary["classifier_weights_changed"])
+        self.assertTrue(summary["checkpoint_reload_passed"])
+        with self.assertRaisesRegex(RuntimeError, "classifier weights did not change"):
+            _smoke_checks(
+                optimizer_steps=50,
+                first_loss=1.2,
+                first_gradient_norm=0.8,
+                classifier_weights_changed=False,
+                checkpoint_reload_passed=True,
+            )
+
+    def test_smoke_report_reproduces_sample_limits_and_uses_new_output_paths(self) -> None:
+        report = {
+            "status": "Exploratory sample only",
+            "model": {"name": "model", "revision": "abc", "card_url": "https://example.com"},
+            "device": "mps",
+            "seed": 7,
+            "config": {"epochs": 1, "max_length": 32},
+            "data": {
+                "train_path": "data/train.jsonl",
+                "validation_path": "data/val.jsonl",
+                "train_used": 1600,
+                "train_total": 18657,
+                "validation_used": 2,
+                "validation_total": 2,
+                "train_sha256": "train-hash",
+                "validation_sha256": "val-hash",
+            },
+            "selected_epoch": 1,
+            "metrics": {
+                "accuracy": 0.5,
+                "macro_f1": 0.5,
+                "labels": ["joy"],
+                "per_class": {"joy": {"precision": 0.5, "recall": 0.5, "f1": 0.5, "support": 2}},
+            },
+            "training_speed": {
+                "optimizer_steps": 50,
+                "seconds_per_step": 2.5,
+                "estimated_full_train_seconds": 1460.0,
+            },
+            "baseline_comparison": {"majority_accuracy": 0.25, "accuracy_delta": 0.25},
+            "smoke_checks": {"optimizer_steps": 50},
+            "checkpoint": {"file": "weights/smoke/model.safetensors", "bytes": 1, "sha256": "hash"},
+            "sampling": {"max_train_samples": 1600, "max_validation_samples": None},
+        }
+
+        markdown = _render_report(report)
+
+        self.assertIn("--max-train-samples 1600", markdown)
+        self.assertIn("--output-dir weights/emotion_encoder_repro", markdown)
+        self.assertIn("'data/train.jsonl'", markdown)
 
 
 if __name__ == "__main__":

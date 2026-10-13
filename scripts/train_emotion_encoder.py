@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import random
 import sys
 import time
@@ -27,6 +28,58 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _training_speed_summary(
+    optimizer_steps: int,
+    measured_step_seconds: float,
+    full_train_examples: int,
+    batch_size: int,
+    epochs: int,
+) -> dict[str, float | int]:
+    if optimizer_steps < 1 or measured_step_seconds <= 0:
+        raise ValueError("training speed requires measured optimizer steps")
+    if full_train_examples < 1 or batch_size < 1 or epochs < 1:
+        raise ValueError("full training dimensions must be positive")
+    seconds_per_step = measured_step_seconds / optimizer_steps
+    full_steps_per_epoch = math.ceil(full_train_examples / batch_size)
+    return {
+        "optimizer_steps": optimizer_steps,
+        "measured_step_seconds": round(measured_step_seconds, 3),
+        "seconds_per_step": round(seconds_per_step, 6),
+        "full_steps_per_epoch": full_steps_per_epoch,
+        "estimated_full_train_seconds": round(
+            seconds_per_step * full_steps_per_epoch * epochs, 3
+        ),
+    }
+
+
+def _smoke_checks(
+    *,
+    optimizer_steps: int,
+    first_loss: float,
+    first_gradient_norm: float,
+    classifier_weights_changed: bool,
+    checkpoint_reload_passed: bool,
+) -> dict[str, Any]:
+    if optimizer_steps < 1:
+        raise RuntimeError("smoke run completed no optimizer steps")
+    if not math.isfinite(first_loss):
+        raise RuntimeError("smoke run produced a non-finite loss")
+    if not math.isfinite(first_gradient_norm) or first_gradient_norm <= 0:
+        raise RuntimeError("smoke run did not produce a finite nonzero gradient")
+    if not classifier_weights_changed:
+        raise RuntimeError("smoke run classifier weights did not change")
+    if not checkpoint_reload_passed:
+        raise RuntimeError("smoke checkpoint could not be reloaded consistently")
+    return {
+        "optimizer_steps": optimizer_steps,
+        "finite_loss": True,
+        "first_step_gradient_finite_nonzero": True,
+        "first_step_classifier_gradient_norm": round(first_gradient_norm, 8),
+        "classifier_weights_changed": True,
+        "checkpoint_reload_passed": True,
+    }
 
 
 def _device(torch: Any, requested: str) -> Any:
@@ -110,6 +163,29 @@ def _evaluate(
 
 def _render_report(report: dict[str, Any]) -> str:
     metrics = report["metrics"]
+    train_path = report["data"]["train_path"]
+    validation_path = report["data"]["validation_path"]
+    reproduction = [
+        "python scripts/train_emotion_encoder.py \\",
+        f"  --train '{train_path}' \\",
+        f"  --val '{validation_path}' \\",
+        f"  --device {report['device']} \\",
+    ]
+    if report["sampling"]["max_train_samples"] is not None:
+        reproduction.append(
+            f"  --max-train-samples {report['sampling']['max_train_samples']} \\",
+        )
+    if report["sampling"]["max_validation_samples"] is not None:
+        reproduction.append(
+            f"  --max-validation-samples {report['sampling']['max_validation_samples']} \\",
+        )
+    reproduction.extend(
+        [
+            "  --output-dir weights/emotion_encoder_repro \\",
+            "  --report-json reports/emotion_encoder_repro.json \\",
+            "  --report-md reports/EMOTION_ENCODER_REPRO.md",
+        ]
+    )
     lines = [
         "# 中文 encoder 情感分类 baseline",
         "",
@@ -125,8 +201,20 @@ def _render_report(report: dict[str, Any]) -> str:
         f"按验证集 Accuracy 选择 epoch {report['selected_epoch']} 的 checkpoint。",
         f"验证 Accuracy：**{metrics['accuracy']:.2%}**；Macro-F1：**{metrics['macro_f1']:.4f}**。",
         (
+            f"测速：{report['training_speed']['optimizer_steps']} optimizer steps，"
+            f"{report['training_speed']['seconds_per_step']:.4f} 秒/step；"
+            f"按完整训练集估算 {report['training_speed']['estimated_full_train_seconds']:.1f} 秒/epoch。"
+        ),
+        (
             f"多数类 baseline Accuracy：{report['baseline_comparison']['majority_accuracy']:.2%}；"
             f"提升 {report['baseline_comparison']['accuracy_delta'] * 100:.2f} 个百分点。"
+        ),
+        "",
+        (
+            f"训练冒烟检查：{report['smoke_checks']['optimizer_steps']} steps；"
+            "loss/梯度有限、分类头权重更新、checkpoint 本地重载均通过。"
+            if report.get("smoke_checks")
+            else "训练冒烟检查：本次未使用样本上限。"
         ),
         "",
         "| 情感类别 | Precision | Recall | F1 | Support |",
@@ -157,9 +245,7 @@ def _render_report(report: dict[str, Any]) -> str:
             "",
             "```bash",
             "python -m pip install -r requirements-emotion.txt",
-            "python scripts/train_emotion_encoder.py \\",
-            "  --train data/raw/训练-验证-数据集/train/train_public.jsonl \\",
-            "  --val data/raw/训练-验证-数据集/val/val_public.jsonl",
+            *reproduction,
             "```",
             "",
         ]
@@ -227,6 +313,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         label2id=label_to_id,
         local_files_only=args.local_files_only,
     ).to(device)
+    smoke_mode = args.max_train_samples is not None or args.max_validation_samples is not None
+    initial_classifier_weight = None
+    if smoke_mode:
+        classifier = getattr(model, "classifier", None)
+        if classifier is None or not hasattr(classifier, "weight"):
+            raise RuntimeError("smoke checks require a model classifier weight")
+        initial_classifier_weight = classifier.weight.detach().cpu().clone()
 
     train_encoded = _encode_dataset(
         tokenizer, train_examples, label_to_id, int(config["max_length"])
@@ -269,19 +362,39 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     best_accuracy = -1.0
     selected_epoch = 0
     selected_metrics: dict[str, Any] = {}
+    selected_classifier_weight = None
+    first_loss = math.nan
+    first_gradient_norm = math.nan
+    optimizer_steps = 0
+    measured_step_seconds = 0.0
     started = time.perf_counter()
     for epoch in range(epochs):
         model.train()
         total_loss = 0.0
+        epoch_started = time.perf_counter()
         for step, batch in enumerate(train_loader, start=1):
+            step_started = time.perf_counter()
             batch = {key: value.to(device) for key, value in batch.items()}
             optimizer.zero_grad(set_to_none=True)
             loss = model(**batch).loss
+            loss_value = float(loss.detach().cpu())
+            if epoch == 0 and step == 1:
+                first_loss = loss_value
+            if smoke_mode and not math.isfinite(loss_value):
+                raise RuntimeError("smoke run produced a non-finite loss")
             loss.backward()
+            if smoke_mode and optimizer_steps == 0:
+                classifier_gradient = model.classifier.weight.grad
+                if classifier_gradient is not None:
+                    first_gradient_norm = float(
+                        torch.linalg.vector_norm(classifier_gradient.detach()).cpu()
+                    )
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             scheduler.step()
-            total_loss += float(loss.detach().cpu())
+            total_loss += loss_value
+            optimizer_steps += 1
+            measured_step_seconds += time.perf_counter() - step_started
             if step % 100 == 0 or step == len(train_loader):
                 mean_loss = total_loss / step
                 print(
@@ -296,6 +409,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             {
                 "epoch": epoch + 1,
                 "train_loss": round(total_loss / max(len(train_loader), 1), 6),
+                "optimizer_steps": len(train_loader),
+                "training_seconds": round(time.perf_counter() - epoch_started, 3),
                 "validation": validation_metrics,
             }
         )
@@ -304,6 +419,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             selected_epoch = epoch + 1
             selected_metrics = validation_metrics
             model.save_pretrained(args.output_dir)
+            if smoke_mode:
+                selected_classifier_weight = model.classifier.weight.detach().cpu().clone()
         print(
             f"epoch={epoch + 1}/{epochs} validation_accuracy="
             f"{validation_metrics['accuracy']:.6f} "
@@ -317,6 +434,32 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if len(checkpoint_files) != 1:
         raise RuntimeError("expected exactly one safetensors checkpoint")
     checkpoint_path = checkpoint_files[0]
+    speed_summary = _training_speed_summary(
+        optimizer_steps,
+        measured_step_seconds,
+        train_total,
+        int(config["batch_size"]),
+        epochs,
+    )
+    smoke_summary = None
+    if smoke_mode:
+        reloaded_model = AutoModelForSequenceClassification.from_pretrained(
+            args.output_dir, local_files_only=True
+        ).to(device)
+        checkpoint_reload_passed = torch.equal(
+            selected_classifier_weight,
+            reloaded_model.classifier.weight.detach().cpu(),
+        )
+        smoke_summary = _smoke_checks(
+            optimizer_steps=optimizer_steps,
+            first_loss=first_loss,
+            first_gradient_norm=first_gradient_norm,
+            classifier_weights_changed=not torch.equal(
+                initial_classifier_weight, selected_classifier_weight
+            ),
+            checkpoint_reload_passed=checkpoint_reload_passed,
+        )
+        del reloaded_model
     used_all_data = len(train_examples) == train_total and len(validation_examples) == validation_total
     report = {
         "version": "emotion_encoder_baseline_v1",
@@ -335,6 +478,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "training_seconds": round(time.perf_counter() - started, 3),
         },
         "data": {
+            "train_path": _portable_path(args.train),
+            "validation_path": _portable_path(args.val),
             "train_total": train_total,
             "train_used": len(train_examples),
             "validation_total": validation_total,
@@ -344,6 +489,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "validation_sha256": _sha256(args.val),
         },
         "history": history,
+        "sampling": {
+            "max_train_samples": args.max_train_samples,
+            "max_validation_samples": args.max_validation_samples,
+        },
+        "training_speed": speed_summary,
+        "smoke_checks": smoke_summary,
         "selected_epoch": selected_epoch,
         "metrics": selected_metrics,
         "checkpoint_directory": _portable_path(args.output_dir),

@@ -1,0 +1,32 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 39848.49it/s]
+[transformers] [1mBertForSequenceClassification LOAD REPORT[0m from: hfl/chinese-macbert-base
+Key                                        | Status     |
+-------------------------------------------+------------+-
+cls.predictions.transform.LayerNorm.bias   | UNEXPECTED |
+cls.predictions.bias                       | UNEXPECTED |
+cls.predictions.transform.dense.weight     | UNEXPECTED |
+cls.seq_relationship.weight                | UNEXPECTED |
+cls.predictions.transform.dense.bias       | UNEXPECTED |
+cls.predictions.decoder.bias               | UNEXPECTED |
+cls.predictions.transform.LayerNorm.weight | UNEXPECTED |
+cls.predictions.decoder.weight             | UNEXPECTED |
+cls.seq_relationship.bias                  | UNEXPECTED |
+classifier.weight                          | MISSING    |
+classifier.bias                            | MISSING    |
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+epoch=1/1 step=50/50 train_loss=2.3379 device=mps
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]
+Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  1.72it/s]
+Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  1.72it/s]
+epoch=1/1 validation_accuracy=0.388700 validation_macro_f1=0.064815
+
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 201/201 [00:00<00:00, 6181.44it/s]
+PASS: device=mps train=1600/18657 val=2354/2354 accuracy=0.388700 macro_f1=0.064815
