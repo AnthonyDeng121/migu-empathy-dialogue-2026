@@ -66,7 +66,7 @@
 | 10/12 | D | 检索回复 baseline 与回复接口 | Integration Gate | `results/baseline/`、`reports/baseline_val100_metrics.json` | A | 待验收 | 分数仅为保底；A 需复现运行与输出 Schema | 建立生成 baseline |
 | 10/13 | A | GitHub 协作规则、CI、实验模板 | Ready |  | B | 待提交 |  |  |
 | 10/13 | B | conversation 分组数据、指标回归 | Ready |  | C | 待提交 |  |  |
-| 10/13 | C | 情感分类 encoder baseline | Ready |  | D | 待提交 |  |  |
+| 10/13 | C | 情感分类 encoder baseline | Integration Gate | `scripts/train_emotion_encoder.py`、`reports/EMOTION_ENCODER_BASELINE.md`、`reports/emotion_encoder_baseline.json` | 等待 D 审查、A 集成、B 独立复核 | D 审查后接入统一配置与推理接口 | 待验收 | 待复核 |
 | 10/13 | D | 检索与生成 baseline 对比 | Ready |  | A | 待提交 |  |  |
 | 10/14 | A | 统一配置、mock 集成和资源基准 | Ready |  | B | 待提交 |  |  |
 | 10/14 | B | 错误分析切片与实验表 | Ready |  | C | 待提交 |  |  |
