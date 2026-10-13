@@ -6,6 +6,11 @@ This is the response-line inference half used for the three-way comparison
 response_text plus timing; emotion and profile come from the classification
 line and memory_refs stays []. Throughput on the first N samples feeds the
 full-evaluation ETA required by the training workplan.
+
+--condition-jsonl feeds C's predicted emotion_label/user_profile per sample
+id (official submission-schema fields) so the training-time gold conditioning
+can be replaced by predicted conditions at inference; every eval id must be
+covered, otherwise the conditioned/unconditioned prompts would silently mix.
 """
 from __future__ import annotations
 
@@ -54,6 +59,26 @@ def _device(torch: Any, requested: str) -> Any:
     return torch.device(requested)
 
 
+def _load_conditions(path: Path) -> dict[str, dict[str, Any]]:
+    """Predicted conditions keyed by sample id (C's classification output)."""
+    conditions: dict[str, dict[str, Any]] = {}
+    for row in read_jsonl(path):
+        sample_id = row.get("id")
+        if not sample_id:
+            raise ValueError(f"condition row without id in {path}")
+        if "emotion_label" not in row or not isinstance(row.get("user_profile"), dict):
+            raise ValueError(
+                f"condition row {sample_id} lacks emotion_label/user_profile"
+            )
+        conditions[sample_id] = {
+            "emotion_label": row["emotion_label"],
+            "user_profile": row["user_profile"],
+        }
+    if not conditions:
+        raise ValueError(f"condition file contains no rows: {path}")
+    return conditions
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
     deps = _load_optional_dependencies()
     torch = deps["torch"]
@@ -66,6 +91,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         rows = rows[: args.max_samples]
     if not rows:
         raise ValueError("eval input contains no rows")
+    conditions = _load_conditions(args.condition_jsonl) if args.condition_jsonl else {}
+    if conditions:
+        missing = [row["id"] for row in rows if row["id"] not in conditions]
+        if missing:
+            raise ValueError(
+                f"{len(missing)} eval ids lack a predicted condition "
+                f"(first: {missing[:5]}); refusing to mix conditioned and "
+                "unconditioned prompts"
+            )
     device = _device(torch, args.device)
     use_bf16 = device.type == "cuda" and torch.cuda.is_bf16_supported()
 
@@ -85,7 +119,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     generated_tokens = 0
     started = time.perf_counter()
     for row in rows:
-        sample = build_eval_sample(row, condition=None)
+        sample = build_eval_sample(row, condition=conditions.get(row["id"]))
         prompt_text = tokenizer.apply_chat_template(
             sample["messages"], add_generation_prompt=True, tokenize=False
         )
@@ -116,7 +150,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "adapter_path": str(args.adapter) if args.adapter else None,
         "device": str(device),
         "dtype": "bfloat16" if use_bf16 else "float32",
-        "condition_mode": "none",
+        "condition_mode": "predicted" if conditions else "none",
+        "condition_source": str(args.condition_jsonl) if args.condition_jsonl else None,
+        "condition_coverage": (
+            f"{sum(1 for row in rows if row['id'] in conditions)}/{len(rows)}"
+            if conditions
+            else None
+        ),
         "input_path": str(args.input),
         "samples": len(predictions),
         "max_new_tokens": int(args.max_new_tokens),
@@ -151,6 +191,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--performance-report", type=Path, required=True)
     parser.add_argument("--max-samples", type=int)
+    parser.add_argument(
+        "--condition-jsonl",
+        type=Path,
+        help=(
+            "predicted emotion_label/user_profile per sample id (C's output); "
+            "when given, every eval id must be covered"
+        ),
+    )
     parser.add_argument("--max-new-tokens", type=int, default=256)
     parser.add_argument("--full-set-size", type=int, default=2354)
     parser.add_argument("--device", choices=("auto", "cpu", "mps", "cuda"), default="auto")

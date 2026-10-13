@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from scripts.run_response_inference import _load_conditions
 from src.response.sft_data import (
     BASE_SYSTEM_PROMPT,
     build_eval_sample,
@@ -202,6 +205,46 @@ class BuildEvalSampleTests(unittest.TestCase):
         }
         sample = build_eval_sample(row, condition=condition)
         self.assertIn("anxiety", sample["messages"][0]["content"])
+
+
+class PredictedConditionFileTests(unittest.TestCase):
+    """C's predicted conditions feed the same prompt structure as gold."""
+
+    def _write(self, rows: list[dict]) -> Path:
+        handle = tempfile.NamedTemporaryFile(
+            "w", suffix=".jsonl", delete=False, encoding="utf-8"
+        )
+        with handle:
+            for row in rows:
+                handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+        return Path(handle.name)
+
+    def test_conditions_keyed_by_id(self) -> None:
+        path = self._write(
+            [
+                {
+                    "id": "eval_000001_t1",
+                    "emotion_label": "anxiety",
+                    "user_profile": {"personality_traits": [], "interests": [], "style": []},
+                }
+            ]
+        )
+        conditions = _load_conditions(path)
+        self.assertEqual(conditions["eval_000001_t1"]["emotion_label"], "anxiety")
+        self.assertIn("user_profile", conditions["eval_000001_t1"])
+        path.unlink()
+
+    def test_row_without_profile_rejected(self) -> None:
+        path = self._write([{"id": "eval_000001_t1", "emotion_label": "anxiety"}])
+        with self.assertRaises(ValueError):
+            _load_conditions(path)
+        path.unlink()
+
+    def test_empty_file_rejected(self) -> None:
+        path = self._write([])
+        with self.assertRaises(ValueError):
+            _load_conditions(path)
+        path.unlink()
 
 
 class ResponseTurnConsistencyTests(unittest.TestCase):

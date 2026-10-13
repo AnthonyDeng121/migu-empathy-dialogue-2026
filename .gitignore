@@ -6,10 +6,20 @@ weights/*
 !weights/README.md
 logs/*
 !logs/README.md
+!logs/D_DAY2_SFT_SMOKE_0P5B.txt
+!logs/D_DAY2_SFT_SMOKE_1P5B.txt
+!logs/D_DAY2_EPOCH_LOOP_CPU.txt
+!logs/D_DAY2_ORIGINAL_0P5B_VAL100.txt
+!logs/D_DAY2_ORIGINAL_1P5B_VAL100.txt
 artifacts/*
 !artifacts/README.md
 results/*
 !results/README.md
+!results/response_gen/original_0p5b_val100.jsonl
+!results/response_gen/original_1p5b_val100.jsonl
+!results/response_gen/original_0p5b_val100_report.json
+!results/response_gen/original_1p5b_val100_report.json
+!results/response_gen/three_way_val100.log
 .cache/
 .pytest_cache/
 __pycache__/
@@ -20,6 +30,8 @@ __pycache__/
 .env
 .venv/
 .codex_tmp/
+.zcode/
+.zcodeignore
 explain.md
 /数字人综合情感陪伴对话模型.zip
 
