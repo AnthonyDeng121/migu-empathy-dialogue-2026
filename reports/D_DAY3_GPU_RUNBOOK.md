@@ -4,13 +4,14 @@
 
 ## 环境现状（已验证）
 
-- 远程：`ssh root@183.222.230.12 -p 59249`，实例 2026-10-14 11:41 +08 创建（容器启动时 GPU 可用，11:50 起被收回）。
-- 仓库：`/root/migu-d2/repo` @ commit `6d187bc`（feature/d-plan-sync-1014，含 .git，`git status` 干净）；后续 commit 用 `git fetch` + `git reset --hard origin/feature/d-plan-sync-1014` 同步（.git 已 scp 过去，origin 指向 GitHub）。
+- 远程：`ssh root@183.222.230.12 -p 59249`，实例 2026-10-14 11:41 +08 创建（容器启动时 GPU 可用，11:50 起被收回）。平台控制台显示该实例**调度方式为"抢占"**——GPU 被平台回收给高优先级任务即本例根因；实例仍在运行并计费（卡时券余额 19.69 卡时 @12:46）。
+- **持久 staging（已迁移，2026-10-14 12:55）**：`/mnt/storage/migu-d2/`（200G Ceph NFS 持久盘，实例重建不丢；控制台"文件存储"资源若被单独删除则仍会丢，GitHub 分支与 data/raw 可再生是最终兜底）。内容：`data/`（B1 三件套，SHA-256 已核）、`weights/hf/Qwen2.5-1.5B-Instruct`、`repo`（@ `6d187bc`，含 .git）、`reports/`、`gpu_watch.log`。训练时建议先 `cp -a` 回容器本地盘（47G 空闲）避免 NFS 随机读。
+- 代码同步（远程 GitHub 主站被墙，git clone/fetch 不通；codeload 通）：① 远程 `curl -sL https://codeload.github.com/AnthonyDeng121/migu-empathy-dialogue-2026/tar.gz/refs/heads/feature/d-plan-sync-1014 | tar xz --strip-components=1` 覆盖代码；② 本地 `scp -P 59249 -r <repo>/.git root@183.222.230.12:<repo>/` 带溯源；③ `git rev-parse HEAD` 与 `git status --short` 核验。
 - 依赖：`/opt/conda/envs/conda_env/bin/python`（Python 3.12.12；torch 2.10.0+cu128、transformers 4.57.6、peft 0.21.2、accelerate 1.15.0、safetensors 0.7.0）。平台预置环境，勿升级。
-- 数据：`/root/migu-d2/data/b1_full_v1/{response_train,response_val,classification_train}.jsonl`，SHA-256 与本地 B1 v1 一致（response_train `a70ca036…`、response_val `ddf76588…`、classification_train `4d4e9498…`）。
-- 模型：`/root/migu-d2/weights/hf/Qwen2.5-1.5B-Instruct`（revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306`，经 hf-mirror 下载，3.09GB）。
+- 数据：B1 `response_train`/`response_val`/`classification_train`.jsonl，SHA-256 与本地 B1 v1 一致（response_train `a70ca036…`、response_val `ddf76588…`、classification_train `4d4e9498…`）。
+- 模型：Qwen2.5-1.5B-Instruct（revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306`，经 hf-mirror 下载，3.09GB）。
 - CPU 端到端冒烟已通过：`reports/d_day3_response_sft_cpu_smoke.json`（B1 数据路径、训练、保存、离线重载、报告均验证；`lora_weights_changed=False` 是 1 步 warm-up 系数为 0 的真实结果，非缺陷）。
-- GPU 看守日志：`/root/migu-d2/gpu_watch.log`（每 5 分钟记录一次设备可开性）。
+- GPU 看守日志：`/mnt/storage/migu-d2/gpu_watch.log`（每 5 分钟记录一次设备可开性）。
 
 ## 步骤 1：GPU 恢复确认
 
@@ -18,12 +19,20 @@
 ssh -p 59249 root@183.222.230.12 "/opt/conda/envs/conda_env/bin/python -c \"import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))\""
 ```
 
-必须输出 `True NVIDIA GeForce RTX 4090` 才继续；仍为 False 则不上传任何东西、不开始训练。
+必须输出 `True NVIDIA GeForce RTX 4090` 才继续；仍为 False 则不上传任何东西、不开始训练。若实例被重建：先按"环境现状"中的代码同步步骤恢复仓库，再执行步骤 1.5。
+
+## 步骤 1.5：从持久盘恢复工作区（实例重建或新容器后执行）
+
+```bash
+ssh -p 59249 root@183.222.230.12 "mkdir -p /root/migu-d2 && cp -a /mnt/storage/migu-d2/data /mnt/storage/migu-d2/weights /root/migu-d2/ && rm -rf /root/migu-d2/repo && cp -a /mnt/storage/migu-d2/repo /root/migu-d2/repo && cd /root/migu-d2/repo && git rev-parse HEAD && git status --short | wc -l"
+```
+
+预期：HEAD 为当日最新 D2 commit、工作区干净（0）。训练产出（adapter、报告、日志）在步骤 4 结束后同步回持久盘：`rsync -a /root/migu-d2/weights /root/migu-d2/reports /root/migu-d2/logs /mnt/storage/migu-d2/`。
 
 ## 步骤 2：≥50 step 短跑复测 ETA（工作plan口径：warm-up 后测 ≥50 step、两端同步、+30% 余量）
 
 ```bash
-ssh -p 59249 root@183.222.230.12 "cd /root/migu-d2/repo && git fetch origin && git reset --hard origin/feature/d-plan-sync-1014 && /opt/conda/envs/conda_env/bin/python scripts/train_response_sft.py \
+ssh -p 59249 root@183.222.230.12 "cd /root/migu-d2/repo && /opt/conda/envs/conda_env/bin/python scripts/train_response_sft.py \
   --train /root/migu-d2/data/b1_full_v1/response_train.jsonl \
   --train-format b1 \
   --condition-jsonl /root/migu-d2/data/b1_full_v1/classification_train.jsonl \
