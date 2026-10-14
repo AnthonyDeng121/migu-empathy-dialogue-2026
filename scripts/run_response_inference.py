@@ -82,6 +82,22 @@ def _load_conditions(path: Path) -> dict[str, dict[str, Any]]:
     return conditions
 
 
+def condition_coverage(
+    rows: list[dict[str, Any]], conditions: dict[str, dict[str, Any]]
+) -> str | None:
+    """Predicted-condition coverage as "covered/total", or None without conditions.
+
+    Ids resolve through eval_row_id so the official test schema (id) and the
+    frozen B1 schema (sample_id) are both counted. Reading row["id"] directly
+    raised KeyError on B1 splits while writing the performance report, i.e.
+    only after the whole inference had already run.
+    """
+    if not conditions:
+        return None
+    covered = sum(1 for row in rows if eval_row_id(row) in conditions)
+    return f"{covered}/{len(rows)}"
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
     deps = _load_optional_dependencies()
     torch = deps["torch"]
@@ -156,11 +172,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "dtype": "bfloat16" if use_bf16 else "float32",
         "condition_mode": "predicted" if conditions else "none",
         "condition_source": str(args.condition_jsonl) if args.condition_jsonl else None,
-        "condition_coverage": (
-            f"{sum(1 for row in rows if row['id'] in conditions)}/{len(rows)}"
-            if conditions
-            else None
-        ),
+        "condition_coverage": condition_coverage(rows, conditions),
         "input_path": str(args.input),
         "samples": len(predictions),
         "max_new_tokens": int(args.max_new_tokens),
