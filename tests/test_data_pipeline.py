@@ -13,7 +13,10 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.prepare_training_data import PROJECT, build_full, build_smoke, check_full_result, expand_point, main
+from scripts.prepare_training_data import (
+    PROJECT, build_full, build_smoke, check_full_result, expand_point, main,
+    write_jsonl as write_training_jsonl,
+)
 from src.common.io import read_jsonl, write_jsonl
 
 
@@ -40,6 +43,13 @@ def conversation(cid: str = "train_1") -> dict:
             for tid in (1, 3)
         ],
     }
+
+
+def create_symlink_or_skip(test: unittest.TestCase, link: Path, target: Path) -> None:
+    try:
+        link.symlink_to(target)
+    except (OSError, NotImplementedError) as error:
+        test.skipTest(f"symlink creation is unavailable: {error}")
 
 
 class DataPipelineTests(unittest.TestCase):
@@ -174,6 +184,39 @@ class DataPipelineTests(unittest.TestCase):
             self.assertEqual(len(read_jsonl(output / "split_manifest_smoke.jsonl")), 2)
             self.assertEqual(len(read_jsonl(output / "classification_smoke.jsonl")), 1)
             self.assertEqual(len(read_jsonl(output / "response_smoke.jsonl")), 1)
+
+    def test_smoke_rejects_symlinked_output_file_without_overwriting_target(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            train, val, output = root / "train.jsonl", root / "val.jsonl", root / "out"
+            protected = root / "protected.txt"
+            write_jsonl(train, [conversation()])
+            write_jsonl(val, [conversation("val_1")])
+            output.mkdir()
+            protected.write_text("keep me", encoding="utf-8")
+            link = output / "classification_smoke.jsonl"
+            create_symlink_or_skip(self, link, protected)
+
+            with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                code = main(["--train", str(train), "--val", str(val), "--output-dir", str(output)])
+
+            self.assertEqual(code, 1)
+            self.assertEqual(protected.read_text(encoding="utf-8"), "keep me")
+            self.assertTrue((output / "classification_smoke.jsonl").is_symlink())
+
+    def test_jsonl_writer_replaces_symlink_without_overwriting_target(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            protected = root / "protected.txt"
+            output = root / "classification_train.jsonl"
+            protected.write_text("keep me", encoding="utf-8")
+            create_symlink_or_skip(self, output, protected)
+
+            write_training_jsonl(output, [{"sample_id": "sample-1"}])
+
+            self.assertEqual(protected.read_text(encoding="utf-8"), "keep me")
+            self.assertFalse(output.is_symlink())
+            self.assertEqual(read_jsonl(output), [{"sample_id": "sample-1"}])
 
 
 class FullDataPipelineTests(unittest.TestCase):
@@ -340,6 +383,22 @@ class FullDataPipelineTests(unittest.TestCase):
                 self.assertEqual(train.read_bytes(), original)
             self.assertFalse((root / "manifest.json").exists())
             self.assertFalse((PROJECT / "data/raw/b1_forbidden_test_output").exists())
+
+    def test_full_rejects_symlinked_output_file_without_overwriting_target(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "out"
+            protected = root / "protected.txt"
+            output.mkdir()
+            protected.write_text("keep me", encoding="utf-8")
+            link = output / "classification_train.jsonl"
+            create_symlink_or_skip(self, link, protected)
+
+            code, _ = self.run_full(root, [conversation()], [conversation("val_1")], output)
+
+            self.assertEqual(code, 1)
+            self.assertEqual(protected.read_text(encoding="utf-8"), "keep me")
+            self.assertTrue((output / "classification_train.jsonl").is_symlink())
 
 
 if __name__ == "__main__":

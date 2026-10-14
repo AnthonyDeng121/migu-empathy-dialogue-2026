@@ -10,17 +10,19 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import random
 import sys
+import tempfile
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, TextIO
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
 
-from src.common.io import read_jsonl, write_jsonl
+from src.common.io import read_jsonl
 from src.data.schema import (
     validate_classification_labels,
     validate_prediction,
@@ -380,15 +382,45 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def atomic_write(path: Path, write_content: Callable[[TextIO], None]) -> None:
+    """Atomically replace one output file without following a leaf symlink."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
+    temporary_path = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+            write_content(handle)
+        os.replace(temporary_path, path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+
 def write_json(path: Path, value: dict) -> None:
-    with path.open("w", encoding="utf-8", newline="\n") as handle:
-        handle.write(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+    atomic_write(
+        path,
+        lambda handle: handle.write(json.dumps(value, ensure_ascii=False, indent=2) + "\n"),
+    )
+
+
+def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    def write_rows(handle: TextIO) -> None:
+        for row in rows:
+            handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+
+    atomic_write(path, write_rows)
 
 
 def validate_output_paths(output: Path, filenames: list[str], train: Path, val: Path) -> None:
+    output = output.resolve()
     raw = (PROJECT / "data/raw").resolve()
     sources = {train.resolve(), val.resolve()}
-    destinations = [output.resolve()] + [(output / name).resolve() for name in filenames]
+    output_files = [output / name for name in filenames]
+    for path in output_files:
+        if path.is_symlink():
+            raise ValueError(f"output file must not be a symlink: {path.name}")
+    destinations = [output] + [path.resolve() for path in output_files]
     for path in destinations:
         if path == raw or raw in path.parents:
             raise ValueError("output-dir and output files must not be inside data/raw")
@@ -431,9 +463,11 @@ def write_full(output: Path, result: dict, train: Path, val: Path, input_hashes:
         "hash_scope": "outputs lists data and leakage hashes; SHA256SUMS additionally hashes manifest.json; SHA256SUMS excludes itself",
     }
     write_json(output / "manifest.json", manifest)
-    with (output / "SHA256SUMS").open("w", encoding="utf-8", newline="\n") as handle:
+    def write_hashes(handle: TextIO) -> None:
         for filename in sorted(list(metadata) + ["manifest.json"]):
             handle.write(f"{sha256(output / filename)}  {filename}\n")
+
+    atomic_write(output / "SHA256SUMS", write_hashes)
 
 
 def main(argv: list[str] | None = None) -> int:
