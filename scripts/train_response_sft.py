@@ -794,6 +794,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     return report
 
 
+def _weight_storage_note() -> str:
+    """Card-time wording that stays true on local and platform GPUs alike.
+
+    The old wording claimed local runs never count as platform GPU hours,
+    which is false once the same script trains on a rented platform card.
+    """
+    return (
+        "权重只保存在忽略目录，不提交 Git；GPU 卡时按 TRAINING_WORKPLAN 与平台账单记录"
+        "（本报告不声称运行是否计入平台卡时，以平台账单为准）。"
+    )
+
+
 def _render_report(report: dict[str, Any]) -> str:
     data = report["data"]
     speed = report["training_speed"]
@@ -885,7 +897,7 @@ def _render_report(report: dict[str, Any]) -> str:
             f"（dirty={reproduction['code_dirty']}）；"
             f"脚本 SHA-256 `{reproduction['script_sha256']}`。",
             "",
-            "权重只保存在本机忽略目录，不提交 Git；本机运行不计平台 GPU 卡时。",
+            _weight_storage_note(),
             "",
         ]
     )

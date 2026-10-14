@@ -1,0 +1,10 @@
+trainable params: 9,232,384 || all params: 1,552,946,688 || trainable%: 0.5945
+epoch=1/1 micro_batches=512 device=cuda
+step=10/53 train_loss=2.8005 device=cuda
+step=20/53 train_loss=2.7332 device=cuda
+step=30/53 train_loss=2.6963 device=cuda
+step=40/53 train_loss=2.6519 device=cuda
+step=50/53 train_loss=2.6490 device=cuda
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+PASS: device=cuda steps=53 sec/step=1.8153 eta_full=4233s (+30% margin 5503s) reload=True vram=7214953472

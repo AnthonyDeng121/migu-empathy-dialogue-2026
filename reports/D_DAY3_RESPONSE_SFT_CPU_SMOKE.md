@@ -37,4 +37,4 @@ python scripts/train_response_sft.py \
 
 运行代码：commit `6d187bceac004a84d1f8db5ad651e1dedfe5a89f`（dirty=False）；脚本 SHA-256 `37a8e567539b4ee09b6060b014fa1279339c92e57bb8ad4726bd91dc777991a8`。
 
-权重只保存在本机忽略目录，不提交 Git；本机运行不计平台 GPU 卡时。
+权重只保存在忽略目录，不提交 Git；GPU 卡时按 TRAINING_WORKPLAN 与平台账单记录（本报告不声称运行是否计入平台卡时，以平台账单为准）。

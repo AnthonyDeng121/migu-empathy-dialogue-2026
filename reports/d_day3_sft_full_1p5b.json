@@ -1,0 +1,148 @@
+{
+  "version": "response_sft_prep_v2",
+  "status": "candidate training",
+  "model": {
+    "name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct",
+    "loaded_from": "external/Qwen2.5-1.5B-Instruct"
+  },
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4090",
+  "dtype": "bfloat16",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 1,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "gold"
+  },
+  "runtime": {
+    "python": "3.12.12",
+    "torch": "2.10.0+cu128",
+    "transformers": "4.57.6",
+    "peft": "0.21.2",
+    "training_seconds": 4219.721
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'external/response_train.jsonl' \\\n  --config 'configs/response_sft.json' \\\n  --device cuda \\\n  --output-dir 'external/response_sft_d2_1p5b' \\\n  --report-json 'external/d_day3_sft_full_1p5b.json' \\\n  --report-md 'external/D_DAY3_SFT_FULL_1P5B.md' \\\n  --train-format b1 \\\n  --condition-jsonl 'external/classification_train.jsonl' \\\n  --model-dir 'external/Qwen2.5-1.5B-Instruct'",
+    "code_commit": "6761204182134153b24581021935ed9323ca60fc",
+    "code_dirty": false,
+    "script_sha256": "37a8e567539b4ee09b6060b014fa1279339c92e57bb8ad4726bd91dc777991a8"
+  },
+  "data": {
+    "train_path": "external/response_train.jsonl",
+    "train_format": "b1",
+    "train_total_samples": 18653,
+    "train_used_samples": 18653,
+    "skipped_long_samples": 0,
+    "train_sha256": "a70ca036f2ad28265bbbd3ce6882006f81e7dd7abb39a50dbf0f16cb713e2ff6",
+    "condition_train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+    "response_turn_consistency": null,
+    "condition_mode": "gold",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 116,
+      "mean": 902.0,
+      "max": 2048
+    }
+  },
+  "parameters": {
+    "trainable": 9232384,
+    "total": 1552946688,
+    "fraction": 0.005945
+  },
+  "training_speed": {
+    "optimizer_steps": 2332,
+    "micro_batches_done": 18653,
+    "mean_train_loss": 2.1587,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 2329,
+    "measured_window_seconds": 4213.984,
+    "seconds_per_step": 1.809353,
+    "seconds_per_step_basis": "mean full gradient-accumulation window after warm-up",
+    "full_steps_per_epoch": 2332,
+    "estimated_full_train_seconds": 4219.412,
+    "estimated_full_train_seconds_with_30pct_margin": 5485.236,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
+  },
+  "vram_peak_bytes": 7219122688,
+  "checks": {
+    "optimizer_steps": 2332,
+    "first_loss": 2.969118,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 0.88015127,
+    "lora_tensors": 392,
+    "lora_weights_changed": true,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "external/response_sft_d2_1p5b",
+      "lora_tensors_in_file": 392,
+      "lora_tensors_compared": 392,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 3,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "pp:[\"train_conv_000001\",9,1]",
+          "generated_text": "嗯，我不给建议了。\n\n那种别扭感确实很难受：明明只是关系变了，却像是连自己在这群人里的位置都动摇了。它不像具体的事那样能立刻解决，却比事情本身更消耗人。\n\n你就按你的节奏待着就行。"
+        },
+        {
+          "id": "pp:[\"train_conv_000001\",11,2]",
+          "generated_text": "那个“怕被整个圈子排除在外”的念头，比单纯的一次冷淡更扎心。它像是在提醒你：不只是他变了，你也可能因为这次反应，被暂时抛到外面看不清的位置。\n\n现在群里的正常互动，更像是他在试探边界，而不是在确认关系。你担心的更多是自己会不会因此失去连接感，而不是他会不会突然翻脸。\n\n这种害怕很真实，也不必立刻把它变成事实。你可以先把注意力放回到眼前这一刻：如果他接下来又说两句，你会怎么回应？或者，如果他沉默了一周，你打算怎么处理？"
+        },
+        {
+          "id": "pp:[\"train_conv_000001\",15,3]",
+          "generated_text": "这个决定挺稳的：先按群里现在的节奏走，不专门挑茬，也不再往那个位置靠。空一下也好，至少不用一直盯着自己到底算不算得上。\n\n等你想再聊时再说就好。"
+        }
+      ],
+      "passed": true
+    },
+    "generation_probe": [
+      {
+        "id": "pp:[\"train_conv_000001\",9,1]",
+        "generated_text": "嗯，我不给建议了。\n\n那种别扭感确实很难受：明明只是关系变了，却像是连自己在这群人里的位置都动摇了。它不像具体的事那样能立刻解决，却比事情本身更消耗人。\n\n你就按你的节奏待着就行。"
+      },
+      {
+        "id": "pp:[\"train_conv_000001\",11,2]",
+        "generated_text": "那个“怕被整个圈子排除在外”的念头，比单纯的一次冷淡更扎心。它像是在提醒你：不只是他变了，你也可能因为这次反应，被暂时抛到外面看不清的位置。\n\n现在群里的正常互动，更像是他在试探边界，而不是在确认关系。你担心的更多是自己会不会因此失去连接感，而不是他会不会突然翻脸。\n\n这种害怕很真实，也不必立刻把它变成事实。你可以先把注意力放回到眼前这一刻：如果他接下来又说两句，你会怎么回应？或者，如果他沉默了一周，你打算怎么处理？"
+      },
+      {
+        "id": "pp:[\"train_conv_000001\",15,3]",
+        "generated_text": "这个决定挺稳的：先按群里现在的节奏走，不专门挑茬，也不再往那个位置靠。空一下也好，至少不用一直盯着自己到底算不算得上。\n\n等你想再聊时再说就好。"
+      }
+    ],
+    "non_empty_generations": 3
+  },
+  "checkpoint_directory": "external/response_sft_d2_1p5b",
+  "adapter": {
+    "file": "external/response_sft_d2_1p5b/adapter_model.safetensors",
+    "bytes": 36981072,
+    "sha256": "62a695ea594a1546e217ee5edd691131051a4e64e3ecfcec91af75de7a133fcf"
+  }
+}

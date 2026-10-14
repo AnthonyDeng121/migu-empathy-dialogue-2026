@@ -14,6 +14,7 @@ from scripts.train_response_sft import (
     _reproduction_command,
     _steps_per_epoch,
     _validate_run_limits,
+    _weight_storage_note,
 )
 
 class _Args:
@@ -164,6 +165,16 @@ class TimingContractTests(unittest.TestCase):
     def test_warmup_steps_are_skipped_and_margin_applied(self) -> None:
         self.assertGreater(TIMING_WARMUP_STEPS, 0)
         self.assertEqual(ETA_MARGIN, 1.3)
+
+
+class WeightStorageNoteTests(unittest.TestCase):
+    """The card-time wording must hold on rented platform GPUs too."""
+
+    def test_note_makes_no_card_time_claim(self) -> None:
+        note = _weight_storage_note()
+        self.assertIn("不提交 Git", note)
+        self.assertNotIn("不计平台", note)
+        self.assertNotIn("本机", note)
 
 
 if __name__ == "__main__":

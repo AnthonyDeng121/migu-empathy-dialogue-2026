@@ -33,6 +33,9 @@ explain.md
 !logs/D_DAY2_EPOCH_LOOP_CPU.txt
 !logs/D_DAY2_ORIGINAL_0P5B_VAL100.txt
 !logs/D_DAY2_ORIGINAL_1P5B_VAL100.txt
+!logs/D_DAY3_SFT_SMOKE_1P5B.txt
+!logs/D_DAY3_SFT_FULL_1P5B.txt
+!logs/D_DAY3_INFERENCE_1P5B_VAL.txt
 !results/response_gen/
 !results/response_gen/original_0p5b_val100.jsonl
 !results/response_gen/original_1p5b_val100.jsonl
