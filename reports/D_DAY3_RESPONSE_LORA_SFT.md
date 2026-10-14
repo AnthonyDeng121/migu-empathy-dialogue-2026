@@ -56,8 +56,9 @@
 ## 平台事故与恢复记录（2026-10-14）
 
 - 11:41:09 远程实例创建（控制台实例 ID `a5503077-6d2c-4600-8bbb-a5b3fd456430`），11:47 GPU 可用；11:50 起 `/dev/nvidia0` 打开 EPERM、NVML `Unknown Error`、`torch.cuda.device_count()=0`。根因：控制台显示该实例**调度方式为"抢占"**，GPU 被平台回收；容器为 k8s burstable pod、无 `CAP_SYS_ADMIN`、seccomp 过滤，内网无法自愈。
+- 用户重启实例后 GPU 恢复，冒烟/训练/微调臂推理全部完成（13:12–16:45）；**16:45 后 GPU 第二次被回收**（原模型同集臂启动即报 CUDA unavailable）。原模型臂改在本机 RTX 4060 上跑（D1 原模型推理同环境；诊断评测、非训练）。
+- 跨环境一致性核验（保证三路对比可比）：同一 B1 val 样本在远程（transformers 4.57.6）与本机（5.17.0）的 chat template 渲染 + tokenize 结果逐 token 一致（样本 1：94 tokens，样本 1000：168 tokens，哈希相同）；tokenizer 快照同 revision。
 - 阻塞期间完成：B1 适配代码与单测、本地/远程真实数据预检、远程环境搭建（数据上传哈希核验、依赖确认、模型经 hf-mirror 下载）、CPU 端到端冒烟、staging 迁移持久盘 `/mnt/storage/migu-d2/`（200G NFS）、`reports/D_DAY3_GPU_RUNBOOK.md` 执行手册。
-- 用户重启实例后 GPU 恢复（`cuda: True`，RTX 4090），按手册同步代码（HEAD `6761204`、工作区干净）、核验数据/模型哈希后开跑；全程未发生训练中断或数据丢失。
 
 ## 复现
 
