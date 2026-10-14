@@ -14,6 +14,7 @@ from scripts.train_response_sft import (
     _reproduction_command,
     _steps_per_epoch,
     _validate_run_limits,
+    _weight_storage_note,
 )
 
 class _Args:
@@ -30,6 +31,8 @@ class _Args:
         self.max_steps = None
         self.eval_prompts = 3
         self.local_files_only = False
+        self.train_format = "raw"
+        self.condition_jsonl = None
         for key, value in overrides.items():
             setattr(self, key, value)
 
@@ -136,11 +139,42 @@ class ReproductionCommandTests(unittest.TestCase):
         self.assertNotIn("--eval-prompts", command)
         self.assertIn("--device cuda", command)
 
+    def test_raw_format_omitted_by_default(self) -> None:
+        command = _reproduction_command(_Args())
+        self.assertNotIn("--train-format", command)
+        self.assertNotIn("--condition-jsonl", command)
+
+    def test_b1_command_carries_format_and_condition_file(self) -> None:
+        command = _reproduction_command(
+            _Args(
+                train=Path("data/processed/b1_full_v1/response_train.jsonl"),
+                train_format="b1",
+                condition_jsonl=Path("data/processed/b1_full_v1/classification_train.jsonl"),
+                model_dir=Path("weights/hf/Qwen2.5-1.5B-Instruct"),
+            )
+        )
+        self.assertIn("--train-format b1", command)
+        self.assertIn(
+            "--condition-jsonl 'data/processed/b1_full_v1/classification_train.jsonl'",
+            command,
+        )
+        self.assertIn("--train 'data/processed/b1_full_v1/response_train.jsonl'", command)
+
 
 class TimingContractTests(unittest.TestCase):
     def test_warmup_steps_are_skipped_and_margin_applied(self) -> None:
         self.assertGreater(TIMING_WARMUP_STEPS, 0)
         self.assertEqual(ETA_MARGIN, 1.3)
+
+
+class WeightStorageNoteTests(unittest.TestCase):
+    """The card-time wording must hold on rented platform GPUs too."""
+
+    def test_note_makes_no_card_time_claim(self) -> None:
+        note = _weight_storage_note()
+        self.assertIn("不提交 Git", note)
+        self.assertNotIn("不计平台", note)
+        self.assertNotIn("本机", note)
 
 
 if __name__ == "__main__":

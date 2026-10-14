@@ -1,0 +1,132 @@
+{
+  "version": "response_sft_prep_v2",
+  "status": "smoke",
+  "model": {
+    "name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct",
+    "loaded_from": "external/Qwen2.5-1.5B-Instruct"
+  },
+  "device": "cpu",
+  "device_name": "cpu",
+  "dtype": "float32",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 1,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "gold"
+  },
+  "runtime": {
+    "python": "3.12.12",
+    "torch": "2.10.0+cu128",
+    "transformers": "4.57.6",
+    "peft": "0.21.2",
+    "training_seconds": 404.471
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'external/response_train.jsonl' \\\n  --config 'configs/response_sft.json' \\\n  --device cpu \\\n  --output-dir 'external/response_sft_cpu_smoke' \\\n  --report-json 'external/d_day3_cpu_smoke.json' \\\n  --report-md 'external/D_DAY3_CPU_SMOKE.md' \\\n  --train-format b1 \\\n  --condition-jsonl 'external/classification_train.jsonl' \\\n  --model-dir 'external/Qwen2.5-1.5B-Instruct' \\\n  --max-train-samples 8 \\\n  --max-steps 2 \\\n  --eval-prompts 1",
+    "code_commit": "6d187bceac004a84d1f8db5ad651e1dedfe5a89f",
+    "code_dirty": false,
+    "script_sha256": "37a8e567539b4ee09b6060b014fa1279339c92e57bb8ad4726bd91dc777991a8"
+  },
+  "data": {
+    "train_path": "external/response_train.jsonl",
+    "train_format": "b1",
+    "train_total_samples": 18653,
+    "train_used_samples": 8,
+    "skipped_long_samples": 0,
+    "train_sha256": "a70ca036f2ad28265bbbd3ce6882006f81e7dd7abb39a50dbf0f16cb713e2ff6",
+    "condition_train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+    "response_turn_consistency": null,
+    "condition_mode": "gold",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 485,
+      "mean": 1046.6,
+      "max": 2039
+    }
+  },
+  "parameters": {
+    "trainable": 9232384,
+    "total": 1552946688,
+    "fraction": 0.005945
+  },
+  "training_speed": {
+    "optimizer_steps": 1,
+    "micro_batches_done": 8,
+    "mean_train_loss": 2.8213,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 0,
+    "measured_window_seconds": 0.0,
+    "seconds_per_step": 404.470556,
+    "seconds_per_step_basis": "wall-clock fallback: run shorter than the warm-up skip",
+    "full_steps_per_epoch": 2332,
+    "estimated_full_train_seconds": 943225.337,
+    "estimated_full_train_seconds_with_30pct_margin": 1226192.938,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
+  },
+  "vram_peak_bytes": null,
+  "checks": {
+    "optimizer_steps": 1,
+    "first_loss": 3.076147,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 1.27453041,
+    "lora_tensors": 392,
+    "lora_weights_changed": false,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "external/response_sft_cpu_smoke",
+      "lora_tensors_in_file": 392,
+      "lora_tensors_compared": 392,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 1,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "pp:[\"train_conv_000001\",9,1]",
+          "generated_text": "“站不稳”这个词很贴切：当关系变了，人就像站在摇晃的船上，明明知道船在晃，却总忍不住想找个地方坐稳，哪怕只是暂时的。\n\n这种感觉，的确像是在提醒你：“别太在意这个变化，别把自己看得太重。”可事实呢，当你发现周围人都在重新调整位置，你也得跟着动，不然就真的会被甩到一边去了。\n\n现在，你可以试试看，不管别人怎么走，自己能不能保持住一些基本姿态，比如情绪稳定、行为适度、心态平衡。如果能，那就说明你还有些根基，不至于完全被甩出去。"
+        }
+      ],
+      "passed": true
+    },
+    "generation_probe": [
+      {
+        "id": "pp:[\"train_conv_000001\",9,1]",
+        "generated_text": "“站不稳”这个词很贴切：当关系变了，人就像站在摇晃的船上，明明知道船在晃，却总忍不住想找个地方坐稳，哪怕只是暂时的。\n\n这种感觉，的确像是在提醒你：“别太在意这个变化，别把自己看得太重。”可事实呢，当你发现周围人都在重新调整位置，你也得跟着动，不然就真的会被甩到一边去了。\n\n现在，你可以试试看，不管别人怎么走，自己能不能保持住一些基本姿态，比如情绪稳定、行为适度、心态平衡。如果能，那就说明你还有些根基，不至于完全被甩出去。"
+      }
+    ],
+    "non_empty_generations": 1
+  },
+  "checkpoint_directory": "external/response_sft_cpu_smoke",
+  "adapter": {
+    "file": "external/response_sft_cpu_smoke/adapter_model.safetensors",
+    "bytes": 36981072,
+    "sha256": "e0c472508bd995e98b0a082fc32f867656bf7f1dbdb266247a13d429257425de"
+  }
+}

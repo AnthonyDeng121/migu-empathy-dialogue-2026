@@ -11,6 +11,9 @@ full-evaluation ETA required by the training workplan.
 id (official submission-schema fields) so the training-time gold conditioning
 can be replaced by predicted conditions at inference; every eval id must be
 covered, otherwise the conditioned/unconditioned prompts would silently mix.
+
+Eval rows may be official test rows (id / history) or frozen B1 response
+rows (sample_id / context_turns); both resolve to the same prompt structure.
 """
 from __future__ import annotations
 
@@ -25,7 +28,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
 
 from src.common.io import read_jsonl, write_jsonl  # noqa: E402
-from src.response.sft_data import build_eval_sample  # noqa: E402
+from src.response.sft_data import build_eval_sample, eval_row_id  # noqa: E402
 
 
 def _load_optional_dependencies() -> dict[str, Any]:
@@ -79,6 +82,22 @@ def _load_conditions(path: Path) -> dict[str, dict[str, Any]]:
     return conditions
 
 
+def condition_coverage(
+    rows: list[dict[str, Any]], conditions: dict[str, dict[str, Any]]
+) -> str | None:
+    """Predicted-condition coverage as "covered/total", or None without conditions.
+
+    Ids resolve through eval_row_id so the official test schema (id) and the
+    frozen B1 schema (sample_id) are both counted. Reading row["id"] directly
+    raised KeyError on B1 splits while writing the performance report, i.e.
+    only after the whole inference had already run.
+    """
+    if not conditions:
+        return None
+    covered = sum(1 for row in rows if eval_row_id(row) in conditions)
+    return f"{covered}/{len(rows)}"
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
     deps = _load_optional_dependencies()
     torch = deps["torch"]
@@ -93,7 +112,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("eval input contains no rows")
     conditions = _load_conditions(args.condition_jsonl) if args.condition_jsonl else {}
     if conditions:
-        missing = [row["id"] for row in rows if row["id"] not in conditions]
+        missing = [eval_row_id(row) for row in rows if eval_row_id(row) not in conditions]
         if missing:
             raise ValueError(
                 f"{len(missing)} eval ids lack a predicted condition "
@@ -119,7 +138,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     generated_tokens = 0
     started = time.perf_counter()
     for row in rows:
-        sample = build_eval_sample(row, condition=conditions.get(row["id"]))
+        row_id = eval_row_id(row)
+        sample = build_eval_sample(row, condition=conditions.get(row_id))
         prompt_text = tokenizer.apply_chat_template(
             sample["messages"], add_generation_prompt=True, tokenize=False
         )
@@ -139,7 +159,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         generated = output_ids[0][prompt_ids.shape[1]:]
         generated_tokens += int(generated.numel())
         text = tokenizer.decode(generated, skip_special_tokens=True).strip()
-        predictions.append({"id": row["id"], "response_text": text})
+        predictions.append({"id": row_id, "response_text": text})
     total_seconds = time.perf_counter() - started
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -152,11 +172,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "dtype": "bfloat16" if use_bf16 else "float32",
         "condition_mode": "predicted" if conditions else "none",
         "condition_source": str(args.condition_jsonl) if args.condition_jsonl else None,
-        "condition_coverage": (
-            f"{sum(1 for row in rows if row['id'] in conditions)}/{len(rows)}"
-            if conditions
-            else None
-        ),
+        "condition_coverage": condition_coverage(rows, conditions),
         "input_path": str(args.input),
         "samples": len(predictions),
         "max_new_tokens": int(args.max_new_tokens),
