@@ -9,6 +9,9 @@ deterministic generations, and the model produces non-empty replies.
 Training runs one shuffled pass per configured epoch; step timing covers a
 full gradient-accumulation window with the device synchronized. Local smoke
 runs (CUDA/MPS/CPU) never count as platform GPU hours.
+
+--train-format b1 trains on the frozen B1 response split; gold conditions
+join from --condition-jsonl (the B1 classification split) by sample_id.
 """
 from __future__ import annotations
 
@@ -29,7 +32,11 @@ PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
 
 from src.common.io import read_jsonl  # noqa: E402
-from src.response.sft_data import build_sft_samples, response_turn_consistency  # noqa: E402
+from src.response.sft_data import (  # noqa: E402
+    build_sft_samples,
+    build_sft_samples_from_b1,
+    response_turn_consistency,
+)
 
 # Optimizer steps whose timing is discarded before averaging: the first steps
 # absorb cuDNN autotuning and allocator warm-up, so the workplan requires
@@ -300,6 +307,10 @@ def _reproduction_command(args: argparse.Namespace) -> str:
         f"--report-json '{_portable_path(args.report_json)}'",
         f"--report-md '{_portable_path(args.report_md)}'",
     ]
+    if args.train_format != "raw":
+        parts.append(f"--train-format {args.train_format}")
+    if args.condition_jsonl is not None:
+        parts.append(f"--condition-jsonl '{_portable_path(args.condition_jsonl)}'")
     if args.model_dir:
         parts.append(f"--model-dir '{_portable_path(args.model_dir)}'")
     if args.max_train_samples is not None:
@@ -400,12 +411,34 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     config = json.loads(args.config.read_text(encoding="utf-8"))
     _validate_run_limits(args.max_train_samples, args.max_steps, args.eval_prompts)
     train_rows = read_jsonl(args.train)
-    consistency = response_turn_consistency(train_rows)
-    train_examples = build_sft_samples(
-        train_rows,
-        condition_mode=str(config["condition_mode"]),
-        max_history_turns=int(config["max_history_turns"]),
-    )
+    condition_sha256: str | None = None
+    if args.train_format == "b1":
+        # Frozen B1 response split: gold conditions live in the classification
+        # JSONL and join by sample_id; a partial join is an error, never a
+        # silent fallback to the unconditioned prompt.
+        condition_rows = None
+        if str(config["condition_mode"]) == "gold":
+            if args.condition_jsonl is None:
+                raise ValueError(
+                    "--train-format b1 with condition_mode=gold requires "
+                    "--condition-jsonl (the B1 classification split)"
+                )
+            condition_rows = read_jsonl(args.condition_jsonl)
+            condition_sha256 = _sha256(args.condition_jsonl)
+        train_examples = build_sft_samples_from_b1(
+            train_rows,
+            condition_rows=condition_rows,
+            condition_mode=str(config["condition_mode"]),
+            max_history_turns=int(config["max_history_turns"]),
+        )
+        consistency = None
+    else:
+        consistency = response_turn_consistency(train_rows)
+        train_examples = build_sft_samples(
+            train_rows,
+            condition_mode=str(config["condition_mode"]),
+            max_history_turns=int(config["max_history_turns"]),
+        )
     train_total = len(train_examples)
     if args.max_train_samples:
         train_examples = train_examples[: args.max_train_samples]
@@ -680,10 +713,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         },
         "data": {
             "train_path": _portable_path(args.train),
+            "train_format": args.train_format,
             "train_total_samples": train_total,
             "train_used_samples": len(train_encoded),
             "skipped_long_samples": context_trimmed,
             "train_sha256": _sha256(args.train),
+            "condition_train_sha256": condition_sha256,
             "response_turn_consistency": consistency,
             "condition_mode": str(config["condition_mode"]),
             "max_history_turns": int(config["max_history_turns"]),
@@ -783,24 +818,37 @@ def _render_report(report: dict[str, Any]) -> str:
         f"（{report['parameters']['fraction']:.2%} of {report['parameters']['total']:,}）。",
         f"样本：{data['train_used_samples']}/{data['train_total_samples']} 个 SFT 样本"
         f"（超长跳过 {data['skipped_long_samples']}）；条件注入 `{data['condition_mode']}`；"
-        f"最大历史轮数 {data['max_history_turns']}。",
+        f"最大历史轮数 {data['max_history_turns']}；数据格式 `{data['train_format']}`。",
         f"token 长度（prompt+回复）：min {data['prompt_plus_response_tokens']['min']} / "
         f"mean {data['prompt_plus_response_tokens']['mean']} / "
         f"max {data['prompt_plus_response_tokens']['max']}（max_length {report['config']['max_length']}）。",
-        f"回复 turn 与目标一致性：{data['response_turn_consistency']['match']}/"
-        f"{data['response_turn_consistency']['total']} 与转写正文一致。",
-        "",
-        f"测速：{speed['optimizer_steps']} 个 optimizer steps，"
-        f"其中 {speed['timed_optimizer_steps']} 个计入平均（前 {speed['timing_warmup_steps']} 个 "
-        f"warm-up step 不计）；每步为一个完整梯度累积窗口"
-        f"（batch {report['config']['batch_size']} × 累积 {report['config']['gradient_accumulation']}），"
-        f"计时两端同步设备；{speed['seconds_per_step']:.4f} 秒/step"
-        f"（{speed['seconds_per_step_basis']}）。",
-        f"全量 {speed['full_steps_per_epoch']} steps/epoch × {report['config']['epochs']} epoch，"
-        f"估算 {speed['estimated_full_train_seconds']:.0f} 秒"
-        f"（+30% 故障余量 {speed['estimated_full_train_seconds_with_30pct_margin']:.0f} 秒）；"
-        f"{speed['eta_note']}。",
     ]
+    if data.get("response_turn_consistency"):
+        lines.append(
+            f"回复 turn 与目标一致性：{data['response_turn_consistency']['match']}/"
+            f"{data['response_turn_consistency']['total']} 与转写正文一致。"
+        )
+    else:
+        lines.append(
+            "回复 turn 与目标一致性：B1 转换产物已由 prepare_training_data.py 校验"
+            "（target.response_text 与助手转写不一致会进 anomalies.jsonl；本批异常均为"
+            "邻接/上下文问题，无金标不一致）。"
+        )
+    lines.extend(
+        [
+            "",
+            f"测速：{speed['optimizer_steps']} 个 optimizer steps，"
+            f"其中 {speed['timed_optimizer_steps']} 个计入平均（前 {speed['timing_warmup_steps']} 个 "
+            f"warm-up step 不计）；每步为一个完整梯度累积窗口"
+            f"（batch {report['config']['batch_size']} × 累积 {report['config']['gradient_accumulation']}），"
+            f"计时两端同步设备；{speed['seconds_per_step']:.4f} 秒/step"
+            f"（{speed['seconds_per_step_basis']}）。",
+            f"全量 {speed['full_steps_per_epoch']} steps/epoch × {report['config']['epochs']} epoch，"
+            f"估算 {speed['estimated_full_train_seconds']:.0f} 秒"
+            f"（+30% 故障余量 {speed['estimated_full_train_seconds_with_30pct_margin']:.0f} 秒）；"
+            f"{speed['eta_note']}。",
+        ]
+    )
     if report.get("vram_peak_bytes") is not None:
         lines.append(f"显存峰值：{report['vram_peak_bytes'] / 1024**3:.2f} GiB。")
     lines.extend(
@@ -847,6 +895,12 @@ def _render_report(report: dict[str, Any]) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="LoRA SFT training template for response generation")
     parser.add_argument("--train", type=Path, required=True)
+    parser.add_argument("--train-format", choices=("raw", "b1"), default="raw",
+                        help="raw = official train rows (turns + prediction_points); "
+                             "b1 = frozen B1 response JSONL from prepare_training_data.py --mode full")
+    parser.add_argument("--condition-jsonl", type=Path,
+                        help="B1 classification JSONL with gold emotion_label/user_profile; "
+                             "required for --train-format b1 when the config condition_mode is gold")
     parser.add_argument("--config", type=Path, default=PROJECT / "configs/response_sft.json")
     parser.add_argument("--output-dir", type=Path, default=PROJECT / "weights/response_sft")
     parser.add_argument(

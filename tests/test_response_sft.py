@@ -13,6 +13,7 @@ from src.response.sft_data import (
     BASE_SYSTEM_PROMPT,
     build_eval_sample,
     build_sft_samples,
+    build_sft_samples_from_b1,
     history_messages,
     profile_text,
     response_turn_consistency,
@@ -48,6 +49,52 @@ def make_point(target_user_turn_id: int, response_text: str = "目标回复") ->
                 "style": ["rational"],
             },
             "memory_refs": [],
+        },
+    }
+
+
+def make_b1_response_row(
+    sample_id: str,
+    target_user_turn_id: int = 3,
+    context_turns: list[dict] | None = None,
+    response_text: str = "目标回复",
+) -> dict:
+    """Build a B1 response JSONL row (frozen split conversion product)."""
+    if context_turns is None:
+        context_turns = [
+            {"turn_id": 1, "role": "user", "content": "第一轮用户发言"},
+            {"turn_id": 2, "role": "assistant", "content": "第一轮助手回复"},
+            {"turn_id": 3, "role": "user", "content": "第二轮用户发言"},
+        ]
+    return {
+        "sample_id": sample_id,
+        "conversation_id": "train_conv_000001",
+        "target_user_turn_id": target_user_turn_id,
+        "source_split": "train",
+        "context_turns": context_turns,
+        "response_text": response_text,
+        "memory_refs": [],
+    }
+
+
+def make_b1_classification_row(
+    sample_id: str,
+    emotion_label: str = "anxiety",
+    user_profile: dict | None = None,
+) -> dict:
+    """Build the matching B1 classification row (gold conditions)."""
+    return {
+        "sample_id": sample_id,
+        "conversation_id": "train_conv_000001",
+        "target_user_turn_id": 3,
+        "source_split": "train",
+        "emotion_label": emotion_label,
+        "user_profile": user_profile
+        if user_profile is not None
+        else {
+            "personality_traits": ["sensitive"],
+            "interests": ["games"],
+            "style": ["rational"],
         },
     }
 
@@ -245,6 +292,160 @@ class PredictedConditionFileTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             _load_conditions(path)
         path.unlink()
+
+
+class BuildSftSamplesFromB1Tests(unittest.TestCase):
+    """The frozen B1 response JSONL path used for the D2 first round."""
+
+    def test_basic_fields_and_messages(self) -> None:
+        rows = [make_b1_response_row('pp:["train_conv_000001",3,1]')]
+        samples = build_sft_samples_from_b1(rows, condition_mode="none")
+        self.assertEqual(len(samples), 1)
+        sample = samples[0]
+        self.assertEqual(sample["id"], 'pp:["train_conv_000001",3,1]')
+        self.assertEqual(sample["conversation_id"], "train_conv_000001")
+        self.assertEqual(sample["target_user_turn_id"], 3)
+        self.assertEqual(sample["response_text"], "目标回复")
+        messages = sample["messages"]
+        self.assertEqual(messages[0]["role"], "system")
+        self.assertEqual([m["role"] for m in messages[1:]], ["user", "assistant", "user"])
+        self.assertEqual(messages[-1]["content"], "第二轮用户发言")
+
+    def test_context_after_target_rejected(self) -> None:
+        rows = [
+            make_b1_response_row(
+                "s1",
+                context_turns=[
+                    {"turn_id": 1, "role": "user", "content": "一"},
+                    {"turn_id": 2, "role": "user", "content": "二"},
+                    {"turn_id": 4, "role": "user", "content": "未来轮"},
+                ],
+            )
+        ]
+        with self.assertRaises(ValueError):
+            build_sft_samples_from_b1(rows, condition_mode="none")
+
+    def test_target_turn_must_be_last_user_turn(self) -> None:
+        rows = [
+            make_b1_response_row(
+                "s1",
+                context_turns=[
+                    {"turn_id": 1, "role": "user", "content": "一"},
+                    {"turn_id": 3, "role": "user", "content": "二"},
+                    {"turn_id": 2, "role": "user", "content": "旧轮"},
+                ],
+            )
+        ]
+        with self.assertRaises(ValueError):
+            build_sft_samples_from_b1(rows, condition_mode="none")
+
+    def test_ascending_turn_ids_required(self) -> None:
+        rows = [
+            make_b1_response_row(
+                "s1",
+                context_turns=[
+                    {"turn_id": 3, "role": "user", "content": "三"},
+                    {"turn_id": 2, "role": "user", "content": "二"},
+                ],
+            )
+        ]
+        with self.assertRaises(ValueError):
+            build_sft_samples_from_b1(rows, condition_mode="none")
+
+    def test_missing_field_rejected(self) -> None:
+        row = make_b1_response_row("s1")
+        del row["response_text"]
+        with self.assertRaises(ValueError):
+            build_sft_samples_from_b1([row], condition_mode="none")
+
+    def test_empty_response_rejected(self) -> None:
+        rows = [make_b1_response_row("s1", response_text="  ")]
+        with self.assertRaises(ValueError):
+            build_sft_samples_from_b1(rows, condition_mode="none")
+
+    def test_duplicate_sample_id_rejected(self) -> None:
+        rows = [make_b1_response_row("s1"), make_b1_response_row("s1")]
+        with self.assertRaises(ValueError):
+            build_sft_samples_from_b1(rows, condition_mode="none")
+
+    def test_condition_mode_none_keeps_base_prompt(self) -> None:
+        rows = [make_b1_response_row("s1")]
+        sample = build_sft_samples_from_b1(rows, condition_mode="none")[0]
+        self.assertEqual(sample["messages"][0]["content"], BASE_SYSTEM_PROMPT)
+
+    def test_gold_joins_classification_rows_by_sample_id(self) -> None:
+        rows = [make_b1_response_row('pp:["c",3,1]')]
+        conditions = [make_b1_classification_row('pp:["c",3,1]')]
+        sample = build_sft_samples_from_b1(rows, condition_rows=conditions, condition_mode="gold")[0]
+        system_content = sample["messages"][0]["content"]
+        self.assertIn("anxiety", system_content)
+        self.assertIn("sensitive", system_content)
+
+    def test_gold_without_condition_rows_rejected(self) -> None:
+        rows = [make_b1_response_row("s1")]
+        with self.assertRaises(ValueError):
+            build_sft_samples_from_b1(rows, condition_rows=None, condition_mode="gold")
+
+    def test_gold_missing_condition_rejected_not_silently_skipped(self) -> None:
+        rows = [make_b1_response_row("s1"), make_b1_response_row("s2")]
+        conditions = [make_b1_classification_row("s1")]
+        with self.assertRaises(ValueError):
+            build_sft_samples_from_b1(rows, condition_rows=conditions, condition_mode="gold")
+
+    def test_max_history_turns_window_keeps_target(self) -> None:
+        rows = [make_b1_response_row("s1")]
+        sample = build_sft_samples_from_b1(rows, condition_mode="none", max_history_turns=2)[0]
+        messages = sample["messages"]
+        self.assertEqual([m["content"] for m in messages[1:]], ["第一轮助手回复", "第二轮用户发言"])
+
+    def test_deterministic_output(self) -> None:
+        rows = [make_b1_response_row("s1")]
+        conditions = [make_b1_classification_row("s1")]
+        first = build_sft_samples_from_b1(rows, condition_rows=conditions, condition_mode="gold")
+        second = build_sft_samples_from_b1(rows, condition_rows=conditions, condition_mode="gold")
+        self.assertEqual(first, second)
+
+
+class BuildEvalSampleContextTurnsTests(unittest.TestCase):
+    """B1 response rows double as eval input (context_turns, no history)."""
+
+    def test_context_turns_row_shape(self) -> None:
+        row = make_b1_response_row('pp:["c",3,1]')
+        sample = build_eval_sample(row)
+        self.assertEqual(sample["id"], 'pp:["c",3,1]')
+        self.assertEqual(sample["messages"][0]["role"], "system")
+        self.assertEqual(sample["messages"][-1]["role"], "user")
+        self.assertEqual(sample["messages"][-1]["content"], "第二轮用户发言")
+
+    def test_context_turns_with_condition(self) -> None:
+        row = make_b1_response_row("s1")
+        condition = {
+            "emotion_label": "anxiety",
+            "user_profile": {"personality_traits": [], "interests": [], "style": []},
+        }
+        sample = build_eval_sample(row, condition=condition)
+        self.assertIn("anxiety", sample["messages"][0]["content"])
+
+    def test_context_turns_future_turns_excluded(self) -> None:
+        # Eval input is filtered at the target turn (the D1 contract): future
+        # turns never reach the prompt. The training loader is the strict
+        # side and rejects them outright (test_context_after_target_rejected).
+        row = make_b1_response_row(
+            "s1",
+            context_turns=[
+                {"turn_id": 1, "role": "user", "content": "一"},
+                {"turn_id": 3, "role": "user", "content": "二"},
+                {"turn_id": 4, "role": "user", "content": "未来轮"},
+            ],
+        )
+        sample = build_eval_sample(row)
+        contents = [message["content"] for message in sample["messages"]]
+        self.assertNotIn("未来轮", contents)
+        self.assertEqual(contents[-1], "二")
+
+    def test_row_without_history_or_context_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            build_eval_sample({"id": "s1", "target_user_turn_id": 1})
 
 
 class ResponseTurnConsistencyTests(unittest.TestCase):
