@@ -1,2 +1,4 @@
+# Legacy C Day 2 training environment only; use requirements-emotion-train.txt for
+# new training runs. Do not install this file into the official vLLM inference image.
 torch==2.14.0
 transformers==5.17.0

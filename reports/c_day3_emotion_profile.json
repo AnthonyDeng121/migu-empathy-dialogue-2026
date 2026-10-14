@@ -1,0 +1,541 @@
+{
+  "status": "Exploratory sample only",
+  "scope_note": "Local MPS/CPU dry-run is not platform RTX 4090 training or official-model-image validation.",
+  "device": "mps",
+  "model": {
+    "name": "hfl/chinese-macbert-base",
+    "revision": "a986e004d2a7f2a1c2f5a3edef4e20604a974ed1"
+  },
+  "config": {
+    "seed": 20261014,
+    "epochs": 1,
+    "batch_size": 16,
+    "max_length": 256,
+    "learning_rate": 2e-05,
+    "profile_threshold": 0.5,
+    "loss": "emotion cross entropy + mean of three profile BCE losses"
+  },
+  "data": {
+    "train": {
+      "path": "data/processed/b1_full_v1/classification_train.jsonl",
+      "sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+      "total_samples": 18653,
+      "used_samples": 96,
+      "conversation_count": 8329
+    },
+    "val": {
+      "path": "data/processed/b1_full_v1/classification_val.jsonl",
+      "sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+      "total_samples": 2354,
+      "used_samples": 32,
+      "conversation_count": 900
+    }
+  },
+  "training": {
+    "optimizer_steps": 3,
+    "elapsed_seconds": 8.794,
+    "mean_step_seconds": 2.930832,
+    "estimated_full_epoch_seconds_from_observed_step": 3417.35,
+    "estimated_steps_per_epoch": 1166,
+    "first_loss": 3.61611056,
+    "last_loss": 3.16764736,
+    "first_gradient_norm": 15.27702522,
+    "all_losses_finite": true,
+    "all_gradient_norms_finite_nonzero": true,
+    "changed_heads": [
+      "emotion_head",
+      "profile_heads.interests",
+      "profile_heads.personality_traits",
+      "profile_heads.style"
+    ]
+  },
+  "metrics": {
+    "emotion": {
+      "accuracy": 0.3125,
+      "macro_f1": 0.029762,
+      "labels": [
+        "anger",
+        "anxiety",
+        "care",
+        "disgust",
+        "fear",
+        "gratitude",
+        "helplessness",
+        "joy",
+        "loneliness",
+        "mixed",
+        "neutral",
+        "pride",
+        "relaxed",
+        "sadness",
+        "shame",
+        "surprise"
+      ],
+      "per_class": {
+        "anger": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 2
+        },
+        "anxiety": {
+          "precision": 0.3125,
+          "recall": 1.0,
+          "f1": 0.47619,
+          "support": 10
+        },
+        "care": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "disgust": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "fear": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1
+        },
+        "gratitude": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1
+        },
+        "helplessness": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "joy": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "loneliness": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "mixed": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "neutral": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 2
+        },
+        "pride": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1
+        },
+        "relaxed": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 5
+        },
+        "sadness": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "shame": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1
+        },
+        "surprise": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        }
+      },
+      "confusion_matrix": [
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "profile": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.0,
+          "micro_f1": 0.111888,
+          "label_count": 10,
+          "gold_positive_count": 16,
+          "predicted_positive_count": 127
+        },
+        "interests": {
+          "exact_match_accuracy": 0.0,
+          "micro_f1": 0.016393,
+          "label_count": 12,
+          "gold_positive_count": 6,
+          "predicted_positive_count": 116
+        },
+        "style": {
+          "exact_match_accuracy": 0.0,
+          "micro_f1": 0.11236,
+          "label_count": 11,
+          "gold_positive_count": 17,
+          "predicted_positive_count": 161
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.0,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.59375,
+          "interests": 0.84375,
+          "style": 0.5625
+        },
+        "profile_macro_exact_match_accuracy": 0.666667
+      }
+    }
+  },
+  "checkpoint": {
+    "path": "weights/c_day3_mps_smoke_20261014",
+    "heads_sha256": "c3e71877be4ff216ec9573a9f443c1cb39ca49aa141448ad51e90677d34c5c45",
+    "tree_sha256": "9ad18bd5720a69c65837d63f16fe0b8415df4672aa72da81edd96cbbbfefef2f",
+    "bytes": 409686267,
+    "reload_logits_match": true,
+    "safetensors_only_for_custom_heads": true
+  },
+  "runtime_compatibility": {
+    "official_vllm_image_verified": false,
+    "torch_owned_by_official_base_image": true,
+    "training_dependencies_separated_from_inference": true
+  },
+  "reproduction_command": "python scripts/train_emotion_profile.py --train 'data/processed/b1_full_v1/classification_train.jsonl' --val 'data/processed/b1_full_v1/classification_val.jsonl' --config 'configs/emotion_profile.json' --output-dir 'weights/emotion_profile_repro' --device mps --local-files-only --max-train-samples 96 --max-validation-samples 32 --max-steps 3",
+  "runtime": {
+    "python": "3.12.14",
+    "system": "Darwin",
+    "machine": "arm64",
+    "macos": "27.2",
+    "torch": "2.14.0",
+    "transformers": "5.17.0",
+    "mps_available": true
+  },
+  "integrity": {
+    "train_rows_validated": 18653,
+    "val_rows_validated": 2354,
+    "train_val_sample_id_overlap": 0,
+    "train_val_conversation_overlap": 0,
+    "all_b1_rows_validated_even_when_sampling": true
+  },
+  "inference_smoke": {
+    "input": "official data/raw/test_inference_data.jsonl first 3 rows",
+    "input_rows": 3,
+    "output_rows": 3,
+    "device": "mps",
+    "id_order_matches": true,
+    "schema_valid": true,
+    "output_fields": [
+      "id",
+      "emotion_label",
+      "user_profile"
+    ]
+  }
+}

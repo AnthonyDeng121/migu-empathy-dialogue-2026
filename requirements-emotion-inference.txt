@@ -1,0 +1,3 @@
+# Intentionally has no pip pins: the official vLLM image owns PyTorch, CUDA and its
+# compatible Transformers stack. Verify those exact image packages before adding
+# anything here; installing a second torch can break vLLM/CUDA compatibility.
