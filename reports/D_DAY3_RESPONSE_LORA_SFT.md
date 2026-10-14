@@ -61,6 +61,15 @@
 - 跨环境一致性核验（保证三路对比可比）：同一 B1 val 样本在远程（transformers 4.57.6）与本机（5.17.0）的 chat template 渲染 + tokenize 结果逐 token 一致（样本 1：94 tokens，样本 1000：168 tokens，哈希相同）；tokenizer 快照同 revision。
 - 阻塞期间完成：B1 适配代码与单测、本地/远程真实数据预检、远程环境搭建（数据上传哈希核验、依赖确认、模型经 hf-mirror 下载）、CPU 端到端冒烟、staging 迁移持久盘 `/mnt/storage/migu-d2/`（200G NFS）、`reports/D_DAY3_GPU_RUNBOOK.md` 执行手册。
 
+## 审查修复记录（2026-10-14，A review）
+
+A 审查 PR #10 提出两项，均已修复并随 PR #10 合并 main（merge `69c1d7c`，13:42 UTC）：
+
+1. **`KeyError('id')`**：`run_response_inference.py` 写性能报告的 condition_coverage 表达式直接读 `row['id']`；B1 响应切分（`sample_id`）接入预测条件（`--condition-jsonl`）后，在**全部推理跑完、写性能报告时**才崩——预测条件臂是最终候选路径，全量跑完才炸，损失的正是计时/覆盖证据。本 PR 加条件接入时，缺失检查/生成循环/predictions 三处均已改用 `eval_row_id`，唯独漏了报告里这一处。修复（commit `a5592f5`）：抽成纯函数 `condition_coverage()`，id 解析统一走 `eval_row_id`；新增 `tests/test_run_response_inference.py` 4 个单测锁定双 schema 与部分覆盖；全量 121/121 通过。
+2. **报告状态与推理耗时**：微调臂 val 全量推理实测 8,844.5s ≈ 2.46h（`results/response_gen/d2_1p5b_val_full_report.json`）；本报告状态行/吞吐表/卡时口径与 `docs/EXECUTION_PLAN.md` D2 行原为"推理中、ETA 约 1.6 GPU h"（小样本外推，实测为其约 1.54 倍），已同步为实测值（commit `5a43779`）。
+
+遗留：预测条件臂复跑时，C 的条件文件键须与 B1 `sample_id`（形如 `pp:["val_conv_000001",1,1]`）对齐；键不一致时缺失检查直接报错拒绝运行，不会静默混合条件/无条件提示。
+
 ## 复现
 
 ```bash
