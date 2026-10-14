@@ -1,0 +1,4 @@
+# Isolated Mac MPS / training environment only. Never install into the official vLLM image.
+torch==2.14.0
+transformers==5.17.0
+safetensors==0.8.0
