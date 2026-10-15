@@ -1,0 +1,197 @@
+{
+  "version": "response_artifact_verification_v1",
+  "offline_env": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "_overridden": {
+      "HF_HUB_OFFLINE": "",
+      "TRANSFORMERS_OFFLINE": "",
+      "HF_DATASETS_OFFLINE": ""
+    }
+  },
+  "artifact_config": "/home/cubesaint/migu-empathy-dialogue-2026/configs/response_artifact.json",
+  "digests": [
+    {
+      "name": "base_model",
+      "path": "weights/hf/Qwen2.5-1.5B-Instruct",
+      "expected": "3dad5ec47fba5d325dd25df184c4fea7d92e913356943f0ef9a6b6f5e0a0b574",
+      "actual": "3dad5ec47fba5d325dd25df184c4fea7d92e913356943f0ef9a6b6f5e0a0b574",
+      "files": 7,
+      "bytes": 3098955668,
+      "status": "ok"
+    },
+    {
+      "name": "adapter",
+      "path": "weights/response_sft_d2_1p5b",
+      "expected": "af4f0e38c5a4fb683a5fdd9cfefa0f40259cf9e84d00c3ae54bac1a75bd1331b",
+      "actual": "af4f0e38c5a4fb683a5fdd9cfefa0f40259cf9e84d00c3ae54bac1a75bd1331b",
+      "files": 10,
+      "bytes": 52866512,
+      "status": "ok"
+    }
+  ],
+  "runs": [
+    {
+      "version": "response_generation_inference_v1",
+      "model_path": "weights/hf/Qwen2.5-1.5B-Instruct",
+      "adapter_path": "weights/response_sft_d2_1p5b",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "condition_mode": "none",
+      "condition_source": null,
+      "condition_coverage": null,
+      "input_path": "/home/cubesaint/migu-empathy-dialogue-2026/data/processed/b1_full_v1/response_val.jsonl",
+      "samples": 8,
+      "max_new_tokens": 256,
+      "total_seconds": 57.594,
+      "mean_seconds_per_sample": 7.1992,
+      "p50_seconds_per_sample": 8.0368,
+      "generated_tokens": 1014,
+      "tokens_per_second": 17.61,
+      "full_set_estimate_seconds": 16947.0,
+      "full_set_size": 2354,
+      "empty_responses": 0
+    },
+    {
+      "version": "response_generation_inference_v1",
+      "model_path": "weights/hf/Qwen2.5-1.5B-Instruct",
+      "adapter_path": "weights/response_sft_d2_1p5b",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "condition_mode": "none",
+      "condition_source": null,
+      "condition_coverage": null,
+      "input_path": "/home/cubesaint/migu-empathy-dialogue-2026/data/processed/b1_full_v1/response_val.jsonl",
+      "samples": 8,
+      "max_new_tokens": 256,
+      "total_seconds": 66.431,
+      "mean_seconds_per_sample": 8.3039,
+      "p50_seconds_per_sample": 6.6252,
+      "generated_tokens": 1014,
+      "tokens_per_second": 15.26,
+      "full_set_estimate_seconds": 19547.4,
+      "full_set_size": 2354,
+      "empty_responses": 0
+    },
+    {
+      "version": "response_generation_inference_v1",
+      "model_path": "/tmp/tmpudxyxifa/staged_model",
+      "adapter_path": "/tmp/tmpudxyxifa/staged_adapter",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "condition_mode": "none",
+      "condition_source": null,
+      "condition_coverage": null,
+      "input_path": "/home/cubesaint/migu-empathy-dialogue-2026/data/processed/b1_full_v1/response_val.jsonl",
+      "samples": 8,
+      "max_new_tokens": 256,
+      "total_seconds": 82.029,
+      "mean_seconds_per_sample": 10.2536,
+      "p50_seconds_per_sample": 8.8836,
+      "generated_tokens": 1014,
+      "tokens_per_second": 12.36,
+      "full_set_estimate_seconds": 24137.1,
+      "full_set_size": 2354,
+      "empty_responses": 0
+    }
+  ],
+  "commands": [
+    [
+      "/usr/bin/python",
+      "/home/cubesaint/migu-empathy-dialogue-2026/scripts/run_response_inference.py",
+      "--input",
+      "/home/cubesaint/migu-empathy-dialogue-2026/data/processed/b1_full_v1/response_val.jsonl",
+      "--model",
+      "weights/hf/Qwen2.5-1.5B-Instruct",
+      "--adapter",
+      "weights/response_sft_d2_1p5b",
+      "--output",
+      "/tmp/tmpudxyxifa/run1.jsonl",
+      "--performance-report",
+      "/tmp/tmpudxyxifa/run1_report.json",
+      "--device",
+      "auto",
+      "--max-samples",
+      "8",
+      "--max-new-tokens",
+      "256"
+    ],
+    [
+      "/usr/bin/python",
+      "/home/cubesaint/migu-empathy-dialogue-2026/scripts/run_response_inference.py",
+      "--input",
+      "/home/cubesaint/migu-empathy-dialogue-2026/data/processed/b1_full_v1/response_val.jsonl",
+      "--model",
+      "weights/hf/Qwen2.5-1.5B-Instruct",
+      "--adapter",
+      "weights/response_sft_d2_1p5b",
+      "--output",
+      "/tmp/tmpudxyxifa/run2.jsonl",
+      "--performance-report",
+      "/tmp/tmpudxyxifa/run2_report.json",
+      "--device",
+      "auto",
+      "--max-samples",
+      "8",
+      "--max-new-tokens",
+      "256"
+    ],
+    [
+      "/usr/bin/python",
+      "/home/cubesaint/migu-empathy-dialogue-2026/scripts/run_response_inference.py",
+      "--input",
+      "/home/cubesaint/migu-empathy-dialogue-2026/data/processed/b1_full_v1/response_val.jsonl",
+      "--model",
+      "/tmp/tmpudxyxifa/staged_model",
+      "--adapter",
+      "/tmp/tmpudxyxifa/staged_adapter",
+      "--output",
+      "/tmp/tmpudxyxifa/run3.jsonl",
+      "--performance-report",
+      "/tmp/tmpudxyxifa/run3_report.json",
+      "--device",
+      "auto",
+      "--max-samples",
+      "8",
+      "--max-new-tokens",
+      "256"
+    ]
+  ],
+  "kept_run_artifacts": [
+    "results/response_gen/artifact_verify_day3/run1.jsonl",
+    "results/response_gen/artifact_verify_day3/run1_report.json",
+    "results/response_gen/artifact_verify_day3/run2.jsonl",
+    "results/response_gen/artifact_verify_day3/run2_report.json",
+    "results/response_gen/artifact_verify_day3/run3.jsonl",
+    "results/response_gen/artifact_verify_day3/run3_report.json"
+  ],
+  "determinism": {
+    "ids": 8,
+    "identical": true,
+    "differing_ids": []
+  },
+  "portability": {
+    "ids": 8,
+    "identical": true,
+    "differing_ids": []
+  },
+  "recorded_agreement": {
+    "compared": 8,
+    "missing_from_recorded": [],
+    "exact_matches": 1,
+    "exact_match_rate": 0.125,
+    "mean_bleu4": 0.4808,
+    "mean_rouge_l": 0.5811,
+    "empty_predictions": 0
+  },
+  "gates": {
+    "digests_pinned_and_matching": true,
+    "deterministic": true,
+    "pinned_files_sufficient_and_path_independent": true,
+    "no_empty_responses": true,
+    "recorded_overlap": true
+  },
+  "passed": true,
+  "failures": []
+}

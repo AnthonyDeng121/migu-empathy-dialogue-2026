@@ -43,3 +43,14 @@ explain.md
 !results/response_gen/original_1p5b_val100_report.json
 !results/response_gen/three_way_val100.log
 
+!logs/original_1p5b_val_full.txt
+!results/response_gen/original_1p5b_val_full.jsonl
+!results/response_gen/original_1p5b_val_full_report.json
+!logs/d2_1p5b_conditioned_val_full.txt
+!results/response_gen/d2_1p5b_val_full_conditioned.jsonl
+!results/response_gen/d2_1p5b_val_full_conditioned_report.json
+!results/response_gen/c2_conditions_val_full.jsonl
+!logs/d2_1p5b_minlen_val_full.txt
+!results/response_gen/d2_1p5b_val_full_minlen.jsonl
+!results/response_gen/d2_1p5b_val_full_minlen_report.json
+!logs/build_conditions.log

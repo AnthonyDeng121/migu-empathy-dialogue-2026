@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import argparse
 import sys
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.run_response_inference import condition_coverage  # noqa: E402
+from scripts.run_response_inference import (  # noqa: E402
+    condition_coverage,
+    parse_args,
+)
 
 B1_ROWS = [
     {"sample_id": 'pp:["val_conv_000001",1,1]', "context_turns": []},
@@ -43,6 +47,30 @@ class ConditionCoverageTests(unittest.TestCase):
 
     def test_no_conditions_reports_none(self) -> None:
         self.assertIsNone(condition_coverage(B1_ROWS, {}))
+
+
+class MinNewTokensFlagTests(unittest.TestCase):
+    """The D3 probe for the 32 near-empty replies needs the floor to actually
+    reach generate(), and to be absent by default so every previously recorded
+    run stays byte-reproducible."""
+
+    def _parse(self, argv: list[str]) -> argparse.Namespace:
+        saved = sys.argv
+        try:
+            sys.argv = ["run_response_inference.py", *argv]
+            return parse_args()
+        finally:
+            sys.argv = saved
+
+    def test_defaults_to_zero_so_recorded_runs_are_unchanged(self) -> None:
+        args = self._parse(["--model", "m", "--output", "o", "--performance-report", "p"])
+        self.assertEqual(args.min_new_tokens, 0)
+
+    def test_floor_is_parsed_when_given(self) -> None:
+        args = self._parse(
+            ["--model", "m", "--output", "o", "--performance-report", "p", "--min-new-tokens", "8"]
+        )
+        self.assertEqual(args.min_new_tokens, 8)
 
 
 if __name__ == "__main__":

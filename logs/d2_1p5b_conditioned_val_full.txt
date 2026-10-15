@@ -1,0 +1,3 @@
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 10911.74it/s]
+PASS: 2354 samples in 8664.8s (3.681s/sample, 23.2 tok/s)
+EXIT=0

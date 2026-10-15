@@ -1,0 +1,21 @@
+{
+  "version": "response_generation_inference_v1",
+  "model_path": "weights/hf/Qwen2.5-1.5B-Instruct",
+  "adapter_path": "weights/response_sft_d2_1p5b",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "condition_mode": "none",
+  "condition_source": null,
+  "condition_coverage": null,
+  "input_path": "/home/cubesaint/migu-empathy-dialogue-2026/data/processed/b1_full_v1/response_val.jsonl",
+  "samples": 8,
+  "max_new_tokens": 256,
+  "total_seconds": 66.431,
+  "mean_seconds_per_sample": 8.3039,
+  "p50_seconds_per_sample": 6.6252,
+  "generated_tokens": 1014,
+  "tokens_per_second": 15.26,
+  "full_set_estimate_seconds": 19547.4,
+  "full_set_size": 2354,
+  "empty_responses": 0
+}

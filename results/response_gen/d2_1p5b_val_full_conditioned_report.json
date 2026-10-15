@@ -1,0 +1,21 @@
+{
+  "version": "response_generation_inference_v1",
+  "model_path": "/root/base_qwen15b",
+  "adapter_path": "weights/response_sft_d2_1p5b",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "condition_mode": "predicted",
+  "condition_source": "results/response_gen/c2_conditions_val_full.jsonl",
+  "condition_coverage": "2354/2354",
+  "input_path": "data/processed/b1_full_v1/response_val.jsonl",
+  "samples": 2354,
+  "max_new_tokens": 256,
+  "total_seconds": 8664.81,
+  "mean_seconds_per_sample": 3.6809,
+  "p50_seconds_per_sample": 2.492,
+  "generated_tokens": 201042,
+  "tokens_per_second": 23.2,
+  "full_set_estimate_seconds": 8664.8,
+  "full_set_size": 2354,
+  "empty_responses": 0
+}
