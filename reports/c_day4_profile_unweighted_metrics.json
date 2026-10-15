@@ -1,0 +1,1347 @@
+{
+  "status": "no-go: unweighted profile candidate remains below Day3 and all-empty exact-match baselines",
+  "device": "mps",
+  "runtime": {
+    "python": "3.12.14",
+    "torch": "2.14.0",
+    "transformers": "5.17.0",
+    "mps_available": true
+  },
+  "method": {
+    "encoder": "frozen from standalone emotion checkpoint",
+    "emotion_head": "preserved without modification",
+    "profile_heads": "three linear heads trained with positive-weight exponent 0",
+    "positive_weight_exponent": 0.0,
+    "calibration": "training-only 15% conversation-disjoint split; thresholds selected by per-dimension micro-F1",
+    "epochs": 60,
+    "selected_epoch": 52,
+    "learning_rate": 0.01,
+    "batch_size": 512,
+    "seed": 20261015
+  },
+  "data": {
+    "train_path": "data/processed/b1_full_v1/classification_train.jsonl",
+    "train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+    "train_samples": 18653,
+    "fit_samples": 15944,
+    "calibration_samples": 2709,
+    "calibration_conversations": 1249,
+    "validation_path": "data/processed/b1_full_v1/classification_val.jsonl",
+    "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+    "validation_samples": 2354,
+    "conversation_overlap": 0
+  },
+  "emotion_reference_metrics": {
+    "accuracy": 0.709431,
+    "macro_f1": 0.573752,
+    "labels": [
+      "anger",
+      "anxiety",
+      "care",
+      "disgust",
+      "fear",
+      "gratitude",
+      "helplessness",
+      "joy",
+      "loneliness",
+      "mixed",
+      "neutral",
+      "pride",
+      "relaxed",
+      "sadness",
+      "shame",
+      "surprise"
+    ],
+    "per_class": {
+      "anger": {
+        "precision": 0.716667,
+        "recall": 0.747826,
+        "f1": 0.731915,
+        "support": 115
+      },
+      "anxiety": {
+        "precision": 0.774235,
+        "recall": 0.808256,
+        "f1": 0.790879,
+        "support": 751
+      },
+      "care": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 11
+      },
+      "disgust": {
+        "precision": 0.9375,
+        "recall": 0.714286,
+        "f1": 0.810811,
+        "support": 21
+      },
+      "fear": {
+        "precision": 0.569697,
+        "recall": 0.758065,
+        "f1": 0.650519,
+        "support": 124
+      },
+      "gratitude": {
+        "precision": 0.778689,
+        "recall": 0.805085,
+        "f1": 0.791667,
+        "support": 118
+      },
+      "helplessness": {
+        "precision": 0.648276,
+        "recall": 0.661972,
+        "f1": 0.655052,
+        "support": 142
+      },
+      "joy": {
+        "precision": 0.5,
+        "recall": 0.45,
+        "f1": 0.473684,
+        "support": 20
+      },
+      "loneliness": {
+        "precision": 0.767241,
+        "recall": 0.773913,
+        "f1": 0.770563,
+        "support": 115
+      },
+      "mixed": {
+        "precision": 0.432099,
+        "recall": 0.19774,
+        "f1": 0.271318,
+        "support": 177
+      },
+      "neutral": {
+        "precision": 0.360656,
+        "recall": 0.415094,
+        "f1": 0.385965,
+        "support": 53
+      },
+      "pride": {
+        "precision": 0.909091,
+        "recall": 0.25,
+        "f1": 0.392157,
+        "support": 40
+      },
+      "relaxed": {
+        "precision": 0.752137,
+        "recall": 0.860636,
+        "f1": 0.802737,
+        "support": 409
+      },
+      "sadness": {
+        "precision": 0.632075,
+        "recall": 0.51145,
+        "f1": 0.565401,
+        "support": 131
+      },
+      "shame": {
+        "precision": 0.669065,
+        "recall": 0.788136,
+        "f1": 0.723735,
+        "support": 118
+      },
+      "surprise": {
+        "precision": 1.0,
+        "recall": 0.222222,
+        "f1": 0.363636,
+        "support": 9
+      }
+    },
+    "confusion_matrix": [
+      [
+        86,
+        12,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        2,
+        3,
+        0,
+        1,
+        4,
+        4,
+        0
+      ],
+      [
+        7,
+        607,
+        0,
+        0,
+        52,
+        3,
+        16,
+        0,
+        7,
+        12,
+        7,
+        0,
+        21,
+        6,
+        13,
+        0
+      ],
+      [
+        1,
+        8,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        15,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        23,
+        0,
+        0,
+        94,
+        0,
+        2,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        95,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        19,
+        0,
+        1,
+        0
+      ],
+      [
+        9,
+        18,
+        0,
+        0,
+        2,
+        0,
+        94,
+        0,
+        4,
+        1,
+        0,
+        0,
+        2,
+        8,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        0,
+        9,
+        0,
+        2,
+        0,
+        0,
+        6,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        11,
+        0,
+        0,
+        6,
+        1,
+        1,
+        0,
+        89,
+        1,
+        2,
+        0,
+        0,
+        3,
+        1,
+        0
+      ],
+      [
+        7,
+        58,
+        0,
+        1,
+        1,
+        3,
+        7,
+        2,
+        1,
+        35,
+        12,
+        1,
+        30,
+        10,
+        9,
+        0
+      ],
+      [
+        2,
+        10,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        22,
+        0,
+        17,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        7,
+        0,
+        10,
+        18,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        9,
+        0,
+        0,
+        0,
+        15,
+        1,
+        5,
+        1,
+        10,
+        13,
+        0,
+        352,
+        3,
+        0,
+        0
+      ],
+      [
+        3,
+        12,
+        0,
+        0,
+        1,
+        1,
+        20,
+        0,
+        9,
+        6,
+        1,
+        0,
+        2,
+        67,
+        9,
+        0
+      ],
+      [
+        1,
+        11,
+        0,
+        0,
+        4,
+        0,
+        4,
+        0,
+        1,
+        2,
+        0,
+        0,
+        0,
+        2,
+        93,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        2
+      ]
+    ]
+  },
+  "emotion_reference_report": "results/emotion_balanced_b1_20261015.json",
+  "profile": {
+    "thresholds": {
+      "personality_traits": 0.18,
+      "interests": 0.16,
+      "style": 0.27
+    },
+    "validation": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.27825,
+          "micro_f1": 0.297101,
+          "gold_positive_count": 1143,
+          "predicted_positive_count": 2445
+        },
+        "interests": {
+          "exact_match_accuracy": 0.531861,
+          "micro_f1": 0.192071,
+          "gold_positive_count": 643,
+          "predicted_positive_count": 1148
+        },
+        "style": {
+          "exact_match_accuracy": 0.337298,
+          "micro_f1": 0.315329,
+          "gold_positive_count": 1333,
+          "predicted_positive_count": 1870
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.38247,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.618522,
+          "interests": 0.748938,
+          "style": 0.517417
+        },
+        "profile_macro_exact_match_accuracy": 0.628292
+      }
+    },
+    "empty_set_baseline": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.618522,
+          "micro_f1": 0.0,
+          "gold_positive_count": 1143,
+          "predicted_positive_count": 0
+        },
+        "interests": {
+          "exact_match_accuracy": 0.748938,
+          "micro_f1": 0.0,
+          "gold_positive_count": 643,
+          "predicted_positive_count": 0
+        },
+        "style": {
+          "exact_match_accuracy": 0.517417,
+          "micro_f1": 0.0,
+          "gold_positive_count": 1333,
+          "predicted_positive_count": 0
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.628292,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.618522,
+          "interests": 0.748938,
+          "style": 0.517417
+        },
+        "profile_macro_exact_match_accuracy": 0.628292
+      }
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "calibration_macro_micro_f1": 0.250494,
+      "calibration_macro_exact_match": 0.244248,
+      "thresholds": {
+        "personality_traits": 0.18,
+        "interests": 0.07,
+        "style": 0.19
+      },
+      "validation_macro_micro_f1": 0.223233,
+      "validation_macro_exact_match": 0.236052
+    },
+    {
+      "epoch": 2,
+      "calibration_macro_micro_f1": 0.268458,
+      "calibration_macro_exact_match": 0.263443,
+      "thresholds": {
+        "personality_traits": 0.21,
+        "interests": 0.11,
+        "style": 0.14
+      },
+      "validation_macro_micro_f1": 0.224131,
+      "validation_macro_exact_match": 0.277825
+    },
+    {
+      "epoch": 3,
+      "calibration_macro_micro_f1": 0.28736,
+      "calibration_macro_exact_match": 0.302695,
+      "thresholds": {
+        "personality_traits": 0.14,
+        "interests": 0.1,
+        "style": 0.16
+      },
+      "validation_macro_micro_f1": 0.242894,
+      "validation_macro_exact_match": 0.287454
+    },
+    {
+      "epoch": 4,
+      "calibration_macro_micro_f1": 0.293287,
+      "calibration_macro_exact_match": 0.343792,
+      "thresholds": {
+        "personality_traits": 0.23,
+        "interests": 0.11,
+        "style": 0.19
+      },
+      "validation_macro_micro_f1": 0.246253,
+      "validation_macro_exact_match": 0.346078
+    },
+    {
+      "epoch": 5,
+      "calibration_macro_micro_f1": 0.289496,
+      "calibration_macro_exact_match": 0.35782,
+      "thresholds": {
+        "personality_traits": 0.26,
+        "interests": 0.13,
+        "style": 0.16
+      },
+      "validation_macro_micro_f1": 0.257304,
+      "validation_macro_exact_match": 0.353016
+    },
+    {
+      "epoch": 6,
+      "calibration_macro_micro_f1": 0.304624,
+      "calibration_macro_exact_match": 0.332349,
+      "thresholds": {
+        "personality_traits": 0.21,
+        "interests": 0.12,
+        "style": 0.19
+      },
+      "validation_macro_micro_f1": 0.253276,
+      "validation_macro_exact_match": 0.316199
+    },
+    {
+      "epoch": 7,
+      "calibration_macro_micro_f1": 0.297177,
+      "calibration_macro_exact_match": 0.335302,
+      "thresholds": {
+        "personality_traits": 0.17,
+        "interests": 0.11,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.255468,
+      "validation_macro_exact_match": 0.316907
+    },
+    {
+      "epoch": 8,
+      "calibration_macro_micro_f1": 0.298821,
+      "calibration_macro_exact_match": 0.367663,
+      "thresholds": {
+        "personality_traits": 0.23,
+        "interests": 0.15,
+        "style": 0.2
+      },
+      "validation_macro_micro_f1": 0.263978,
+      "validation_macro_exact_match": 0.36038
+    },
+    {
+      "epoch": 9,
+      "calibration_macro_micro_f1": 0.292798,
+      "calibration_macro_exact_match": 0.398917,
+      "thresholds": {
+        "personality_traits": 0.18,
+        "interests": 0.12,
+        "style": 0.14
+      },
+      "validation_macro_micro_f1": 0.256597,
+      "validation_macro_exact_match": 0.389408
+    },
+    {
+      "epoch": 10,
+      "calibration_macro_micro_f1": 0.288886,
+      "calibration_macro_exact_match": 0.324474,
+      "thresholds": {
+        "personality_traits": 0.16,
+        "interests": 0.11,
+        "style": 0.2
+      },
+      "validation_macro_micro_f1": 0.253669,
+      "validation_macro_exact_match": 0.327386
+    },
+    {
+      "epoch": 11,
+      "calibration_macro_micro_f1": 0.300657,
+      "calibration_macro_exact_match": 0.388581,
+      "thresholds": {
+        "personality_traits": 0.19,
+        "interests": 0.14,
+        "style": 0.2
+      },
+      "validation_macro_micro_f1": 0.262402,
+      "validation_macro_exact_match": 0.386434
+    },
+    {
+      "epoch": 12,
+      "calibration_macro_micro_f1": 0.303949,
+      "calibration_macro_exact_match": 0.371847,
+      "thresholds": {
+        "personality_traits": 0.22,
+        "interests": 0.14,
+        "style": 0.16
+      },
+      "validation_macro_micro_f1": 0.255501,
+      "validation_macro_exact_match": 0.373832
+    },
+    {
+      "epoch": 13,
+      "calibration_macro_micro_f1": 0.301424,
+      "calibration_macro_exact_match": 0.356466,
+      "thresholds": {
+        "personality_traits": 0.21,
+        "interests": 0.11,
+        "style": 0.17
+      },
+      "validation_macro_micro_f1": 0.246802,
+      "validation_macro_exact_match": 0.339847
+    },
+    {
+      "epoch": 14,
+      "calibration_macro_micro_f1": 0.300448,
+      "calibration_macro_exact_match": 0.335056,
+      "thresholds": {
+        "personality_traits": 0.21,
+        "interests": 0.14,
+        "style": 0.17
+      },
+      "validation_macro_micro_f1": 0.263956,
+      "validation_macro_exact_match": 0.327386
+    },
+    {
+      "epoch": 15,
+      "calibration_macro_micro_f1": 0.29377,
+      "calibration_macro_exact_match": 0.368156,
+      "thresholds": {
+        "personality_traits": 0.17,
+        "interests": 0.13,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.257543,
+      "validation_macro_exact_match": 0.374681
+    },
+    {
+      "epoch": 16,
+      "calibration_macro_micro_f1": 0.305179,
+      "calibration_macro_exact_match": 0.363726,
+      "thresholds": {
+        "personality_traits": 0.19,
+        "interests": 0.14,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.265921,
+      "validation_macro_exact_match": 0.35514
+    },
+    {
+      "epoch": 17,
+      "calibration_macro_micro_f1": 0.3071,
+      "calibration_macro_exact_match": 0.390427,
+      "thresholds": {
+        "personality_traits": 0.17,
+        "interests": 0.15,
+        "style": 0.2
+      },
+      "validation_macro_micro_f1": 0.266276,
+      "validation_macro_exact_match": 0.388417
+    },
+    {
+      "epoch": 18,
+      "calibration_macro_micro_f1": 0.300397,
+      "calibration_macro_exact_match": 0.393011,
+      "thresholds": {
+        "personality_traits": 0.18,
+        "interests": 0.16,
+        "style": 0.21
+      },
+      "validation_macro_micro_f1": 0.254418,
+      "validation_macro_exact_match": 0.384452
+    },
+    {
+      "epoch": 19,
+      "calibration_macro_micro_f1": 0.303347,
+      "calibration_macro_exact_match": 0.420204,
+      "thresholds": {
+        "personality_traits": 0.27,
+        "interests": 0.15,
+        "style": 0.21
+      },
+      "validation_macro_micro_f1": 0.25502,
+      "validation_macro_exact_match": 0.41164
+    },
+    {
+      "epoch": 20,
+      "calibration_macro_micro_f1": 0.297121,
+      "calibration_macro_exact_match": 0.3732,
+      "thresholds": {
+        "personality_traits": 0.21,
+        "interests": 0.15,
+        "style": 0.17
+      },
+      "validation_macro_micro_f1": 0.260889,
+      "validation_macro_exact_match": 0.370717
+    },
+    {
+      "epoch": 21,
+      "calibration_macro_micro_f1": 0.301782,
+      "calibration_macro_exact_match": 0.40913,
+      "thresholds": {
+        "personality_traits": 0.24,
+        "interests": 0.17,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.251552,
+      "validation_macro_exact_match": 0.41079
+    },
+    {
+      "epoch": 22,
+      "calibration_macro_micro_f1": 0.312206,
+      "calibration_macro_exact_match": 0.410114,
+      "thresholds": {
+        "personality_traits": 0.2,
+        "interests": 0.18,
+        "style": 0.22
+      },
+      "validation_macro_micro_f1": 0.266947,
+      "validation_macro_exact_match": 0.399179
+    },
+    {
+      "epoch": 23,
+      "calibration_macro_micro_f1": 0.30254,
+      "calibration_macro_exact_match": 0.377753,
+      "thresholds": {
+        "personality_traits": 0.18,
+        "interests": 0.13,
+        "style": 0.17
+      },
+      "validation_macro_micro_f1": 0.257599,
+      "validation_macro_exact_match": 0.378221
+    },
+    {
+      "epoch": 24,
+      "calibration_macro_micro_f1": 0.276012,
+      "calibration_macro_exact_match": 0.308478,
+      "thresholds": {
+        "personality_traits": 0.15,
+        "interests": 0.13,
+        "style": 0.21
+      },
+      "validation_macro_micro_f1": 0.247443,
+      "validation_macro_exact_match": 0.305154
+    },
+    {
+      "epoch": 25,
+      "calibration_macro_micro_f1": 0.292086,
+      "calibration_macro_exact_match": 0.364464,
+      "thresholds": {
+        "personality_traits": 0.2,
+        "interests": 0.12,
+        "style": 0.17
+      },
+      "validation_macro_micro_f1": 0.255123,
+      "validation_macro_exact_match": 0.36392
+    },
+    {
+      "epoch": 26,
+      "calibration_macro_micro_f1": 0.30591,
+      "calibration_macro_exact_match": 0.381937,
+      "thresholds": {
+        "personality_traits": 0.2,
+        "interests": 0.14,
+        "style": 0.17
+      },
+      "validation_macro_micro_f1": 0.271588,
+      "validation_macro_exact_match": 0.375956
+    },
+    {
+      "epoch": 27,
+      "calibration_macro_micro_f1": 0.311418,
+      "calibration_macro_exact_match": 0.420327,
+      "thresholds": {
+        "personality_traits": 0.28,
+        "interests": 0.22,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.26788,
+      "validation_macro_exact_match": 0.429057
+    },
+    {
+      "epoch": 28,
+      "calibration_macro_micro_f1": 0.304655,
+      "calibration_macro_exact_match": 0.342562,
+      "thresholds": {
+        "personality_traits": 0.24,
+        "interests": 0.1,
+        "style": 0.2
+      },
+      "validation_macro_micro_f1": 0.273177,
+      "validation_macro_exact_match": 0.331492
+    },
+    {
+      "epoch": 29,
+      "calibration_macro_micro_f1": 0.307026,
+      "calibration_macro_exact_match": 0.413437,
+      "thresholds": {
+        "personality_traits": 0.2,
+        "interests": 0.2,
+        "style": 0.15
+      },
+      "validation_macro_micro_f1": 0.258426,
+      "validation_macro_exact_match": 0.415746
+    },
+    {
+      "epoch": 30,
+      "calibration_macro_micro_f1": 0.307518,
+      "calibration_macro_exact_match": 0.393626,
+      "thresholds": {
+        "personality_traits": 0.2,
+        "interests": 0.12,
+        "style": 0.19
+      },
+      "validation_macro_micro_f1": 0.266454,
+      "validation_macro_exact_match": 0.40017
+    },
+    {
+      "epoch": 31,
+      "calibration_macro_micro_f1": 0.304421,
+      "calibration_macro_exact_match": 0.416636,
+      "thresholds": {
+        "personality_traits": 0.22,
+        "interests": 0.15,
+        "style": 0.2
+      },
+      "validation_macro_micro_f1": 0.25869,
+      "validation_macro_exact_match": 0.417304
+    },
+    {
+      "epoch": 32,
+      "calibration_macro_micro_f1": 0.309953,
+      "calibration_macro_exact_match": 0.360527,
+      "thresholds": {
+        "personality_traits": 0.19,
+        "interests": 0.12,
+        "style": 0.2
+      },
+      "validation_macro_micro_f1": 0.266608,
+      "validation_macro_exact_match": 0.348202
+    },
+    {
+      "epoch": 33,
+      "calibration_macro_micro_f1": 0.299971,
+      "calibration_macro_exact_match": 0.397441,
+      "thresholds": {
+        "personality_traits": 0.24,
+        "interests": 0.17,
+        "style": 0.14
+      },
+      "validation_macro_micro_f1": 0.255251,
+      "validation_macro_exact_match": 0.392099
+    },
+    {
+      "epoch": 34,
+      "calibration_macro_micro_f1": 0.292803,
+      "calibration_macro_exact_match": 0.350068,
+      "thresholds": {
+        "personality_traits": 0.16,
+        "interests": 0.12,
+        "style": 0.15
+      },
+      "validation_macro_micro_f1": 0.249334,
+      "validation_macro_exact_match": 0.35953
+    },
+    {
+      "epoch": 35,
+      "calibration_macro_micro_f1": 0.303339,
+      "calibration_macro_exact_match": 0.342316,
+      "thresholds": {
+        "personality_traits": 0.19,
+        "interests": 0.11,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.264757,
+      "validation_macro_exact_match": 0.352025
+    },
+    {
+      "epoch": 36,
+      "calibration_macro_micro_f1": 0.312781,
+      "calibration_macro_exact_match": 0.412329,
+      "thresholds": {
+        "personality_traits": 0.19,
+        "interests": 0.14,
+        "style": 0.21
+      },
+      "validation_macro_micro_f1": 0.265702,
+      "validation_macro_exact_match": 0.413481
+    },
+    {
+      "epoch": 37,
+      "calibration_macro_micro_f1": 0.302525,
+      "calibration_macro_exact_match": 0.373939,
+      "thresholds": {
+        "personality_traits": 0.2,
+        "interests": 0.12,
+        "style": 0.19
+      },
+      "validation_macro_micro_f1": 0.253071,
+      "validation_macro_exact_match": 0.371566
+    },
+    {
+      "epoch": 38,
+      "calibration_macro_micro_f1": 0.306979,
+      "calibration_macro_exact_match": 0.400763,
+      "thresholds": {
+        "personality_traits": 0.22,
+        "interests": 0.15,
+        "style": 0.17
+      },
+      "validation_macro_micro_f1": 0.247261,
+      "validation_macro_exact_match": 0.40286
+    },
+    {
+      "epoch": 39,
+      "calibration_macro_micro_f1": 0.302298,
+      "calibration_macro_exact_match": 0.4047,
+      "thresholds": {
+        "personality_traits": 0.22,
+        "interests": 0.18,
+        "style": 0.21
+      },
+      "validation_macro_micro_f1": 0.274727,
+      "validation_macro_exact_match": 0.402152
+    },
+    {
+      "epoch": 40,
+      "calibration_macro_micro_f1": 0.306964,
+      "calibration_macro_exact_match": 0.372093,
+      "thresholds": {
+        "personality_traits": 0.25,
+        "interests": 0.13,
+        "style": 0.2
+      },
+      "validation_macro_micro_f1": 0.259872,
+      "validation_macro_exact_match": 0.374681
+    },
+    {
+      "epoch": 41,
+      "calibration_macro_micro_f1": 0.309741,
+      "calibration_macro_exact_match": 0.385628,
+      "thresholds": {
+        "personality_traits": 0.27,
+        "interests": 0.17,
+        "style": 0.21
+      },
+      "validation_macro_micro_f1": 0.273027,
+      "validation_macro_exact_match": 0.378929
+    },
+    {
+      "epoch": 42,
+      "calibration_macro_micro_f1": 0.309632,
+      "calibration_macro_exact_match": 0.41196,
+      "thresholds": {
+        "personality_traits": 0.19,
+        "interests": 0.13,
+        "style": 0.2
+      },
+      "validation_macro_micro_f1": 0.279816,
+      "validation_macro_exact_match": 0.419145
+    },
+    {
+      "epoch": 43,
+      "calibration_macro_micro_f1": 0.29801,
+      "calibration_macro_exact_match": 0.399532,
+      "thresholds": {
+        "personality_traits": 0.2,
+        "interests": 0.13,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.251055,
+      "validation_macro_exact_match": 0.400878
+    },
+    {
+      "epoch": 44,
+      "calibration_macro_micro_f1": 0.30299,
+      "calibration_macro_exact_match": 0.397318,
+      "thresholds": {
+        "personality_traits": 0.22,
+        "interests": 0.15,
+        "style": 0.22
+      },
+      "validation_macro_micro_f1": 0.27463,
+      "validation_macro_exact_match": 0.403427
+    },
+    {
+      "epoch": 45,
+      "calibration_macro_micro_f1": 0.305687,
+      "calibration_macro_exact_match": 0.381445,
+      "thresholds": {
+        "personality_traits": 0.16,
+        "interests": 0.2,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.265904,
+      "validation_macro_exact_match": 0.376664
+    },
+    {
+      "epoch": 46,
+      "calibration_macro_micro_f1": 0.307401,
+      "calibration_macro_exact_match": 0.3748,
+      "thresholds": {
+        "personality_traits": 0.22,
+        "interests": 0.16,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.260479,
+      "validation_macro_exact_match": 0.365902
+    },
+    {
+      "epoch": 47,
+      "calibration_macro_micro_f1": 0.292784,
+      "calibration_macro_exact_match": 0.42205,
+      "thresholds": {
+        "personality_traits": 0.23,
+        "interests": 0.16,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.249702,
+      "validation_macro_exact_match": 0.42141
+    },
+    {
+      "epoch": 48,
+      "calibration_macro_micro_f1": 0.306235,
+      "calibration_macro_exact_match": 0.361757,
+      "thresholds": {
+        "personality_traits": 0.2,
+        "interests": 0.12,
+        "style": 0.17
+      },
+      "validation_macro_micro_f1": 0.269903,
+      "validation_macro_exact_match": 0.355848
+    },
+    {
+      "epoch": 49,
+      "calibration_macro_micro_f1": 0.299527,
+      "calibration_macro_exact_match": 0.385013,
+      "thresholds": {
+        "personality_traits": 0.19,
+        "interests": 0.1,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.251121,
+      "validation_macro_exact_match": 0.369017
+    },
+    {
+      "epoch": 50,
+      "calibration_macro_micro_f1": 0.309708,
+      "calibration_macro_exact_match": 0.412452,
+      "thresholds": {
+        "personality_traits": 0.22,
+        "interests": 0.14,
+        "style": 0.24
+      },
+      "validation_macro_micro_f1": 0.253283,
+      "validation_macro_exact_match": 0.39578
+    },
+    {
+      "epoch": 51,
+      "calibration_macro_micro_f1": 0.304841,
+      "calibration_macro_exact_match": 0.38206,
+      "thresholds": {
+        "personality_traits": 0.24,
+        "interests": 0.12,
+        "style": 0.23
+      },
+      "validation_macro_micro_f1": 0.265396,
+      "validation_macro_exact_match": 0.380062
+    },
+    {
+      "epoch": 52,
+      "calibration_macro_micro_f1": 0.315383,
+      "calibration_macro_exact_match": 0.395841,
+      "thresholds": {
+        "personality_traits": 0.18,
+        "interests": 0.16,
+        "style": 0.27
+      },
+      "validation_macro_micro_f1": 0.268167,
+      "validation_macro_exact_match": 0.38247
+    },
+    {
+      "epoch": 53,
+      "calibration_macro_micro_f1": 0.310355,
+      "calibration_macro_exact_match": 0.423896,
+      "thresholds": {
+        "personality_traits": 0.23,
+        "interests": 0.19,
+        "style": 0.19
+      },
+      "validation_macro_micro_f1": 0.268565,
+      "validation_macro_exact_match": 0.431464
+    },
+    {
+      "epoch": 54,
+      "calibration_macro_micro_f1": 0.307463,
+      "calibration_macro_exact_match": 0.377138,
+      "thresholds": {
+        "personality_traits": 0.24,
+        "interests": 0.15,
+        "style": 0.19
+      },
+      "validation_macro_micro_f1": 0.256564,
+      "validation_macro_exact_match": 0.366185
+    },
+    {
+      "epoch": 55,
+      "calibration_macro_micro_f1": 0.295417,
+      "calibration_macro_exact_match": 0.421189,
+      "thresholds": {
+        "personality_traits": 0.22,
+        "interests": 0.16,
+        "style": 0.18
+      },
+      "validation_macro_micro_f1": 0.247367,
+      "validation_macro_exact_match": 0.406967
+    },
+    {
+      "epoch": 56,
+      "calibration_macro_micro_f1": 0.308252,
+      "calibration_macro_exact_match": 0.406669,
+      "thresholds": {
+        "personality_traits": 0.25,
+        "interests": 0.2,
+        "style": 0.16
+      },
+      "validation_macro_micro_f1": 0.264464,
+      "validation_macro_exact_match": 0.408949
+    },
+    {
+      "epoch": 57,
+      "calibration_macro_micro_f1": 0.308772,
+      "calibration_macro_exact_match": 0.382798,
+      "thresholds": {
+        "personality_traits": 0.25,
+        "interests": 0.17,
+        "style": 0.19
+      },
+      "validation_macro_micro_f1": 0.252085,
+      "validation_macro_exact_match": 0.371
+    },
+    {
+      "epoch": 58,
+      "calibration_macro_micro_f1": 0.312386,
+      "calibration_macro_exact_match": 0.39498,
+      "thresholds": {
+        "personality_traits": 0.23,
+        "interests": 0.15,
+        "style": 0.14
+      },
+      "validation_macro_micro_f1": 0.269686,
+      "validation_macro_exact_match": 0.394789
+    },
+    {
+      "epoch": 59,
+      "calibration_macro_micro_f1": 0.311619,
+      "calibration_macro_exact_match": 0.390058,
+      "thresholds": {
+        "personality_traits": 0.16,
+        "interests": 0.14,
+        "style": 0.22
+      },
+      "validation_macro_micro_f1": 0.263901,
+      "validation_macro_exact_match": 0.367318
+    },
+    {
+      "epoch": 60,
+      "calibration_macro_micro_f1": 0.309795,
+      "calibration_macro_exact_match": 0.372708,
+      "thresholds": {
+        "personality_traits": 0.26,
+        "interests": 0.13,
+        "style": 0.23
+      },
+      "validation_macro_micro_f1": 0.268914,
+      "validation_macro_exact_match": 0.367884
+    }
+  ],
+  "experiment_elapsed_seconds": 374.817,
+  "checkpoint": "weights/profile_unweighted_b1_20261015",
+  "validation_usage": {
+    "per_epoch_diagnostics_logged": true,
+    "checkpoint_and_threshold_selection": "training-only 15% conversation-disjoint calibration split; macro micro-F1",
+    "validation_used_for_selection_or_early_stopping": false,
+    "note": "Validation metrics were printed each epoch for diagnostics; no validation-driven model, threshold, or stopping decision was made."
+  },
+  "experiment": {
+    "task": "C3 Day4 profile optimization",
+    "hypothesis": "Removing positive reweighting reduces overprediction of profile labels.",
+    "single_changed_variable": {
+      "positive_weight_exponent_before": 0.5,
+      "positive_weight_exponent_after": 0.0
+    },
+    "fixed_settings": "seed, model checkpoint, data split, training epochs, optimizer, threshold calibration, and epoch selection held fixed",
+    "decision": "no-go; do not replace or publish the Day3 candidate"
+  },
+  "comparison": {
+    "day3_weighted": {
+      "profile_macro_exact_match_accuracy": 0.42934,
+      "profile_macro_micro_f1": 0.252458,
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.404418,
+          "micro_f1": 0.287376,
+          "gold_positive_count": 1143,
+          "predicted_positive_count": 1780
+        },
+        "interests": {
+          "exact_match_accuracy": 0.607477,
+          "micro_f1": 0.199728,
+          "gold_positive_count": 643,
+          "predicted_positive_count": 829
+        },
+        "style": {
+          "exact_match_accuracy": 0.276126,
+          "micro_f1": 0.27027,
+          "gold_positive_count": 1333,
+          "predicted_positive_count": 2256
+        }
+      }
+    },
+    "day4_unweighted": {
+      "profile_macro_exact_match_accuracy": 0.38247,
+      "profile_macro_micro_f1": 0.268167,
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.27825,
+          "micro_f1": 0.297101,
+          "gold_positive_count": 1143,
+          "predicted_positive_count": 2445
+        },
+        "interests": {
+          "exact_match_accuracy": 0.531861,
+          "micro_f1": 0.192071,
+          "gold_positive_count": 643,
+          "predicted_positive_count": 1148
+        },
+        "style": {
+          "exact_match_accuracy": 0.337298,
+          "micro_f1": 0.315329,
+          "gold_positive_count": 1333,
+          "predicted_positive_count": 1870
+        }
+      }
+    },
+    "empty_set_baseline": {
+      "per_dimension_exact_match_accuracy": {
+        "personality_traits": 0.618522,
+        "interests": 0.748938,
+        "style": 0.517417
+      },
+      "profile_macro_exact_match_accuracy": 0.628292
+    },
+    "delta_vs_day3": {
+      "profile_macro_exact_match_accuracy": -0.04687,
+      "profile_macro_micro_f1": 0.015709
+    },
+    "delta_exact_vs_empty_baseline": -0.245822
+  },
+  "checkpoint_artifact": {
+    "path": "weights/profile_unweighted_b1_20261015",
+    "uploaded": false,
+    "total_bytes": 409687410,
+    "directory_tree_sha256": "1b1bee3d8cf5175ea7d7c771015f3aa7ecd5455b740c3f93e2bce1ce98bfd4b0",
+    "files": {
+      "checkpoint_metadata.json": "39704ec40ea23135a9ed99ef2634f84e48e4cf29e696a8fdfb242f5fa7536890",
+      "encoder/config.json": "cfa627f12e360886101147f58d8012fea2f1a10da88ed5bbd46a49b974ff89b7",
+      "encoder/model.safetensors": "20376e0571baf16eff1036721471fb3b2224ce4e899dbaa5b612463a4f452fe2",
+      "heads.safetensors": "d8a148bb47b915f94ccea0fb8aa0abab0461d9eec073c466718683ec5ab3fca7",
+      "tokenizer.json": "867be2cb3189c94aaf44e0cd095a871e0db5a57146441de913d489827f0e9c5a",
+      "tokenizer_config.json": "18307e407ae7e1f4433c3581e4c8083fadb4639aa543e2178330b7ac6940622c"
+    }
+  },
+  "checkpoint_reload_smoke": {
+    "loader": "src.classification.emotion_profile_checkpoint.EmotionProfileCheckpoint",
+    "device": "mps",
+    "official_test_rows": 3,
+    "predictions_written_and_schema_checked": 3,
+    "legacy_cli": "scripts/predict_emotion_profile.py is not compatible with plural per-dimension profile_thresholds metadata; the new checkpoint loader was used."
+  },
+  "limits": [
+    "Profile macro exact match is below both the Day3 candidate and all-empty validation baseline; do not adopt this checkpoint.",
+    "Training ran on Apple M5 MPS with zero competition GPU card hours; platform image compatibility and official scoring were not verified.",
+    "Epoch-wise validation metrics were logged for diagnosis only; model and thresholds were selected from the training-only calibration split.",
+    "The new checkpoint loader passed a 3-row local smoke; the legacy C1 CLI expects a different threshold metadata key."
+  ],
+  "code_evidence": {
+    "train_profile_heads_sha256": "317b378c9f76c4466e9d9a3b1c541e1d7bb91465f03c7db9e2417bff40e09be3"
+  }
+}
