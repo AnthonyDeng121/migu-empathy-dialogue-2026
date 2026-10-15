@@ -1,0 +1,175 @@
+{
+  "status": "experimental_candidate; profile gate not passed",
+  "device": "Apple M5 / PyTorch MPS / 32 GB unified memory",
+  "software": {
+    "python": "3.12.14",
+    "torch": "2.14.0",
+    "transformers": "5.17.0"
+  },
+  "data": {
+    "version": "B1 v1",
+    "train_samples": 18653,
+    "validation_samples": 2354,
+    "train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+    "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+    "train_validation_conversation_overlap": 0,
+    "calibration_fraction_of_train_conversations": 0.15,
+    "calibration_split_is_conversation_disjoint": true
+  },
+  "emotion": {
+    "validation": {
+      "sample_count": 2354,
+      "baseline_accuracy": 0.67842,
+      "baseline_macro_f1": 0.4032,
+      "candidate_accuracy": 0.709431,
+      "candidate_macro_f1": 0.573752,
+      "per_class": {
+        "anger": {
+          "f1": 0.731915,
+          "support": 115
+        },
+        "anxiety": {
+          "f1": 0.790879,
+          "support": 751
+        },
+        "care": {
+          "f1": 0.0,
+          "support": 11
+        },
+        "disgust": {
+          "f1": 0.810811,
+          "support": 21
+        },
+        "fear": {
+          "f1": 0.650519,
+          "support": 124
+        },
+        "gratitude": {
+          "f1": 0.791667,
+          "support": 118
+        },
+        "helplessness": {
+          "f1": 0.655052,
+          "support": 142
+        },
+        "joy": {
+          "f1": 0.473684,
+          "support": 20
+        },
+        "loneliness": {
+          "f1": 0.770563,
+          "support": 115
+        },
+        "mixed": {
+          "f1": 0.271318,
+          "support": 177
+        },
+        "neutral": {
+          "f1": 0.385965,
+          "support": 53
+        },
+        "pride": {
+          "f1": 0.392157,
+          "support": 40
+        },
+        "relaxed": {
+          "f1": 0.802737,
+          "support": 409
+        },
+        "sadness": {
+          "f1": 0.565401,
+          "support": 131
+        },
+        "shame": {
+          "f1": 0.723735,
+          "support": 118
+        },
+        "surprise": {
+          "f1": 0.363636,
+          "support": 9
+        }
+      }
+    },
+    "training": {
+      "epochs": 1,
+      "optimizer_steps": 583,
+      "batch_size": 32,
+      "max_length": 256,
+      "learning_rate": 5e-06,
+      "elapsed_seconds": 1479.459,
+      "class_weighting": "cross entropy with normalized square-root inverse-frequency weights, clipped to [0.35, 4.0]"
+    }
+  },
+  "profile": {
+    "selection_metric": "training-only calibration micro-F1",
+    "selected_epoch": 41,
+    "thresholds": {
+      "personality_traits": 0.48,
+      "interests": 0.55,
+      "style": 0.45
+    },
+    "validation": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.404418,
+          "micro_f1": 0.287376,
+          "gold_positive_count": 1143,
+          "predicted_positive_count": 1780
+        },
+        "interests": {
+          "exact_match_accuracy": 0.607477,
+          "micro_f1": 0.199728,
+          "gold_positive_count": 643,
+          "predicted_positive_count": 829
+        },
+        "style": {
+          "exact_match_accuracy": 0.276126,
+          "micro_f1": 0.27027,
+          "gold_positive_count": 1333,
+          "predicted_positive_count": 2256
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.42934,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.618522,
+          "interests": 0.748938,
+          "style": 0.517417
+        },
+        "profile_macro_exact_match_accuracy": 0.628292
+      }
+    },
+    "training_only_threshold_calibration_exact_match_check": {
+      "validation_profile_macro_exact_match_accuracy": 0.6223,
+      "empty_set_baseline_profile_macro_exact_match_accuracy": 0.628292,
+      "note": "A separate calibration objective check; still below empty-set baseline."
+    },
+    "feature_extraction_and_training_elapsed_seconds": 345.517
+  },
+  "artifacts": {
+    "uploaded_in_this_pr": false,
+    "local_only": false,
+    "emotion_checkpoint": {
+      "path": "weights/emotion_balanced_b1_20261015",
+      "approx_size_mib": 391,
+      "model_sha256": "51692b19961935a9edfcc4f47d6897cd79cdf4de528e845d015a07ffe00fd72e",
+      "directory_tree_sha256": "399f4ce2d26c40b7877d0edead75d9410ba8f8ae55cb0e57b69f2469af9c21cd"
+    },
+    "joint_checkpoint": {
+      "path": "weights/emotion_profile_balanced_b1_20261015",
+      "approx_size_mib": 391,
+      "encoder_sha256": "20376e0571baf16eff1036721471fb3b2224ce4e899dbaa5b612463a4f452fe2",
+      "heads_sha256": "dfd63c9475775a1b99c1d5f641c544690e1fd3c95cba477bb020e09320e44c9b",
+      "directory_tree_sha256": "6b975dd0eb375eb34fa3d874f11f629eaada9974676551d7a563bb5db9ba5eb2"
+    },
+    "public_release_url": "https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-day3-retrained-20261015",
+    "public_release_asset": "C_DAY3_RETRAINED_EMOTION_PROFILE_20261015.zip",
+    "archive_sha256": "550e9c4743671eb736338c8193b7cdc3f82386c63a86ac2d143dcf034c2f7b50"
+  },
+  "limits": [
+    "Profile macro exact-match remains below the all-empty profile baseline.",
+    "Care has zero validation F1 with support 11; surprise support is 9 and recall is low.",
+    "Official scoring/acceptance thresholds and target runtime image compatibility were not verified.",
+    "No platform GPU card time was used."
+  ]
+}
