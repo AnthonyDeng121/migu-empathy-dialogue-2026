@@ -53,3 +53,4 @@ explain.md
 !logs/d2_1p5b_minlen_val_full.txt
 !results/response_gen/d2_1p5b_val_full_minlen.jsonl
 !results/response_gen/d2_1p5b_val_full_minlen_report.json
+!logs/build_conditions.log
