@@ -72,9 +72,12 @@ bash /root/participant/start.sh TEST_FILE RESULT_DIR
 另提供 `Dockerfile.integrated`，固定集成入口且不替换平台 PyTorch。待确认实际官方镜像引用、模型文件齐备后，可用 BuildKit 构建：
 
 ```bash
-docker build -f Dockerfile.integrated --build-arg OFFICIAL_BASE_IMAGE=<官方完整镜像引用> --build-context model_assets=./weights -t migu-integrated:candidate .
+python scripts/package_expert_materials.py --output artifacts/expert_materials_day4
+docker build -f Dockerfile.integrated --build-arg OFFICIAL_BASE_IMAGE=<官方完整镜像引用> --build-arg TEAM_NAME=<正式队名> --build-context model_assets=./weights --build-context expert_materials=./artifacts/expert_materials_day4 -t migu-integrated:candidate .
 ```
 
-构建需要可访问的软件包源；运行不需要联网。该配方需在实际官方基础镜像上构建并执行 GPU/断网回归才算验收，源码中有 Dockerfile 不代表镜像已构建成功。比赛要求的专家材料还需另行补齐到指定目录，本配方不伪造材料。
+构建需要可访问的软件包源；运行不需要联网。该配方需在实际官方基础镜像上构建并执行 GPU/断网回归才算验收，源码中有 Dockerfile 不代表镜像已构建成功。专家材料由明确清单打包，含技术方案、实验记录和训练日志及 SHA-256，不包含本地验收记录；需按最终候选复核材料完整性。
+
+若实例没有 Docker，通过平台保存当前实例镜像。先使用 `scripts/stage_submission.py --config configs/cloud_runtime.json --python /root/a-integration-20261015/venv/bin/python --destination /root/migu-submission-day4` 建立新目录；它复制模型并固化入口环境，不覆盖现有 `/root/participant`。验证新目录后再切换官方路径，最终必须重跑 `bash /root/participant/start.sh TEST_FILE RESULT_DIR`。保存时保留指定 Python 环境，将专家材料放入 `/root/AI技术赛道-数字人综合情感对话模型-正式队名`，并核对基础镜像来源。平台保存、安全审核、B 复核和官方成功状态仍分别记录，不能以试跑代替。
 
 验收报告仅保存在本地忽略目录 `.codex_tmp/acceptance/`，不提交或上传 GitHub。

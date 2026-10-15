@@ -2,6 +2,8 @@
 # Supply the exact competition image reference; never substitute the dev image.
 ARG OFFICIAL_BASE_IMAGE
 FROM ${OFFICIAL_BASE_IMAGE}
+ARG TEAM_NAME
+RUN test -n "${TEAM_NAME}" && test "${TEAM_NAME}" != "队名"
 ARG PLATFORM_PYTHON=/opt/conda/envs/conda_env/bin/python
 ENV PYTHON_BIN=/opt/migu-inference/bin/python \
     INFERENCE_BACKEND=integrated \
@@ -20,5 +22,6 @@ COPY start.sh start.sh
 COPY --from=model_assets /emotion_profile/ weights/emotion_profile/
 COPY --from=model_assets /hf/Qwen2.5-1.5B-Instruct/ weights/hf/Qwen2.5-1.5B-Instruct/
 COPY --from=model_assets /response_sft_d2_1p5b/ weights/response_sft_d2_1p5b/
+COPY --from=expert_materials / /root/AI技术赛道-数字人综合情感对话模型-${TEAM_NAME}/
 RUN chmod +x start.sh && ${PYTHON_BIN} scripts/cloud_preflight.py --files-only --verify-hashes
 ENTRYPOINT ["/root/participant/start.sh"]
