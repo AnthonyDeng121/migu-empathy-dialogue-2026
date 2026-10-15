@@ -66,6 +66,19 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python3 scripts/run_response_inference.p
 
 **对采用判断的意义**：D2 的收益主要来自学会短确认语域，而不是整体语言质量提升；同时它引入了原模型没有的近空失败模式。这两个事实都要进候选结论——不能只报"BLEU-4 翻倍"。若要继续优化（D3），近空回复是最明确的靶子，且需要约束"最短生成长度"而不是继续压长度。
 
+## 与 A 集成产出的交叉验证（10/15 傍晚）
+
+A 的集成管线（PR #17）在同一台远程 4090 上跑完全量 val 2,354 条，产出 `submission.jsonl`（四字段齐全：`id`/`emotion_label`/`user_profile`/`response_text`）。逐条比对：
+
+- **`response_text` 与 D2 记录预测 2,354/2,354 逐字节相同**；id 集合一致；0 空回复。
+- A 的配置为 `response_adapter_dir` = D2 adapter、`condition_mode: none`、`profile_mode: empty`、`max_new_tokens: 256`、`backend: transformers`——与本报告的无条件臂同一路径。
+- A 的性能报告（官方口径，前 100 条计时、`timing_scope` 含分类+提示+分词+生成+解码+校验、不含模型加载）：`complete: true`、`rounds: 100/100`、`parse_failure_count: 0`、平均 **4,042.4 ms/条**、中位 2,994.0 ms、p95 10,846.9 ms、模型加载 4.46 s。
+
+**两条结论**：
+
+1. **D2 的诊断指标可以直接当作集成交付物里回复字段的指标**——集成管线吐出的 `response_text` 就是被评测的那 2,354 条，不是另一个模型。
+2. **修正此前"跨 GPU 不保证字节一致"的表述范围**：本机 4060 与远程 4090 之间确有漂移（1/8 字节相同），但**两张 4090 之间、即使软件栈不同也字节一致**（本次 D2 记录跑在 10/14 的远程 4090 + torch 2.10.0/transformers 4.57.6，A 的集成跑在 10/15 新开 4090 + conda Python 3.12 的另一套依赖，输出仍 2,354/2,354 相同）。因此漂移是**GPU 型号差异**导致的内核/归约顺序差异，不是软件版本差异。G5 的"两次冷启动预测哈希一致"在同类卡上成立；换卡型才需要重新固定基线。
+
 ## 与既有记录的关系
 
 - B2 报告（`reports/B_DAY3_B2_EVAL.md`）中"原模型仅 100 条切片、NOT FULL SET、不能与 D2 同级排名"的限制，随本次全量跑完**解除**；该表现在可以按全量同级重排。表由 B 维护，D 不代改，数值以本报告为准。
