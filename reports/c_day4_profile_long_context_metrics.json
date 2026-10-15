@@ -4,7 +4,17 @@
     "internal_profile_macro_exact_baseline": 0.628292,
     "official_metric_confirmed": false,
     "passed": false,
+    "scope": "Original exact-match comparison; retained as historical metric, not the revised internal handoff gate.",
     "reason": "Unweighted 512-token exact-calibrated candidate ties, but does not exceed, the empty-set baseline."
+  },
+  "revised_internal_gate": {
+    "approval": "Group leader approved the relaxed internal stage criterion in team discussion on 2026-10-15.",
+    "metric": "Validation profile macro Micro-F1 after training-only exact-threshold calibration",
+    "candidate_score": 0.019807,
+    "empty_set_baseline_score": 0.0,
+    "criterion": "candidate_score > empty_set_baseline_score",
+    "passed": true,
+    "scope": "Internal Day4 stage handoff only; does not supersede the exact-match result or establish an official pass."
   },
   "weighted_512_training": {
     "status": "profile heads trained; emotion checkpoint preserved",
