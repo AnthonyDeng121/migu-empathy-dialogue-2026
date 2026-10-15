@@ -43,3 +43,6 @@ explain.md
 !results/response_gen/original_1p5b_val100_report.json
 !results/response_gen/three_way_val100.log
 
+!logs/original_1p5b_val_full.txt
+!results/response_gen/original_1p5b_val_full.jsonl
+!results/response_gen/original_1p5b_val_full_report.json
