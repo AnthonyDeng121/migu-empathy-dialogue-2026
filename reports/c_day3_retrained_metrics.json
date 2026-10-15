@@ -148,7 +148,7 @@
   },
   "artifacts": {
     "uploaded_in_this_pr": false,
-    "local_only": true,
+    "local_only": false,
     "emotion_checkpoint": {
       "path": "weights/emotion_balanced_b1_20261015",
       "approx_size_mib": 391,
@@ -161,7 +161,10 @@
       "encoder_sha256": "20376e0571baf16eff1036721471fb3b2224ce4e899dbaa5b612463a4f452fe2",
       "heads_sha256": "dfd63c9475775a1b99c1d5f641c544690e1fd3c95cba477bb020e09320e44c9b",
       "directory_tree_sha256": "6b975dd0eb375eb34fa3d874f11f629eaada9974676551d7a563bb5db9ba5eb2"
-    }
+    },
+    "public_release_url": "https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-day3-retrained-20261015",
+    "public_release_asset": "C_DAY3_RETRAINED_EMOTION_PROFILE_20261015.zip",
+    "archive_sha256": "550e9c4743671eb736338c8193b7cdc3f82386c63a86ac2d143dcf034c2f7b50"
   },
   "limits": [
     "Profile macro exact-match remains below the all-empty profile baseline.",

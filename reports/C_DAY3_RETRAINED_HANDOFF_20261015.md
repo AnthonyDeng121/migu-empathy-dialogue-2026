@@ -33,7 +33,7 @@
 
 ## 可复现代码与模型产物
 
-本 PR 包含训练脚本、重载推理类和上面的指标摘要。由于仓库是 Public，且两个 checkpoint 各约 391 MiB，模型权重保存在本机被 Git 忽略的 `weights/` 目录，没有随 PR 上传或发布。PR 合并不会自动把权重交给其他成员；需要组内选定模型文件共享渠道后，组长才能下载并实际运行。
+本 PR 包含训练脚本、重载推理类和上面的指标摘要。由于仓库是 Public，且 checkpoint 约 391 MiB，权重没有进入 Git；经授权后，已另行发布到公开 GitHub 预发布版本：[C Day 3 重训实验候选（2026-10-15）](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-day3-retrained-20261015)。组长可从该 Release 下载模型包和校验文件。
 
 本机产物及 SHA-256：
 
