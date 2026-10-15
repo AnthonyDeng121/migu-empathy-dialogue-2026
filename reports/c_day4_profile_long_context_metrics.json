@@ -1,0 +1,2785 @@
+{
+  "experiment": "C Day4 profile long-context 2x2 follow-up",
+  "gate": {
+    "internal_profile_macro_exact_baseline": 0.628292,
+    "official_metric_confirmed": false,
+    "passed": false,
+    "reason": "Unweighted 512-token exact-calibrated candidate ties, but does not exceed, the empty-set baseline."
+  },
+  "weighted_512_training": {
+    "status": "profile heads trained; emotion checkpoint preserved",
+    "device": "mps",
+    "runtime": {
+      "python": "3.12.14",
+      "torch": "2.14.0",
+      "transformers": "5.17.0",
+      "mps_available": true
+    },
+    "method": {
+      "encoder": "frozen from standalone emotion checkpoint",
+      "emotion_head": "preserved without modification",
+      "profile_heads": "three linear heads trained with capped inverse-frequency positive weights; exponent=0.5",
+      "positive_weight_exponent": 0.5,
+      "calibration": "training-only 15% conversation-disjoint split; thresholds selected by per-dimension micro-F1",
+      "epochs": 60,
+      "selected_epoch": 41,
+      "learning_rate": 0.01,
+      "batch_size": 512,
+      "seed": 20261015
+    },
+    "data": {
+      "train_path": "data/processed/b1_full_v1/classification_train.jsonl",
+      "train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+      "train_samples": 18653,
+      "fit_samples": 15944,
+      "calibration_samples": 2709,
+      "calibration_conversations": 1249,
+      "validation_path": "data/processed/b1_full_v1/classification_val.jsonl",
+      "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+      "validation_samples": 2354,
+      "conversation_overlap": 0
+    },
+    "emotion_reference_metrics": {
+      "accuracy": 0.709431,
+      "macro_f1": 0.573752,
+      "labels": [
+        "anger",
+        "anxiety",
+        "care",
+        "disgust",
+        "fear",
+        "gratitude",
+        "helplessness",
+        "joy",
+        "loneliness",
+        "mixed",
+        "neutral",
+        "pride",
+        "relaxed",
+        "sadness",
+        "shame",
+        "surprise"
+      ],
+      "per_class": {
+        "anger": {
+          "precision": 0.716667,
+          "recall": 0.747826,
+          "f1": 0.731915,
+          "support": 115
+        },
+        "anxiety": {
+          "precision": 0.774235,
+          "recall": 0.808256,
+          "f1": 0.790879,
+          "support": 751
+        },
+        "care": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 11
+        },
+        "disgust": {
+          "precision": 0.9375,
+          "recall": 0.714286,
+          "f1": 0.810811,
+          "support": 21
+        },
+        "fear": {
+          "precision": 0.569697,
+          "recall": 0.758065,
+          "f1": 0.650519,
+          "support": 124
+        },
+        "gratitude": {
+          "precision": 0.778689,
+          "recall": 0.805085,
+          "f1": 0.791667,
+          "support": 118
+        },
+        "helplessness": {
+          "precision": 0.648276,
+          "recall": 0.661972,
+          "f1": 0.655052,
+          "support": 142
+        },
+        "joy": {
+          "precision": 0.5,
+          "recall": 0.45,
+          "f1": 0.473684,
+          "support": 20
+        },
+        "loneliness": {
+          "precision": 0.767241,
+          "recall": 0.773913,
+          "f1": 0.770563,
+          "support": 115
+        },
+        "mixed": {
+          "precision": 0.432099,
+          "recall": 0.19774,
+          "f1": 0.271318,
+          "support": 177
+        },
+        "neutral": {
+          "precision": 0.360656,
+          "recall": 0.415094,
+          "f1": 0.385965,
+          "support": 53
+        },
+        "pride": {
+          "precision": 0.909091,
+          "recall": 0.25,
+          "f1": 0.392157,
+          "support": 40
+        },
+        "relaxed": {
+          "precision": 0.752137,
+          "recall": 0.860636,
+          "f1": 0.802737,
+          "support": 409
+        },
+        "sadness": {
+          "precision": 0.632075,
+          "recall": 0.51145,
+          "f1": 0.565401,
+          "support": 131
+        },
+        "shame": {
+          "precision": 0.669065,
+          "recall": 0.788136,
+          "f1": 0.723735,
+          "support": 118
+        },
+        "surprise": {
+          "precision": 1.0,
+          "recall": 0.222222,
+          "f1": 0.363636,
+          "support": 9
+        }
+      },
+      "confusion_matrix": [
+        [
+          86,
+          12,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          2,
+          3,
+          0,
+          1,
+          4,
+          4,
+          0
+        ],
+        [
+          7,
+          607,
+          0,
+          0,
+          52,
+          3,
+          16,
+          0,
+          7,
+          12,
+          7,
+          0,
+          21,
+          6,
+          13,
+          0
+        ],
+        [
+          1,
+          8,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          15,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          23,
+          0,
+          0,
+          94,
+          0,
+          2,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          1,
+          2,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          95,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          19,
+          0,
+          1,
+          0
+        ],
+        [
+          9,
+          18,
+          0,
+          0,
+          2,
+          0,
+          94,
+          0,
+          4,
+          1,
+          0,
+          0,
+          2,
+          8,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          9,
+          0,
+          2,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          11,
+          0,
+          0,
+          6,
+          1,
+          1,
+          0,
+          89,
+          1,
+          2,
+          0,
+          0,
+          3,
+          1,
+          0
+        ],
+        [
+          7,
+          58,
+          0,
+          1,
+          1,
+          3,
+          7,
+          2,
+          1,
+          35,
+          12,
+          1,
+          30,
+          10,
+          9,
+          0
+        ],
+        [
+          2,
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          22,
+          0,
+          17,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          7,
+          0,
+          10,
+          18,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          9,
+          0,
+          0,
+          0,
+          15,
+          1,
+          5,
+          1,
+          10,
+          13,
+          0,
+          352,
+          3,
+          0,
+          0
+        ],
+        [
+          3,
+          12,
+          0,
+          0,
+          1,
+          1,
+          20,
+          0,
+          9,
+          6,
+          1,
+          0,
+          2,
+          67,
+          9,
+          0
+        ],
+        [
+          1,
+          11,
+          0,
+          0,
+          4,
+          0,
+          4,
+          0,
+          1,
+          2,
+          0,
+          0,
+          0,
+          2,
+          93,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2
+        ]
+      ]
+    },
+    "emotion_reference_report": "results/emotion_balanced_b1_20261015.json",
+    "profile": {
+      "thresholds": {
+        "personality_traits": 0.46,
+        "interests": 0.52,
+        "style": 0.4
+      },
+      "validation": {
+        "per_dimension": {
+          "personality_traits": {
+            "exact_match_accuracy": 0.391249,
+            "micro_f1": 0.304127,
+            "gold_positive_count": 1143,
+            "predicted_positive_count": 2007
+          },
+          "interests": {
+            "exact_match_accuracy": 0.612999,
+            "micro_f1": 0.213049,
+            "gold_positive_count": 643,
+            "predicted_positive_count": 859
+          },
+          "style": {
+            "exact_match_accuracy": 0.231521,
+            "micro_f1": 0.282764,
+            "gold_positive_count": 1333,
+            "predicted_positive_count": 2734
+          }
+        },
+        "profile_macro_exact_match_accuracy": 0.411923,
+        "empty_set_baseline": {
+          "per_dimension_exact_match_accuracy": {
+            "personality_traits": 0.618522,
+            "interests": 0.748938,
+            "style": 0.517417
+          },
+          "profile_macro_exact_match_accuracy": 0.628292
+        }
+      },
+      "empty_set_baseline": {
+        "per_dimension": {
+          "personality_traits": {
+            "exact_match_accuracy": 0.618522,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1143,
+            "predicted_positive_count": 0
+          },
+          "interests": {
+            "exact_match_accuracy": 0.748938,
+            "micro_f1": 0.0,
+            "gold_positive_count": 643,
+            "predicted_positive_count": 0
+          },
+          "style": {
+            "exact_match_accuracy": 0.517417,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1333,
+            "predicted_positive_count": 0
+          }
+        },
+        "profile_macro_exact_match_accuracy": 0.628292,
+        "empty_set_baseline": {
+          "per_dimension_exact_match_accuracy": {
+            "personality_traits": 0.618522,
+            "interests": 0.748938,
+            "style": 0.517417
+          },
+          "profile_macro_exact_match_accuracy": 0.628292
+        }
+      }
+    },
+    "history": [
+      {
+        "epoch": 1,
+        "calibration_macro_micro_f1": 0.254106,
+        "calibration_macro_exact_match": 0.352159,
+        "thresholds": {
+          "personality_traits": 0.42,
+          "interests": 0.44,
+          "style": 0.38
+        },
+        "validation_macro_micro_f1": 0.204247,
+        "validation_macro_exact_match": 0.336449
+      },
+      {
+        "epoch": 2,
+        "calibration_macro_micro_f1": 0.264155,
+        "calibration_macro_exact_match": 0.267257,
+        "thresholds": {
+          "personality_traits": 0.37,
+          "interests": 0.34,
+          "style": 0.3
+        },
+        "validation_macro_micro_f1": 0.19842,
+        "validation_macro_exact_match": 0.271594
+      },
+      {
+        "epoch": 3,
+        "calibration_macro_micro_f1": 0.264123,
+        "calibration_macro_exact_match": 0.320413,
+        "thresholds": {
+          "personality_traits": 0.33,
+          "interests": 0.39,
+          "style": 0.32
+        },
+        "validation_macro_micro_f1": 0.231915,
+        "validation_macro_exact_match": 0.31889
+      },
+      {
+        "epoch": 4,
+        "calibration_macro_micro_f1": 0.291571,
+        "calibration_macro_exact_match": 0.390427,
+        "thresholds": {
+          "personality_traits": 0.39,
+          "interests": 0.41,
+          "style": 0.43
+        },
+        "validation_macro_micro_f1": 0.237954,
+        "validation_macro_exact_match": 0.390683
+      },
+      {
+        "epoch": 5,
+        "calibration_macro_micro_f1": 0.284113,
+        "calibration_macro_exact_match": 0.390058,
+        "thresholds": {
+          "personality_traits": 0.43,
+          "interests": 0.43,
+          "style": 0.42
+        },
+        "validation_macro_micro_f1": 0.247446,
+        "validation_macro_exact_match": 0.389125
+      },
+      {
+        "epoch": 6,
+        "calibration_macro_micro_f1": 0.288499,
+        "calibration_macro_exact_match": 0.41196,
+        "thresholds": {
+          "personality_traits": 0.39,
+          "interests": 0.5,
+          "style": 0.49
+        },
+        "validation_macro_micro_f1": 0.246124,
+        "validation_macro_exact_match": 0.415463
+      },
+      {
+        "epoch": 7,
+        "calibration_macro_micro_f1": 0.282563,
+        "calibration_macro_exact_match": 0.422419,
+        "thresholds": {
+          "personality_traits": 0.46,
+          "interests": 0.42,
+          "style": 0.42
+        },
+        "validation_macro_micro_f1": 0.245538,
+        "validation_macro_exact_match": 0.40725
+      },
+      {
+        "epoch": 8,
+        "calibration_macro_micro_f1": 0.293212,
+        "calibration_macro_exact_match": 0.382552,
+        "thresholds": {
+          "personality_traits": 0.41,
+          "interests": 0.46,
+          "style": 0.4
+        },
+        "validation_macro_micro_f1": 0.254739,
+        "validation_macro_exact_match": 0.386151
+      },
+      {
+        "epoch": 9,
+        "calibration_macro_micro_f1": 0.278041,
+        "calibration_macro_exact_match": 0.385259,
+        "thresholds": {
+          "personality_traits": 0.32,
+          "interests": 0.42,
+          "style": 0.31
+        },
+        "validation_macro_micro_f1": 0.241469,
+        "validation_macro_exact_match": 0.381195
+      },
+      {
+        "epoch": 10,
+        "calibration_macro_micro_f1": 0.286001,
+        "calibration_macro_exact_match": 0.395718,
+        "thresholds": {
+          "personality_traits": 0.33,
+          "interests": 0.48,
+          "style": 0.4
+        },
+        "validation_macro_micro_f1": 0.248937,
+        "validation_macro_exact_match": 0.397338
+      },
+      {
+        "epoch": 11,
+        "calibration_macro_micro_f1": 0.294221,
+        "calibration_macro_exact_match": 0.384644,
+        "thresholds": {
+          "personality_traits": 0.38,
+          "interests": 0.45,
+          "style": 0.41
+        },
+        "validation_macro_micro_f1": 0.247518,
+        "validation_macro_exact_match": 0.391249
+      },
+      {
+        "epoch": 12,
+        "calibration_macro_micro_f1": 0.292109,
+        "calibration_macro_exact_match": 0.417128,
+        "thresholds": {
+          "personality_traits": 0.41,
+          "interests": 0.46,
+          "style": 0.37
+        },
+        "validation_macro_micro_f1": 0.245144,
+        "validation_macro_exact_match": 0.431464
+      },
+      {
+        "epoch": 13,
+        "calibration_macro_micro_f1": 0.279187,
+        "calibration_macro_exact_match": 0.362249,
+        "thresholds": {
+          "personality_traits": 0.38,
+          "interests": 0.4,
+          "style": 0.37
+        },
+        "validation_macro_micro_f1": 0.23945,
+        "validation_macro_exact_match": 0.358255
+      },
+      {
+        "epoch": 14,
+        "calibration_macro_micro_f1": 0.299106,
+        "calibration_macro_exact_match": 0.391411,
+        "thresholds": {
+          "personality_traits": 0.37,
+          "interests": 0.49,
+          "style": 0.39
+        },
+        "validation_macro_micro_f1": 0.258219,
+        "validation_macro_exact_match": 0.384027
+      },
+      {
+        "epoch": 15,
+        "calibration_macro_micro_f1": 0.274592,
+        "calibration_macro_exact_match": 0.390181,
+        "thresholds": {
+          "personality_traits": 0.38,
+          "interests": 0.39,
+          "style": 0.44
+        },
+        "validation_macro_micro_f1": 0.243266,
+        "validation_macro_exact_match": 0.402719
+      },
+      {
+        "epoch": 16,
+        "calibration_macro_micro_f1": 0.291662,
+        "calibration_macro_exact_match": 0.38206,
+        "thresholds": {
+          "personality_traits": 0.38,
+          "interests": 0.52,
+          "style": 0.36
+        },
+        "validation_macro_micro_f1": 0.260557,
+        "validation_macro_exact_match": 0.387567
+      },
+      {
+        "epoch": 17,
+        "calibration_macro_micro_f1": 0.304582,
+        "calibration_macro_exact_match": 0.377384,
+        "thresholds": {
+          "personality_traits": 0.41,
+          "interests": 0.51,
+          "style": 0.32
+        },
+        "validation_macro_micro_f1": 0.250772,
+        "validation_macro_exact_match": 0.376239
+      },
+      {
+        "epoch": 18,
+        "calibration_macro_micro_f1": 0.282337,
+        "calibration_macro_exact_match": 0.385628,
+        "thresholds": {
+          "personality_traits": 0.4,
+          "interests": 0.47,
+          "style": 0.36
+        },
+        "validation_macro_micro_f1": 0.231882,
+        "validation_macro_exact_match": 0.387284
+      },
+      {
+        "epoch": 19,
+        "calibration_macro_micro_f1": 0.286985,
+        "calibration_macro_exact_match": 0.434478,
+        "thresholds": {
+          "personality_traits": 0.48,
+          "interests": 0.53,
+          "style": 0.36
+        },
+        "validation_macro_micro_f1": 0.24386,
+        "validation_macro_exact_match": 0.44081
+      },
+      {
+        "epoch": 20,
+        "calibration_macro_micro_f1": 0.284836,
+        "calibration_macro_exact_match": 0.388335,
+        "thresholds": {
+          "personality_traits": 0.44,
+          "interests": 0.45,
+          "style": 0.37
+        },
+        "validation_macro_micro_f1": 0.245779,
+        "validation_macro_exact_match": 0.380629
+      },
+      {
+        "epoch": 21,
+        "calibration_macro_micro_f1": 0.291131,
+        "calibration_macro_exact_match": 0.398671,
+        "thresholds": {
+          "personality_traits": 0.39,
+          "interests": 0.54,
+          "style": 0.36
+        },
+        "validation_macro_micro_f1": 0.237912,
+        "validation_macro_exact_match": 0.394789
+      },
+      {
+        "epoch": 22,
+        "calibration_macro_micro_f1": 0.2981,
+        "calibration_macro_exact_match": 0.421066,
+        "thresholds": {
+          "personality_traits": 0.38,
+          "interests": 0.51,
+          "style": 0.4
+        },
+        "validation_macro_micro_f1": 0.258096,
+        "validation_macro_exact_match": 0.420844
+      },
+      {
+        "epoch": 23,
+        "calibration_macro_micro_f1": 0.281678,
+        "calibration_macro_exact_match": 0.32915,
+        "thresholds": {
+          "personality_traits": 0.37,
+          "interests": 0.37,
+          "style": 0.32
+        },
+        "validation_macro_micro_f1": 0.24186,
+        "validation_macro_exact_match": 0.342962
+      },
+      {
+        "epoch": 24,
+        "calibration_macro_micro_f1": 0.269274,
+        "calibration_macro_exact_match": 0.3764,
+        "thresholds": {
+          "personality_traits": 0.37,
+          "interests": 0.49,
+          "style": 0.45
+        },
+        "validation_macro_micro_f1": 0.239737,
+        "validation_macro_exact_match": 0.36746
+      },
+      {
+        "epoch": 25,
+        "calibration_macro_micro_f1": 0.281193,
+        "calibration_macro_exact_match": 0.363234,
+        "thresholds": {
+          "personality_traits": 0.36,
+          "interests": 0.39,
+          "style": 0.39
+        },
+        "validation_macro_micro_f1": 0.252204,
+        "validation_macro_exact_match": 0.372699
+      },
+      {
+        "epoch": 26,
+        "calibration_macro_micro_f1": 0.292346,
+        "calibration_macro_exact_match": 0.41922,
+        "thresholds": {
+          "personality_traits": 0.42,
+          "interests": 0.54,
+          "style": 0.36
+        },
+        "validation_macro_micro_f1": 0.249992,
+        "validation_macro_exact_match": 0.422543
+      },
+      {
+        "epoch": 27,
+        "calibration_macro_micro_f1": 0.293893,
+        "calibration_macro_exact_match": 0.361511,
+        "thresholds": {
+          "personality_traits": 0.42,
+          "interests": 0.52,
+          "style": 0.31
+        },
+        "validation_macro_micro_f1": 0.248533,
+        "validation_macro_exact_match": 0.364628
+      },
+      {
+        "epoch": 28,
+        "calibration_macro_micro_f1": 0.28877,
+        "calibration_macro_exact_match": 0.356835,
+        "thresholds": {
+          "personality_traits": 0.41,
+          "interests": 0.37,
+          "style": 0.41
+        },
+        "validation_macro_micro_f1": 0.255118,
+        "validation_macro_exact_match": 0.344237
+      },
+      {
+        "epoch": 29,
+        "calibration_macro_micro_f1": 0.284485,
+        "calibration_macro_exact_match": 0.411591,
+        "thresholds": {
+          "personality_traits": 0.38,
+          "interests": 0.55,
+          "style": 0.31
+        },
+        "validation_macro_micro_f1": 0.23317,
+        "validation_macro_exact_match": 0.422968
+      },
+      {
+        "epoch": 30,
+        "calibration_macro_micro_f1": 0.290116,
+        "calibration_macro_exact_match": 0.390427,
+        "thresholds": {
+          "personality_traits": 0.39,
+          "interests": 0.43,
+          "style": 0.36
+        },
+        "validation_macro_micro_f1": 0.244954,
+        "validation_macro_exact_match": 0.390966
+      },
+      {
+        "epoch": 31,
+        "calibration_macro_micro_f1": 0.278448,
+        "calibration_macro_exact_match": 0.348837,
+        "thresholds": {
+          "personality_traits": 0.38,
+          "interests": 0.46,
+          "style": 0.36
+        },
+        "validation_macro_micro_f1": 0.243132,
+        "validation_macro_exact_match": 0.373549
+      },
+      {
+        "epoch": 32,
+        "calibration_macro_micro_f1": 0.298142,
+        "calibration_macro_exact_match": 0.40507,
+        "thresholds": {
+          "personality_traits": 0.38,
+          "interests": 0.51,
+          "style": 0.45
+        },
+        "validation_macro_micro_f1": 0.263615,
+        "validation_macro_exact_match": 0.417304
+      },
+      {
+        "epoch": 33,
+        "calibration_macro_micro_f1": 0.279513,
+        "calibration_macro_exact_match": 0.415159,
+        "thresholds": {
+          "personality_traits": 0.42,
+          "interests": 0.56,
+          "style": 0.33
+        },
+        "validation_macro_micro_f1": 0.240405,
+        "validation_macro_exact_match": 0.414613
+      },
+      {
+        "epoch": 34,
+        "calibration_macro_micro_f1": 0.26543,
+        "calibration_macro_exact_match": 0.382675,
+        "thresholds": {
+          "personality_traits": 0.33,
+          "interests": 0.57,
+          "style": 0.33
+        },
+        "validation_macro_micro_f1": 0.227399,
+        "validation_macro_exact_match": 0.388983
+      },
+      {
+        "epoch": 35,
+        "calibration_macro_micro_f1": 0.291335,
+        "calibration_macro_exact_match": 0.389566,
+        "thresholds": {
+          "personality_traits": 0.42,
+          "interests": 0.47,
+          "style": 0.39
+        },
+        "validation_macro_micro_f1": 0.264405,
+        "validation_macro_exact_match": 0.411215
+      },
+      {
+        "epoch": 36,
+        "calibration_macro_micro_f1": 0.28758,
+        "calibration_macro_exact_match": 0.375907,
+        "thresholds": {
+          "personality_traits": 0.36,
+          "interests": 0.39,
+          "style": 0.36
+        },
+        "validation_macro_micro_f1": 0.242334,
+        "validation_macro_exact_match": 0.38247
+      },
+      {
+        "epoch": 37,
+        "calibration_macro_micro_f1": 0.274163,
+        "calibration_macro_exact_match": 0.381568,
+        "thresholds": {
+          "personality_traits": 0.36,
+          "interests": 0.51,
+          "style": 0.37
+        },
+        "validation_macro_micro_f1": 0.234487,
+        "validation_macro_exact_match": 0.388134
+      },
+      {
+        "epoch": 38,
+        "calibration_macro_micro_f1": 0.303825,
+        "calibration_macro_exact_match": 0.409991,
+        "thresholds": {
+          "personality_traits": 0.44,
+          "interests": 0.45,
+          "style": 0.33
+        },
+        "validation_macro_micro_f1": 0.251558,
+        "validation_macro_exact_match": 0.423534
+      },
+      {
+        "epoch": 39,
+        "calibration_macro_micro_f1": 0.304457,
+        "calibration_macro_exact_match": 0.427956,
+        "thresholds": {
+          "personality_traits": 0.44,
+          "interests": 0.52,
+          "style": 0.37
+        },
+        "validation_macro_micro_f1": 0.271227,
+        "validation_macro_exact_match": 0.436703
+      },
+      {
+        "epoch": 40,
+        "calibration_macro_micro_f1": 0.294725,
+        "calibration_macro_exact_match": 0.364833,
+        "thresholds": {
+          "personality_traits": 0.47,
+          "interests": 0.44,
+          "style": 0.34
+        },
+        "validation_macro_micro_f1": 0.244176,
+        "validation_macro_exact_match": 0.369017
+      },
+      {
+        "epoch": 41,
+        "calibration_macro_micro_f1": 0.308679,
+        "calibration_macro_exact_match": 0.409868,
+        "thresholds": {
+          "personality_traits": 0.46,
+          "interests": 0.52,
+          "style": 0.4
+        },
+        "validation_macro_micro_f1": 0.266647,
+        "validation_macro_exact_match": 0.411923
+      },
+      {
+        "epoch": 42,
+        "calibration_macro_micro_f1": 0.27768,
+        "calibration_macro_exact_match": 0.382675,
+        "thresholds": {
+          "personality_traits": 0.33,
+          "interests": 0.36,
+          "style": 0.44
+        },
+        "validation_macro_micro_f1": 0.237588,
+        "validation_macro_exact_match": 0.38516
+      },
+      {
+        "epoch": 43,
+        "calibration_macro_micro_f1": 0.284931,
+        "calibration_macro_exact_match": 0.386366,
+        "thresholds": {
+          "personality_traits": 0.42,
+          "interests": 0.47,
+          "style": 0.3
+        },
+        "validation_macro_micro_f1": 0.241048,
+        "validation_macro_exact_match": 0.393939
+      },
+      {
+        "epoch": 44,
+        "calibration_macro_micro_f1": 0.282906,
+        "calibration_macro_exact_match": 0.353636,
+        "thresholds": {
+          "personality_traits": 0.36,
+          "interests": 0.45,
+          "style": 0.37
+        },
+        "validation_macro_micro_f1": 0.24644,
+        "validation_macro_exact_match": 0.35514
+      },
+      {
+        "epoch": 45,
+        "calibration_macro_micro_f1": 0.284138,
+        "calibration_macro_exact_match": 0.37357,
+        "thresholds": {
+          "personality_traits": 0.37,
+          "interests": 0.46,
+          "style": 0.39
+        },
+        "validation_macro_micro_f1": 0.246747,
+        "validation_macro_exact_match": 0.372133
+      },
+      {
+        "epoch": 46,
+        "calibration_macro_micro_f1": 0.30516,
+        "calibration_macro_exact_match": 0.387351,
+        "thresholds": {
+          "personality_traits": 0.39,
+          "interests": 0.5,
+          "style": 0.3
+        },
+        "validation_macro_micro_f1": 0.250488,
+        "validation_macro_exact_match": 0.384169
+      },
+      {
+        "epoch": 47,
+        "calibration_macro_micro_f1": 0.286337,
+        "calibration_macro_exact_match": 0.37037,
+        "thresholds": {
+          "personality_traits": 0.4,
+          "interests": 0.4,
+          "style": 0.39
+        },
+        "validation_macro_micro_f1": 0.252193,
+        "validation_macro_exact_match": 0.362928
+      },
+      {
+        "epoch": 48,
+        "calibration_macro_micro_f1": 0.2923,
+        "calibration_macro_exact_match": 0.393011,
+        "thresholds": {
+          "personality_traits": 0.4,
+          "interests": 0.4,
+          "style": 0.41
+        },
+        "validation_macro_micro_f1": 0.242768,
+        "validation_macro_exact_match": 0.383744
+      },
+      {
+        "epoch": 49,
+        "calibration_macro_micro_f1": 0.286522,
+        "calibration_macro_exact_match": 0.394364,
+        "thresholds": {
+          "personality_traits": 0.41,
+          "interests": 0.36,
+          "style": 0.38
+        },
+        "validation_macro_micro_f1": 0.235604,
+        "validation_macro_exact_match": 0.394364
+      },
+      {
+        "epoch": 50,
+        "calibration_macro_micro_f1": 0.293153,
+        "calibration_macro_exact_match": 0.391288,
+        "thresholds": {
+          "personality_traits": 0.47,
+          "interests": 0.42,
+          "style": 0.4
+        },
+        "validation_macro_micro_f1": 0.239099,
+        "validation_macro_exact_match": 0.389975
+      },
+      {
+        "epoch": 51,
+        "calibration_macro_micro_f1": 0.291372,
+        "calibration_macro_exact_match": 0.396948,
+        "thresholds": {
+          "personality_traits": 0.43,
+          "interests": 0.56,
+          "style": 0.37
+        },
+        "validation_macro_micro_f1": 0.259698,
+        "validation_macro_exact_match": 0.410507
+      },
+      {
+        "epoch": 52,
+        "calibration_macro_micro_f1": 0.305132,
+        "calibration_macro_exact_match": 0.396948,
+        "thresholds": {
+          "personality_traits": 0.45,
+          "interests": 0.54,
+          "style": 0.32
+        },
+        "validation_macro_micro_f1": 0.258587,
+        "validation_macro_exact_match": 0.399179
+      },
+      {
+        "epoch": 53,
+        "calibration_macro_micro_f1": 0.290985,
+        "calibration_macro_exact_match": 0.358927,
+        "thresholds": {
+          "personality_traits": 0.4,
+          "interests": 0.47,
+          "style": 0.32
+        },
+        "validation_macro_micro_f1": 0.243698,
+        "validation_macro_exact_match": 0.377372
+      },
+      {
+        "epoch": 54,
+        "calibration_macro_micro_f1": 0.291889,
+        "calibration_macro_exact_match": 0.405193,
+        "thresholds": {
+          "personality_traits": 0.47,
+          "interests": 0.57,
+          "style": 0.37
+        },
+        "validation_macro_micro_f1": 0.247368,
+        "validation_macro_exact_match": 0.404843
+      },
+      {
+        "epoch": 55,
+        "calibration_macro_micro_f1": 0.282003,
+        "calibration_macro_exact_match": 0.369386,
+        "thresholds": {
+          "personality_traits": 0.4,
+          "interests": 0.39,
+          "style": 0.34
+        },
+        "validation_macro_micro_f1": 0.246574,
+        "validation_macro_exact_match": 0.365619
+      },
+      {
+        "epoch": 56,
+        "calibration_macro_micro_f1": 0.292492,
+        "calibration_macro_exact_match": 0.397195,
+        "thresholds": {
+          "personality_traits": 0.43,
+          "interests": 0.54,
+          "style": 0.36
+        },
+        "validation_macro_micro_f1": 0.254881,
+        "validation_macro_exact_match": 0.416029
+      },
+      {
+        "epoch": 57,
+        "calibration_macro_micro_f1": 0.297562,
+        "calibration_macro_exact_match": 0.397071,
+        "thresholds": {
+          "personality_traits": 0.46,
+          "interests": 0.62,
+          "style": 0.33
+        },
+        "validation_macro_micro_f1": 0.241374,
+        "validation_macro_exact_match": 0.398187
+      },
+      {
+        "epoch": 58,
+        "calibration_macro_micro_f1": 0.300378,
+        "calibration_macro_exact_match": 0.397564,
+        "thresholds": {
+          "personality_traits": 0.41,
+          "interests": 0.51,
+          "style": 0.3
+        },
+        "validation_macro_micro_f1": 0.250065,
+        "validation_macro_exact_match": 0.406117
+      },
+      {
+        "epoch": 59,
+        "calibration_macro_micro_f1": 0.297167,
+        "calibration_macro_exact_match": 0.35905,
+        "thresholds": {
+          "personality_traits": 0.33,
+          "interests": 0.38,
+          "style": 0.37
+        },
+        "validation_macro_micro_f1": 0.254153,
+        "validation_macro_exact_match": 0.359813
+      },
+      {
+        "epoch": 60,
+        "calibration_macro_micro_f1": 0.301977,
+        "calibration_macro_exact_match": 0.390427,
+        "thresholds": {
+          "personality_traits": 0.42,
+          "interests": 0.44,
+          "style": 0.42
+        },
+        "validation_macro_micro_f1": 0.257125,
+        "validation_macro_exact_match": 0.383744
+      }
+    ],
+    "experiment_elapsed_seconds": 884.562,
+    "checkpoint": "weights/profile_long_context_b1_20261015"
+  },
+  "weighted_512_exact_calibration": {
+    "status": "threshold calibration evaluation; checkpoint weights unchanged",
+    "method": {
+      "objective": "per-dimension exact-match accuracy",
+      "threshold_source": "training-only 15% conversation-disjoint calibration split",
+      "validation_used_for_selection": false,
+      "max_length": 512,
+      "seed": 20261015,
+      "thresholds": {
+        "personality_traits": 0.84,
+        "interests": 0.94,
+        "style": 0.91
+      }
+    },
+    "data": {
+      "train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+      "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+      "train_samples": 18653,
+      "calibration_samples": 2709,
+      "validation_samples": 2354,
+      "conversation_overlap": 0
+    },
+    "calibration": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.590993,
+          "micro_f1": 0.100119,
+          "gold_positive_count": 1530,
+          "predicted_positive_count": 148
+        },
+        "interests": {
+          "exact_match_accuracy": 0.710963,
+          "micro_f1": 0.059081,
+          "gold_positive_count": 858,
+          "predicted_positive_count": 56
+        },
+        "style": {
+          "exact_match_accuracy": 0.507198,
+          "micro_f1": 0.027431,
+          "gold_positive_count": 1559,
+          "predicted_positive_count": 45
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.603052,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.589516,
+          "interests": 0.710594,
+          "style": 0.505722
+        },
+        "profile_macro_exact_match_accuracy": 0.601944
+      }
+    },
+    "validation": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.610875,
+          "micro_f1": 0.046774,
+          "gold_positive_count": 1143,
+          "predicted_positive_count": 97
+        },
+        "interests": {
+          "exact_match_accuracy": 0.750212,
+          "micro_f1": 0.03609,
+          "gold_positive_count": 643,
+          "predicted_positive_count": 22
+        },
+        "style": {
+          "exact_match_accuracy": 0.518267,
+          "micro_f1": 0.021962,
+          "gold_positive_count": 1333,
+          "predicted_positive_count": 33
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.626451,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.618522,
+          "interests": 0.748938,
+          "style": 0.517417
+        },
+        "profile_macro_exact_match_accuracy": 0.628292
+      }
+    },
+    "empty_set_baseline": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.618522,
+          "micro_f1": 0.0,
+          "gold_positive_count": 1143,
+          "predicted_positive_count": 0
+        },
+        "interests": {
+          "exact_match_accuracy": 0.748938,
+          "micro_f1": 0.0,
+          "gold_positive_count": 643,
+          "predicted_positive_count": 0
+        },
+        "style": {
+          "exact_match_accuracy": 0.517417,
+          "micro_f1": 0.0,
+          "gold_positive_count": 1333,
+          "predicted_positive_count": 0
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.628292,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.618522,
+          "interests": 0.748938,
+          "style": 0.517417
+        },
+        "profile_macro_exact_match_accuracy": 0.628292
+      },
+      "calibration": {
+        "per_dimension": {
+          "personality_traits": {
+            "exact_match_accuracy": 0.589516,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1530,
+            "predicted_positive_count": 0
+          },
+          "interests": {
+            "exact_match_accuracy": 0.710594,
+            "micro_f1": 0.0,
+            "gold_positive_count": 858,
+            "predicted_positive_count": 0
+          },
+          "style": {
+            "exact_match_accuracy": 0.505722,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1559,
+            "predicted_positive_count": 0
+          }
+        },
+        "profile_macro_exact_match_accuracy": 0.601944,
+        "empty_set_baseline": {
+          "per_dimension_exact_match_accuracy": {
+            "personality_traits": 0.589516,
+            "interests": 0.710594,
+            "style": 0.505722
+          },
+          "profile_macro_exact_match_accuracy": 0.601944
+        }
+      }
+    },
+    "elapsed_seconds": 185.388,
+    "checkpoint": "weights/profile_long_context_b1_20261015"
+  },
+  "unweighted_512_training": {
+    "status": "profile heads trained; emotion checkpoint preserved",
+    "device": "mps",
+    "runtime": {
+      "python": "3.12.14",
+      "torch": "2.14.0",
+      "transformers": "5.17.0",
+      "mps_available": true
+    },
+    "method": {
+      "encoder": "frozen from standalone emotion checkpoint",
+      "emotion_head": "preserved without modification",
+      "profile_heads": "three linear heads trained with capped inverse-frequency positive weights; exponent=0",
+      "positive_weight_exponent": 0.0,
+      "calibration": "training-only 15% conversation-disjoint split; thresholds selected by per-dimension micro-F1",
+      "epochs": 60,
+      "selected_epoch": 32,
+      "learning_rate": 0.01,
+      "batch_size": 512,
+      "seed": 20261015
+    },
+    "data": {
+      "train_path": "data/processed/b1_full_v1/classification_train.jsonl",
+      "train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+      "train_samples": 18653,
+      "fit_samples": 15944,
+      "calibration_samples": 2709,
+      "calibration_conversations": 1249,
+      "validation_path": "data/processed/b1_full_v1/classification_val.jsonl",
+      "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+      "validation_samples": 2354,
+      "conversation_overlap": 0
+    },
+    "emotion_reference_metrics": {
+      "accuracy": 0.709431,
+      "macro_f1": 0.573752,
+      "labels": [
+        "anger",
+        "anxiety",
+        "care",
+        "disgust",
+        "fear",
+        "gratitude",
+        "helplessness",
+        "joy",
+        "loneliness",
+        "mixed",
+        "neutral",
+        "pride",
+        "relaxed",
+        "sadness",
+        "shame",
+        "surprise"
+      ],
+      "per_class": {
+        "anger": {
+          "precision": 0.716667,
+          "recall": 0.747826,
+          "f1": 0.731915,
+          "support": 115
+        },
+        "anxiety": {
+          "precision": 0.774235,
+          "recall": 0.808256,
+          "f1": 0.790879,
+          "support": 751
+        },
+        "care": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 11
+        },
+        "disgust": {
+          "precision": 0.9375,
+          "recall": 0.714286,
+          "f1": 0.810811,
+          "support": 21
+        },
+        "fear": {
+          "precision": 0.569697,
+          "recall": 0.758065,
+          "f1": 0.650519,
+          "support": 124
+        },
+        "gratitude": {
+          "precision": 0.778689,
+          "recall": 0.805085,
+          "f1": 0.791667,
+          "support": 118
+        },
+        "helplessness": {
+          "precision": 0.648276,
+          "recall": 0.661972,
+          "f1": 0.655052,
+          "support": 142
+        },
+        "joy": {
+          "precision": 0.5,
+          "recall": 0.45,
+          "f1": 0.473684,
+          "support": 20
+        },
+        "loneliness": {
+          "precision": 0.767241,
+          "recall": 0.773913,
+          "f1": 0.770563,
+          "support": 115
+        },
+        "mixed": {
+          "precision": 0.432099,
+          "recall": 0.19774,
+          "f1": 0.271318,
+          "support": 177
+        },
+        "neutral": {
+          "precision": 0.360656,
+          "recall": 0.415094,
+          "f1": 0.385965,
+          "support": 53
+        },
+        "pride": {
+          "precision": 0.909091,
+          "recall": 0.25,
+          "f1": 0.392157,
+          "support": 40
+        },
+        "relaxed": {
+          "precision": 0.752137,
+          "recall": 0.860636,
+          "f1": 0.802737,
+          "support": 409
+        },
+        "sadness": {
+          "precision": 0.632075,
+          "recall": 0.51145,
+          "f1": 0.565401,
+          "support": 131
+        },
+        "shame": {
+          "precision": 0.669065,
+          "recall": 0.788136,
+          "f1": 0.723735,
+          "support": 118
+        },
+        "surprise": {
+          "precision": 1.0,
+          "recall": 0.222222,
+          "f1": 0.363636,
+          "support": 9
+        }
+      },
+      "confusion_matrix": [
+        [
+          86,
+          12,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          2,
+          3,
+          0,
+          1,
+          4,
+          4,
+          0
+        ],
+        [
+          7,
+          607,
+          0,
+          0,
+          52,
+          3,
+          16,
+          0,
+          7,
+          12,
+          7,
+          0,
+          21,
+          6,
+          13,
+          0
+        ],
+        [
+          1,
+          8,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          15,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          23,
+          0,
+          0,
+          94,
+          0,
+          2,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          1,
+          2,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          95,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          19,
+          0,
+          1,
+          0
+        ],
+        [
+          9,
+          18,
+          0,
+          0,
+          2,
+          0,
+          94,
+          0,
+          4,
+          1,
+          0,
+          0,
+          2,
+          8,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          9,
+          0,
+          2,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          11,
+          0,
+          0,
+          6,
+          1,
+          1,
+          0,
+          89,
+          1,
+          2,
+          0,
+          0,
+          3,
+          1,
+          0
+        ],
+        [
+          7,
+          58,
+          0,
+          1,
+          1,
+          3,
+          7,
+          2,
+          1,
+          35,
+          12,
+          1,
+          30,
+          10,
+          9,
+          0
+        ],
+        [
+          2,
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          22,
+          0,
+          17,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          7,
+          0,
+          10,
+          18,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          9,
+          0,
+          0,
+          0,
+          15,
+          1,
+          5,
+          1,
+          10,
+          13,
+          0,
+          352,
+          3,
+          0,
+          0
+        ],
+        [
+          3,
+          12,
+          0,
+          0,
+          1,
+          1,
+          20,
+          0,
+          9,
+          6,
+          1,
+          0,
+          2,
+          67,
+          9,
+          0
+        ],
+        [
+          1,
+          11,
+          0,
+          0,
+          4,
+          0,
+          4,
+          0,
+          1,
+          2,
+          0,
+          0,
+          0,
+          2,
+          93,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2
+        ]
+      ]
+    },
+    "emotion_reference_report": "results/emotion_balanced_b1_20261015.json",
+    "profile": {
+      "thresholds": {
+        "personality_traits": 0.25,
+        "interests": 0.15,
+        "style": 0.2
+      },
+      "validation": {
+        "per_dimension": {
+          "personality_traits": {
+            "exact_match_accuracy": 0.429482,
+            "micro_f1": 0.300964,
+            "gold_positive_count": 1143,
+            "predicted_positive_count": 1555
+          },
+          "interests": {
+            "exact_match_accuracy": 0.587935,
+            "micro_f1": 0.196721,
+            "gold_positive_count": 643,
+            "predicted_positive_count": 943
+          },
+          "style": {
+            "exact_match_accuracy": 0.233645,
+            "micro_f1": 0.336806,
+            "gold_positive_count": 1333,
+            "predicted_positive_count": 2699
+          }
+        },
+        "profile_macro_exact_match_accuracy": 0.417021,
+        "empty_set_baseline": {
+          "per_dimension_exact_match_accuracy": {
+            "personality_traits": 0.618522,
+            "interests": 0.748938,
+            "style": 0.517417
+          },
+          "profile_macro_exact_match_accuracy": 0.628292
+        }
+      },
+      "empty_set_baseline": {
+        "per_dimension": {
+          "personality_traits": {
+            "exact_match_accuracy": 0.618522,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1143,
+            "predicted_positive_count": 0
+          },
+          "interests": {
+            "exact_match_accuracy": 0.748938,
+            "micro_f1": 0.0,
+            "gold_positive_count": 643,
+            "predicted_positive_count": 0
+          },
+          "style": {
+            "exact_match_accuracy": 0.517417,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1333,
+            "predicted_positive_count": 0
+          }
+        },
+        "profile_macro_exact_match_accuracy": 0.628292,
+        "empty_set_baseline": {
+          "per_dimension_exact_match_accuracy": {
+            "personality_traits": 0.618522,
+            "interests": 0.748938,
+            "style": 0.517417
+          },
+          "profile_macro_exact_match_accuracy": 0.628292
+        }
+      }
+    },
+    "history": [
+      {
+        "epoch": 1,
+        "calibration_macro_micro_f1": 0.258724,
+        "calibration_macro_exact_match": 0.268242,
+        "thresholds": {
+          "personality_traits": 0.22,
+          "interests": 0.07,
+          "style": 0.18
+        },
+        "validation_macro_micro_f1": 0.223622,
+        "validation_macro_exact_match": 0.248796
+      },
+      {
+        "epoch": 2,
+        "calibration_macro_micro_f1": 0.281671,
+        "calibration_macro_exact_match": 0.314753,
+        "thresholds": {
+          "personality_traits": 0.2,
+          "interests": 0.12,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.237363,
+        "validation_macro_exact_match": 0.32682
+      },
+      {
+        "epoch": 3,
+        "calibration_macro_micro_f1": 0.299172,
+        "calibration_macro_exact_match": 0.332349,
+        "thresholds": {
+          "personality_traits": 0.18,
+          "interests": 0.1,
+          "style": 0.16
+        },
+        "validation_macro_micro_f1": 0.25584,
+        "validation_macro_exact_match": 0.328519
+      },
+      {
+        "epoch": 4,
+        "calibration_macro_micro_f1": 0.305926,
+        "calibration_macro_exact_match": 0.385259,
+        "thresholds": {
+          "personality_traits": 0.26,
+          "interests": 0.11,
+          "style": 0.21
+        },
+        "validation_macro_micro_f1": 0.257157,
+        "validation_macro_exact_match": 0.392523
+      },
+      {
+        "epoch": 5,
+        "calibration_macro_micro_f1": 0.302018,
+        "calibration_macro_exact_match": 0.366556,
+        "thresholds": {
+          "personality_traits": 0.27,
+          "interests": 0.12,
+          "style": 0.18
+        },
+        "validation_macro_micro_f1": 0.269898,
+        "validation_macro_exact_match": 0.365619
+      },
+      {
+        "epoch": 6,
+        "calibration_macro_micro_f1": 0.314896,
+        "calibration_macro_exact_match": 0.354866,
+        "thresholds": {
+          "personality_traits": 0.2,
+          "interests": 0.15,
+          "style": 0.18
+        },
+        "validation_macro_micro_f1": 0.264972,
+        "validation_macro_exact_match": 0.347352
+      },
+      {
+        "epoch": 7,
+        "calibration_macro_micro_f1": 0.313199,
+        "calibration_macro_exact_match": 0.419589,
+        "thresholds": {
+          "personality_traits": 0.23,
+          "interests": 0.14,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.263854,
+        "validation_macro_exact_match": 0.406259
+      },
+      {
+        "epoch": 8,
+        "calibration_macro_micro_f1": 0.31405,
+        "calibration_macro_exact_match": 0.399286,
+        "thresholds": {
+          "personality_traits": 0.22,
+          "interests": 0.15,
+          "style": 0.22
+        },
+        "validation_macro_micro_f1": 0.275576,
+        "validation_macro_exact_match": 0.395214
+      },
+      {
+        "epoch": 9,
+        "calibration_macro_micro_f1": 0.31057,
+        "calibration_macro_exact_match": 0.406792,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.12,
+          "style": 0.13
+        },
+        "validation_macro_micro_f1": 0.26548,
+        "validation_macro_exact_match": 0.398329
+      },
+      {
+        "epoch": 10,
+        "calibration_macro_micro_f1": 0.303565,
+        "calibration_macro_exact_match": 0.372216,
+        "thresholds": {
+          "personality_traits": 0.13,
+          "interests": 0.15,
+          "style": 0.22
+        },
+        "validation_macro_micro_f1": 0.273347,
+        "validation_macro_exact_match": 0.377938
+      },
+      {
+        "epoch": 11,
+        "calibration_macro_micro_f1": 0.3168,
+        "calibration_macro_exact_match": 0.394857,
+        "thresholds": {
+          "personality_traits": 0.19,
+          "interests": 0.16,
+          "style": 0.2
+        },
+        "validation_macro_micro_f1": 0.282586,
+        "validation_macro_exact_match": 0.405976
+      },
+      {
+        "epoch": 12,
+        "calibration_macro_micro_f1": 0.319761,
+        "calibration_macro_exact_match": 0.43054,
+        "thresholds": {
+          "personality_traits": 0.22,
+          "interests": 0.16,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.28045,
+        "validation_macro_exact_match": 0.439252
+      },
+      {
+        "epoch": 13,
+        "calibration_macro_micro_f1": 0.316818,
+        "calibration_macro_exact_match": 0.430663,
+        "thresholds": {
+          "personality_traits": 0.25,
+          "interests": 0.13,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.263819,
+        "validation_macro_exact_match": 0.414755
+      },
+      {
+        "epoch": 14,
+        "calibration_macro_micro_f1": 0.317377,
+        "calibration_macro_exact_match": 0.399532,
+        "thresholds": {
+          "personality_traits": 0.24,
+          "interests": 0.16,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.274003,
+        "validation_macro_exact_match": 0.394223
+      },
+      {
+        "epoch": 15,
+        "calibration_macro_micro_f1": 0.305286,
+        "calibration_macro_exact_match": 0.40753,
+        "thresholds": {
+          "personality_traits": 0.18,
+          "interests": 0.14,
+          "style": 0.21
+        },
+        "validation_macro_micro_f1": 0.277347,
+        "validation_macro_exact_match": 0.414897
+      },
+      {
+        "epoch": 16,
+        "calibration_macro_micro_f1": 0.315136,
+        "calibration_macro_exact_match": 0.400148,
+        "thresholds": {
+          "personality_traits": 0.22,
+          "interests": 0.13,
+          "style": 0.2
+        },
+        "validation_macro_micro_f1": 0.277473,
+        "validation_macro_exact_match": 0.395214
+      },
+      {
+        "epoch": 17,
+        "calibration_macro_micro_f1": 0.322035,
+        "calibration_macro_exact_match": 0.445675,
+        "thresholds": {
+          "personality_traits": 0.24,
+          "interests": 0.21,
+          "style": 0.21
+        },
+        "validation_macro_micro_f1": 0.273342,
+        "validation_macro_exact_match": 0.452421
+      },
+      {
+        "epoch": 18,
+        "calibration_macro_micro_f1": 0.318051,
+        "calibration_macro_exact_match": 0.464378,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.19,
+          "style": 0.23
+        },
+        "validation_macro_micro_f1": 0.255462,
+        "validation_macro_exact_match": 0.454404
+      },
+      {
+        "epoch": 19,
+        "calibration_macro_micro_f1": 0.319017,
+        "calibration_macro_exact_match": 0.399655,
+        "thresholds": {
+          "personality_traits": 0.26,
+          "interests": 0.13,
+          "style": 0.15
+        },
+        "validation_macro_micro_f1": 0.275925,
+        "validation_macro_exact_match": 0.400736
+      },
+      {
+        "epoch": 20,
+        "calibration_macro_micro_f1": 0.318382,
+        "calibration_macro_exact_match": 0.425618,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.15,
+          "style": 0.23
+        },
+        "validation_macro_micro_f1": 0.269397,
+        "validation_macro_exact_match": 0.405551
+      },
+      {
+        "epoch": 21,
+        "calibration_macro_micro_f1": 0.324358,
+        "calibration_macro_exact_match": 0.456257,
+        "thresholds": {
+          "personality_traits": 0.27,
+          "interests": 0.18,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.270599,
+        "validation_macro_exact_match": 0.450439
+      },
+      {
+        "epoch": 22,
+        "calibration_macro_micro_f1": 0.329992,
+        "calibration_macro_exact_match": 0.416759,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.16,
+          "style": 0.21
+        },
+        "validation_macro_micro_f1": 0.283885,
+        "validation_macro_exact_match": 0.418862
+      },
+      {
+        "epoch": 23,
+        "calibration_macro_micro_f1": 0.31695,
+        "calibration_macro_exact_match": 0.385136,
+        "thresholds": {
+          "personality_traits": 0.18,
+          "interests": 0.13,
+          "style": 0.16
+        },
+        "validation_macro_micro_f1": 0.277623,
+        "validation_macro_exact_match": 0.391249
+      },
+      {
+        "epoch": 24,
+        "calibration_macro_micro_f1": 0.297373,
+        "calibration_macro_exact_match": 0.367909,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.11,
+          "style": 0.24
+        },
+        "validation_macro_micro_f1": 0.269124,
+        "validation_macro_exact_match": 0.366044
+      },
+      {
+        "epoch": 25,
+        "calibration_macro_micro_f1": 0.311462,
+        "calibration_macro_exact_match": 0.40064,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.13,
+          "style": 0.17
+        },
+        "validation_macro_micro_f1": 0.280926,
+        "validation_macro_exact_match": 0.407816
+      },
+      {
+        "epoch": 26,
+        "calibration_macro_micro_f1": 0.324959,
+        "calibration_macro_exact_match": 0.432509,
+        "thresholds": {
+          "personality_traits": 0.18,
+          "interests": 0.18,
+          "style": 0.2
+        },
+        "validation_macro_micro_f1": 0.273309,
+        "validation_macro_exact_match": 0.423251
+      },
+      {
+        "epoch": 27,
+        "calibration_macro_micro_f1": 0.322711,
+        "calibration_macro_exact_match": 0.448013,
+        "thresholds": {
+          "personality_traits": 0.28,
+          "interests": 0.21,
+          "style": 0.21
+        },
+        "validation_macro_micro_f1": 0.269204,
+        "validation_macro_exact_match": 0.451855
+      },
+      {
+        "epoch": 28,
+        "calibration_macro_micro_f1": 0.31911,
+        "calibration_macro_exact_match": 0.379353,
+        "thresholds": {
+          "personality_traits": 0.19,
+          "interests": 0.15,
+          "style": 0.2
+        },
+        "validation_macro_micro_f1": 0.284685,
+        "validation_macro_exact_match": 0.379071
+      },
+      {
+        "epoch": 29,
+        "calibration_macro_micro_f1": 0.319488,
+        "calibration_macro_exact_match": 0.425249,
+        "thresholds": {
+          "personality_traits": 0.18,
+          "interests": 0.17,
+          "style": 0.18
+        },
+        "validation_macro_micro_f1": 0.267495,
+        "validation_macro_exact_match": 0.426083
+      },
+      {
+        "epoch": 30,
+        "calibration_macro_micro_f1": 0.324113,
+        "calibration_macro_exact_match": 0.424757,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.17,
+          "style": 0.17
+        },
+        "validation_macro_micro_f1": 0.279393,
+        "validation_macro_exact_match": 0.42226
+      },
+      {
+        "epoch": 31,
+        "calibration_macro_micro_f1": 0.319551,
+        "calibration_macro_exact_match": 0.433493,
+        "thresholds": {
+          "personality_traits": 0.22,
+          "interests": 0.16,
+          "style": 0.22
+        },
+        "validation_macro_micro_f1": 0.281956,
+        "validation_macro_exact_match": 0.438544
+      },
+      {
+        "epoch": 32,
+        "calibration_macro_micro_f1": 0.330154,
+        "calibration_macro_exact_match": 0.413929,
+        "thresholds": {
+          "personality_traits": 0.25,
+          "interests": 0.15,
+          "style": 0.2
+        },
+        "validation_macro_micro_f1": 0.278164,
+        "validation_macro_exact_match": 0.417021
+      },
+      {
+        "epoch": 33,
+        "calibration_macro_micro_f1": 0.315668,
+        "calibration_macro_exact_match": 0.413683,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.22,
+          "style": 0.12
+        },
+        "validation_macro_micro_f1": 0.27243,
+        "validation_macro_exact_match": 0.408383
+      },
+      {
+        "epoch": 34,
+        "calibration_macro_micro_f1": 0.307316,
+        "calibration_macro_exact_match": 0.443337,
+        "thresholds": {
+          "personality_traits": 0.17,
+          "interests": 0.19,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.260579,
+        "validation_macro_exact_match": 0.435995
+      },
+      {
+        "epoch": 35,
+        "calibration_macro_micro_f1": 0.31358,
+        "calibration_macro_exact_match": 0.399409,
+        "thresholds": {
+          "personality_traits": 0.25,
+          "interests": 0.16,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.280914,
+        "validation_macro_exact_match": 0.418578
+      },
+      {
+        "epoch": 36,
+        "calibration_macro_micro_f1": 0.327016,
+        "calibration_macro_exact_match": 0.443583,
+        "thresholds": {
+          "personality_traits": 0.2,
+          "interests": 0.12,
+          "style": 0.23
+        },
+        "validation_macro_micro_f1": 0.277355,
+        "validation_macro_exact_match": 0.44789
+      },
+      {
+        "epoch": 37,
+        "calibration_macro_micro_f1": 0.30736,
+        "calibration_macro_exact_match": 0.450474,
+        "thresholds": {
+          "personality_traits": 0.22,
+          "interests": 0.17,
+          "style": 0.21
+        },
+        "validation_macro_micro_f1": 0.270817,
+        "validation_macro_exact_match": 0.454829
+      },
+      {
+        "epoch": 38,
+        "calibration_macro_micro_f1": 0.328079,
+        "calibration_macro_exact_match": 0.45355,
+        "thresholds": {
+          "personality_traits": 0.24,
+          "interests": 0.13,
+          "style": 0.2
+        },
+        "validation_macro_micro_f1": 0.269414,
+        "validation_macro_exact_match": 0.45228
+      },
+      {
+        "epoch": 39,
+        "calibration_macro_micro_f1": 0.324375,
+        "calibration_macro_exact_match": 0.422911,
+        "thresholds": {
+          "personality_traits": 0.24,
+          "interests": 0.16,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.284877,
+        "validation_macro_exact_match": 0.425942
+      },
+      {
+        "epoch": 40,
+        "calibration_macro_micro_f1": 0.322725,
+        "calibration_macro_exact_match": 0.379476,
+        "thresholds": {
+          "personality_traits": 0.26,
+          "interests": 0.14,
+          "style": 0.18
+        },
+        "validation_macro_micro_f1": 0.27025,
+        "validation_macro_exact_match": 0.385868
+      },
+      {
+        "epoch": 41,
+        "calibration_macro_micro_f1": 0.3236,
+        "calibration_macro_exact_match": 0.442968,
+        "thresholds": {
+          "personality_traits": 0.29,
+          "interests": 0.23,
+          "style": 0.22
+        },
+        "validation_macro_micro_f1": 0.284309,
+        "validation_macro_exact_match": 0.445766
+      },
+      {
+        "epoch": 42,
+        "calibration_macro_micro_f1": 0.322871,
+        "calibration_macro_exact_match": 0.428448,
+        "thresholds": {
+          "personality_traits": 0.18,
+          "interests": 0.13,
+          "style": 0.2
+        },
+        "validation_macro_micro_f1": 0.279141,
+        "validation_macro_exact_match": 0.429765
+      },
+      {
+        "epoch": 43,
+        "calibration_macro_micro_f1": 0.320014,
+        "calibration_macro_exact_match": 0.43497,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.17,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.271094,
+        "validation_macro_exact_match": 0.434013
+      },
+      {
+        "epoch": 44,
+        "calibration_macro_micro_f1": 0.320786,
+        "calibration_macro_exact_match": 0.415898,
+        "thresholds": {
+          "personality_traits": 0.2,
+          "interests": 0.19,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.284439,
+        "validation_macro_exact_match": 0.419286
+      },
+      {
+        "epoch": 45,
+        "calibration_macro_micro_f1": 0.31643,
+        "calibration_macro_exact_match": 0.413314,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.19,
+          "style": 0.18
+        },
+        "validation_macro_micro_f1": 0.280021,
+        "validation_macro_exact_match": 0.41872
+      },
+      {
+        "epoch": 46,
+        "calibration_macro_micro_f1": 0.327667,
+        "calibration_macro_exact_match": 0.413191,
+        "thresholds": {
+          "personality_traits": 0.23,
+          "interests": 0.15,
+          "style": 0.18
+        },
+        "validation_macro_micro_f1": 0.273081,
+        "validation_macro_exact_match": 0.415321
+      },
+      {
+        "epoch": 47,
+        "calibration_macro_micro_f1": 0.315314,
+        "calibration_macro_exact_match": 0.406915,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.11,
+          "style": 0.25
+        },
+        "validation_macro_micro_f1": 0.276332,
+        "validation_macro_exact_match": 0.401303
+      },
+      {
+        "epoch": 48,
+        "calibration_macro_micro_f1": 0.326547,
+        "calibration_macro_exact_match": 0.424019,
+        "thresholds": {
+          "personality_traits": 0.22,
+          "interests": 0.14,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.278386,
+        "validation_macro_exact_match": 0.421552
+      },
+      {
+        "epoch": 49,
+        "calibration_macro_micro_f1": 0.316885,
+        "calibration_macro_exact_match": 0.407161,
+        "thresholds": {
+          "personality_traits": 0.21,
+          "interests": 0.11,
+          "style": 0.17
+        },
+        "validation_macro_micro_f1": 0.264271,
+        "validation_macro_exact_match": 0.394931
+      },
+      {
+        "epoch": 50,
+        "calibration_macro_micro_f1": 0.324384,
+        "calibration_macro_exact_match": 0.429925,
+        "thresholds": {
+          "personality_traits": 0.25,
+          "interests": 0.16,
+          "style": 0.2
+        },
+        "validation_macro_micro_f1": 0.271677,
+        "validation_macro_exact_match": 0.41957
+      },
+      {
+        "epoch": 51,
+        "calibration_macro_micro_f1": 0.31947,
+        "calibration_macro_exact_match": 0.383536,
+        "thresholds": {
+          "personality_traits": 0.25,
+          "interests": 0.15,
+          "style": 0.17
+        },
+        "validation_macro_micro_f1": 0.278085,
+        "validation_macro_exact_match": 0.396488
+      },
+      {
+        "epoch": 52,
+        "calibration_macro_micro_f1": 0.328772,
+        "calibration_macro_exact_match": 0.379353,
+        "thresholds": {
+          "personality_traits": 0.2,
+          "interests": 0.17,
+          "style": 0.18
+        },
+        "validation_macro_micro_f1": 0.28331,
+        "validation_macro_exact_match": 0.37454
+      },
+      {
+        "epoch": 53,
+        "calibration_macro_micro_f1": 0.322372,
+        "calibration_macro_exact_match": 0.400025,
+        "thresholds": {
+          "personality_traits": 0.17,
+          "interests": 0.21,
+          "style": 0.17
+        },
+        "validation_macro_micro_f1": 0.28353,
+        "validation_macro_exact_match": 0.418862
+      },
+      {
+        "epoch": 54,
+        "calibration_macro_micro_f1": 0.324017,
+        "calibration_macro_exact_match": 0.43214,
+        "thresholds": {
+          "personality_traits": 0.31,
+          "interests": 0.2,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.271791,
+        "validation_macro_exact_match": 0.425517
+      },
+      {
+        "epoch": 55,
+        "calibration_macro_micro_f1": 0.312298,
+        "calibration_macro_exact_match": 0.412452,
+        "thresholds": {
+          "personality_traits": 0.23,
+          "interests": 0.11,
+          "style": 0.19
+        },
+        "validation_macro_micro_f1": 0.277967,
+        "validation_macro_exact_match": 0.410507
+      },
+      {
+        "epoch": 56,
+        "calibration_macro_micro_f1": 0.320831,
+        "calibration_macro_exact_match": 0.437677,
+        "thresholds": {
+          "personality_traits": 0.27,
+          "interests": 0.17,
+          "style": 0.21
+        },
+        "validation_macro_micro_f1": 0.279109,
+        "validation_macro_exact_match": 0.448032
+      },
+      {
+        "epoch": 57,
+        "calibration_macro_micro_f1": 0.324814,
+        "calibration_macro_exact_match": 0.418112,
+        "thresholds": {
+          "personality_traits": 0.24,
+          "interests": 0.21,
+          "style": 0.18
+        },
+        "validation_macro_micro_f1": 0.266725,
+        "validation_macro_exact_match": 0.411215
+      },
+      {
+        "epoch": 58,
+        "calibration_macro_micro_f1": 0.324544,
+        "calibration_macro_exact_match": 0.411468,
+        "thresholds": {
+          "personality_traits": 0.27,
+          "interests": 0.15,
+          "style": 0.13
+        },
+        "validation_macro_micro_f1": 0.269763,
+        "validation_macro_exact_match": 0.409091
+      },
+      {
+        "epoch": 59,
+        "calibration_macro_micro_f1": 0.31854,
+        "calibration_macro_exact_match": 0.421066,
+        "thresholds": {
+          "personality_traits": 0.19,
+          "interests": 0.13,
+          "style": 0.25
+        },
+        "validation_macro_micro_f1": 0.27808,
+        "validation_macro_exact_match": 0.417304
+      },
+      {
+        "epoch": 60,
+        "calibration_macro_micro_f1": 0.324641,
+        "calibration_macro_exact_match": 0.43214,
+        "thresholds": {
+          "personality_traits": 0.23,
+          "interests": 0.19,
+          "style": 0.25
+        },
+        "validation_macro_micro_f1": 0.284101,
+        "validation_macro_exact_match": 0.426083
+      }
+    ],
+    "experiment_elapsed_seconds": 715.363,
+    "checkpoint": "weights/profile_long_context_unweighted_b1_20261015"
+  },
+  "unweighted_512_exact_calibration": {
+    "status": "threshold calibration evaluation; checkpoint weights unchanged",
+    "method": {
+      "objective": "per-dimension exact-match accuracy",
+      "threshold_source": "training-only 15% conversation-disjoint calibration split",
+      "validation_used_for_selection": false,
+      "max_length": 512,
+      "seed": 20261015,
+      "thresholds": {
+        "personality_traits": 0.7,
+        "interests": 0.64,
+        "style": 0.8
+      }
+    },
+    "data": {
+      "train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+      "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+      "train_samples": 18653,
+      "calibration_samples": 2709,
+      "validation_samples": 2354,
+      "conversation_overlap": 0
+    },
+    "calibration": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.59247,
+          "micro_f1": 0.059443,
+          "gold_positive_count": 1530,
+          "predicted_positive_count": 85
+        },
+        "interests": {
+          "exact_match_accuracy": 0.714655,
+          "micro_f1": 0.078007,
+          "gold_positive_count": 858,
+          "predicted_positive_count": 65
+        },
+        "style": {
+          "exact_match_accuracy": 0.51089,
+          "micro_f1": 0.022713,
+          "gold_positive_count": 1559,
+          "predicted_positive_count": 26
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.606005,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.589516,
+          "interests": 0.710594,
+          "style": 0.505722
+        },
+        "profile_macro_exact_match_accuracy": 0.601944
+      }
+    },
+    "validation": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.614698,
+          "micro_f1": 0.008562,
+          "gold_positive_count": 1143,
+          "predicted_positive_count": 25
+        },
+        "interests": {
+          "exact_match_accuracy": 0.750637,
+          "micro_f1": 0.038981,
+          "gold_positive_count": 643,
+          "predicted_positive_count": 24
+        },
+        "style": {
+          "exact_match_accuracy": 0.519541,
+          "micro_f1": 0.011878,
+          "gold_positive_count": 1333,
+          "predicted_positive_count": 14
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.628292,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.618522,
+          "interests": 0.748938,
+          "style": 0.517417
+        },
+        "profile_macro_exact_match_accuracy": 0.628292
+      }
+    },
+    "empty_set_baseline": {
+      "calibration": {
+        "per_dimension": {
+          "personality_traits": {
+            "exact_match_accuracy": 0.589516,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1530,
+            "predicted_positive_count": 0
+          },
+          "interests": {
+            "exact_match_accuracy": 0.710594,
+            "micro_f1": 0.0,
+            "gold_positive_count": 858,
+            "predicted_positive_count": 0
+          },
+          "style": {
+            "exact_match_accuracy": 0.505722,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1559,
+            "predicted_positive_count": 0
+          }
+        },
+        "profile_macro_exact_match_accuracy": 0.601944,
+        "empty_set_baseline": {
+          "per_dimension_exact_match_accuracy": {
+            "personality_traits": 0.589516,
+            "interests": 0.710594,
+            "style": 0.505722
+          },
+          "profile_macro_exact_match_accuracy": 0.601944
+        }
+      },
+      "validation": {
+        "per_dimension": {
+          "personality_traits": {
+            "exact_match_accuracy": 0.618522,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1143,
+            "predicted_positive_count": 0
+          },
+          "interests": {
+            "exact_match_accuracy": 0.748938,
+            "micro_f1": 0.0,
+            "gold_positive_count": 643,
+            "predicted_positive_count": 0
+          },
+          "style": {
+            "exact_match_accuracy": 0.517417,
+            "micro_f1": 0.0,
+            "gold_positive_count": 1333,
+            "predicted_positive_count": 0
+          }
+        },
+        "profile_macro_exact_match_accuracy": 0.628292,
+        "empty_set_baseline": {
+          "per_dimension_exact_match_accuracy": {
+            "personality_traits": 0.618522,
+            "interests": 0.748938,
+            "style": 0.517417
+          },
+          "profile_macro_exact_match_accuracy": 0.628292
+        }
+      }
+    },
+    "elapsed_seconds": 206.857,
+    "checkpoint": "weights/profile_long_context_unweighted_b1_20261015"
+  }
+}
