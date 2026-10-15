@@ -177,8 +177,17 @@ def main() -> int:
     parser.add_argument("--epochs", type=int, default=60)
     parser.add_argument("--learning-rate", type=float, default=0.01)
     parser.add_argument("--calibration-fraction", type=float, default=0.15)
+    parser.add_argument(
+        "--positive-weight-exponent",
+        type=float,
+        default=0.5,
+        help="Exponent for inverse-frequency profile loss weights; 0 disables positive reweighting.",
+    )
     parser.add_argument("--device", choices=("auto", "cpu", "mps", "cuda"), default="auto")
     args = parser.parse_args()
+
+    if not 0.0 <= args.positive_weight_exponent <= 1.0:
+        parser.error("--positive-weight-exponent must be between 0 and 1")
 
     try:
         import torch
@@ -280,7 +289,9 @@ def main() -> int:
     for dim in PROFILE_LABELS_BY_DIMENSION:
         positives = fit_y[dim].sum(dim=0)
         negatives = len(fit_rows) - positives
-        pos_weights[dim] = torch.sqrt(negatives / positives.clamp(min=1)).clamp(min=1.0, max=8.0)
+        pos_weights[dim] = (
+            negatives / positives.clamp(min=1)
+        ).pow(args.positive_weight_exponent).clamp(min=1.0, max=8.0)
 
     history: list[dict[str, Any]] = []
     best_score = -1.0
@@ -415,7 +426,11 @@ def main() -> int:
         "method": {
             "encoder": "frozen from standalone emotion checkpoint",
             "emotion_head": "preserved without modification",
-            "profile_heads": "three linear heads trained with capped inverse-square-root positive weights",
+            "profile_heads": (
+                "three linear heads trained with capped inverse-frequency positive weights; "
+                f"exponent={args.positive_weight_exponent:g}"
+            ),
+            "positive_weight_exponent": args.positive_weight_exponent,
             "calibration": "training-only 15% conversation-disjoint split; thresholds selected by per-dimension micro-F1",
             "epochs": args.epochs,
             "selected_epoch": max(history, key=lambda row: row["calibration_macro_micro_f1"])["epoch"],
