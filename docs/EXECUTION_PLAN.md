@@ -69,6 +69,8 @@ T0为10/13团队实际开始时间。若开始较晚，按TRAINING_WORKPLAN的�
 
 分支纪律（2026-10-14 用户明确）：**每天只开一个新分支**——当天开工 `git fetch origin` 拉到最新后从最新 `origin/main` 切出，当天所有任务都归并在该分支上，**当天不开第二个分支**；分支名 `feature/<岗位>-day<N>-<任务>`。分支从最新main同步，禁止直接推main或force push。固定review闭环A→B→C→D→A；相关公共接口追加模块负责人复核；最终发布A+B双签。训练与review并行，正式镜像必须包含已验收产物。
 
+分支与 PR 操作细则（2026-10-15 实操补充）：① 当天开工先 `gh pr list --state open --author @me` 确认有无昨天遗留的开放 PR；有则判断内容是"仍有效"还是"已被后续合并盖住"，仍有效的把该分支改名成当天任务分支、commit 原样带走并归并当天全部工作，不要另开第二个分支。② **给带开放 PR 的分支改名时，`git push <新分支>` + `git push --delete <旧分支>` 会把 PR 关掉而不是改名**（10/15 实测 PR #12 因此 CLOSED）；要用 GitHub 的 branch rename API，或接受关闭、重开 PR 并重写正文。③ 判断队友 PR 会不会回退自己的改动时，**不要看两点 diff**（`git diff origin/main..<branch>` 会把"对方只是落后、没碰那几行"显示成"对方改回了旧值"）；用 `git merge-tree --write-tree origin/main <branch>` 模拟真实合并后读合并结果文件，干净就可直接合，不必强求对方 rebase。
+
 Ready=实际依赖满足才可开始；Blocked=写明阻塞人、缺什么、预计解除时间、降级方案；Integration Gate=有完整交付仍待review/合并；Done=合并main且测试与验收证据齐全。训练依赖GPU资源，不把未确认资源的任务统一标Ready。
 
 ### 10/12历史记录（保留原事实）
