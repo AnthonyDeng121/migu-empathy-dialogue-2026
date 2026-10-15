@@ -1,0 +1,34 @@
+{
+  "classifier_release": "c-day3-retrained-20261015",
+  "classifier_source_commit": "54e65f026a0d4b577267ba7d48ece9f83a36fd3b",
+  "classifier_files": [
+    {
+      "path": "checkpoint_metadata.json",
+      "sha256": "ec338f3a5d4c30a5bc7a665c536fe5c5514b55dea64e0afb4d002720ebee0142"
+    },
+    {
+      "path": "encoder/config.json",
+      "sha256": "cfa627f12e360886101147f58d8012fea2f1a10da88ed5bbd46a49b974ff89b7"
+    },
+    {
+      "path": "encoder/model.safetensors",
+      "sha256": "20376e0571baf16eff1036721471fb3b2224ce4e899dbaa5b612463a4f452fe2"
+    },
+    {
+      "path": "heads.safetensors",
+      "sha256": "dfd63c9475775a1b99c1d5f641c544690e1fd3c95cba477bb020e09320e44c9b"
+    },
+    {
+      "path": "tokenizer.json",
+      "sha256": "867be2cb3189c94aaf44e0cd095a871e0db5a57146441de913d489827f0e9c5a"
+    },
+    {
+      "path": "tokenizer_config.json",
+      "sha256": "18307e407ae7e1f4433c3581e4c8083fadb4639aa543e2178330b7ac6940622c"
+    }
+  ],
+  "response_base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "response_base_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "response_adapter_sha256": "62a695ea594a1546e217ee5edd691131051a4e64e3ecfcec91af75de7a133fcf",
+  "response_base_weights_sha256": "dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee"
+}
