@@ -1120,7 +1120,7 @@
     "archive_sha256": "67db558687a42c6b10f31075ff1fecf14ffc6ba881c4d14d0bcd387b0ea0c526",
     "archive_bytes": 409585966,
     "archive_integrity_verified": true,
-    "public_release_url": null
+    "public_release_url": "https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-day5-emotion-longtail075-20261016"
   },
   "limits": [
     "Local B1 validation only; the official scoring formula and acceptance threshold are not confirmed.",

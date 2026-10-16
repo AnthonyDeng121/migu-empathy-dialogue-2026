@@ -43,7 +43,7 @@ Day3 的弱项集中在长尾类别：`care`（训练 79 条、验证 11 条）F
 - 保存 checkpoint 后重新加载，对完整验证集重新推理；Accuracy、Macro-F1 和逐类指标与训练报告完全一致。
 - 机器可读指标、完整混淆矩阵与类别权重见 [JSON 报告](c_day5_emotion_longtail075_metrics.json)；完整训练 stdout 随 checkpoint 一并放入公开 Release 供复核。
 - 本地 checkpoint 目录：`weights/emotion_longtail075_b1_20261016`；`model.safetensors` SHA-256：`aedbacb14bced4417ac00d42c7cfccec722b64efaf84779fd9c8339f018e9e37`；目录树 SHA-256：`258c43a7120741d9281e42edf0ddd8c3c543228a690a7e6c13f2549b6f6d4e79`。
-- 交付包：`C_DAY5_EMOTION_LONGTAIL075_20261016.zip`，约 391 MiB，ZIP 完整性检查通过；SHA-256：`67db558687a42c6b10f31075ff1fecf14ffc6ba881c4d14d0bcd387b0ea0c526`。公开 Release 链接待上传后补入。
+- 交付包：`C_DAY5_EMOTION_LONGTAIL075_20261016.zip`，约 391 MiB，ZIP 完整性检查通过；SHA-256：`67db558687a42c6b10f31075ff1fecf14ffc6ba881c4d14d0bcd387b0ea0c526`。公开预发布：[Day5 checkpoint 与训练日志](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-day5-emotion-longtail075-20261016)。
 
 ## 复现
 
