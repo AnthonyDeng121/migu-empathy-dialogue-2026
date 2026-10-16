@@ -10,6 +10,8 @@
 - D 基座：`weights/hf/Qwen2.5-1.5B-Instruct/`，完整配置、分片权重和 tokenizer；revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306`。
 - D adapter：`weights/response_sft_d2_1p5b/`，包含 `adapter_config.json`、`adapter_model.safetensors`。当前候选 adapter SHA-256 为 `62a695ea594a1546e217ee5edd691131051a4e64e3ecfcec91af75de7a133fcf`。
 
+D 的持久交付为 GitHub Release `d-day3-response-sft-20261015`，使用资产 `D_DAY3_RESPONSE_SFT_D2_1P5B_20261015.zip`（adapter 与 tokenizer）。基座仍需固定 revision 的本地副本；完整目录指纹见 `configs/response_artifact.json`。保留包内原始 `adapter_config.json`，不要因其中训练机路径而直接改写。merged 分卷是备用方案，生成结果与基座加 adapter 不保证一致；换用须重新全量评测，当前候选继续使用基座加 adapter。
+
 已有云端模型不必下载再上传；在 `configs/integrated.json` 填写云端绝对路径即可。相对路径以项目根目录为准。
 
 当前 C 候选是 Release `c-day3-retrained-20261015`（包 SHA-256 `550e9c4743671eb736338c8193b7cdc3f82386c63a86ac2d143dcf034c2f7b50`），使用从 C 源 commit `54e65f0` 引入的 `EmotionProfileCheckpoint`，不能使用旧版联合头加载方式。`classifier_format=packaged` 读取每维校准阈值并采用模型记录的标签顺序。文件哈希固定在 `configs/integrated_artifacts.json`。
