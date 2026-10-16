@@ -39,6 +39,8 @@ def main() -> None:
     parser.add_argument("--gold", type=Path, required=True, help="B1 response_val.jsonl（含 gold response_text）")
     parser.add_argument("--arm", action="append", required=True, metavar="NAME=PATH", help="预测臂，可多次")
     parser.add_argument("--bridge", type=Path, help="val_eval_input.jsonl（eval 系 id 与 B1 sample_id 的桥接）")
+    parser.add_argument("--main", help="head-to-head 主臂名（默认第一个 --arm）")
+    parser.add_argument("--base", help="head-to-head 对照臂名（默认第二个 --arm）")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
@@ -106,27 +108,30 @@ def main() -> None:
 
     names = list(arms)
     if len(names) >= 2:
-        main_name = "d2" if "d2" in arms else names[0]
-        base_name = "original" if "original" in arms else (names[1] if len(names) > 1 else None)
-        if base_name:
-            wins = losses = ties = 0
-            regressions = []
-            for sid in gold:
-                m = per_row[sid][main_name]["rouge_l"]
-                b = per_row[sid][base_name]["rouge_l"]
-                if m > b + 1e-9:
-                    wins += 1
-                elif m < b - 1e-9:
-                    losses += 1
-                    if b - m > 0.15:
-                        regressions.append({"sample_id": gold_ids[sid], f"{main_name}_rouge_l": round(m, 4), f"{base_name}_rouge_l": round(b, 4), "gold_len": len(gold[sid].strip())})
-                else:
-                    ties += 1
-            report["head_to_head"] = {
-                "main": main_name, "base": base_name,
-                "wins": wins, "losses": losses, "ties": ties,
-                "regressions_gt_0p15": sorted(regressions, key=lambda r: r[f"{base_name}_rouge_l"] - r[f"{main_name}_rouge_l"], reverse=True)[:20],
-            }
+        main_name = args.main or names[0]
+        base_name = args.base or names[1]
+        if main_name not in arms or base_name not in arms:
+            raise SystemExit(f"--main/--base must be arm names among {names}")
+        if main_name == base_name:
+            raise SystemExit("--main and --base must differ")
+        wins = losses = ties = 0
+        regressions = []
+        for sid in gold:
+            m = per_row[sid][main_name]["rouge_l"]
+            b = per_row[sid][base_name]["rouge_l"]
+            if m > b + 1e-9:
+                wins += 1
+            elif m < b - 1e-9:
+                losses += 1
+                if b - m > 0.15:
+                    regressions.append({"sample_id": gold_ids[sid], f"{main_name}_rouge_l": round(m, 4), f"{base_name}_rouge_l": round(b, 4), "gold_len": len(gold[sid].strip())})
+            else:
+                ties += 1
+        report["head_to_head"] = {
+            "main": main_name, "base": base_name,
+            "wins": wins, "losses": losses, "ties": ties,
+            "regressions_gt_0p15": sorted(regressions, key=lambda r: r[f"{base_name}_rouge_l"] - r[f"{main_name}_rouge_l"], reverse=True)[:20],
+        }
 
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
