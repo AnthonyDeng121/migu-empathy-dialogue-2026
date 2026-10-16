@@ -1,0 +1,1131 @@
+{
+  "status": "full B1 v1 one-epoch class-balanced fine-tune",
+  "device": "mps",
+  "runtime": {
+    "python": "3.12.14",
+    "torch": "2.14.0",
+    "transformers": "5.17.0",
+    "elapsed_seconds": 1255.565
+  },
+  "model": {
+    "initial_checkpoint": "weights/emotion_baseline",
+    "base_checkpoint_sha256": "50183b12b36ab33848c81ecbe068310ec233ceeccdedd4ad2a2c702d7eecc5e8",
+    "output_checkpoint": "weights/emotion_longtail075_b1_20261016"
+  },
+  "config": {
+    "seed": 20261015,
+    "epochs": 1,
+    "batch_size": 32,
+    "max_length": 256,
+    "learning_rate": 5e-06,
+    "loss": "cross entropy with normalized inverse-frequency weights raised to exponent 0.75, clipped to [0.35, 4.0]",
+    "class_weight_exponent": 0.75
+  },
+  "data": {
+    "train_path": "data/processed/b1_full_v1/classification_train.jsonl",
+    "train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+    "train_samples": 18653,
+    "train_conversations": 8329,
+    "validation_path": "data/processed/b1_full_v1/classification_val.jsonl",
+    "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+    "validation_samples": 2354,
+    "validation_conversations": 900,
+    "conversation_overlap": 0,
+    "class_counts": {
+      "anger": 855,
+      "anxiety": 6340,
+      "care": 79,
+      "disgust": 125,
+      "fear": 1388,
+      "gratitude": 694,
+      "helplessness": 1575,
+      "joy": 171,
+      "loneliness": 876,
+      "mixed": 945,
+      "neutral": 654,
+      "pride": 234,
+      "relaxed": 2816,
+      "sadness": 1085,
+      "shame": 752,
+      "surprise": 64
+    },
+    "class_weights": {
+      "anger": 0.494297,
+      "anxiety": 0.35,
+      "care": 2.94946,
+      "disgust": 2.090645,
+      "fear": 0.35,
+      "gratitude": 0.57802,
+      "helplessness": 0.35,
+      "joy": 1.652783,
+      "loneliness": 0.485383,
+      "mixed": 0.458552,
+      "neutral": 0.604337,
+      "pride": 1.306324,
+      "relaxed": 0.35,
+      "sadness": 0.413419,
+      "shame": 0.544251,
+      "surprise": 3.454044
+    }
+  },
+  "metrics": {
+    "before": {
+      "accuracy": 0.67842,
+      "macro_f1": 0.4032,
+      "labels": [
+        "anger",
+        "anxiety",
+        "care",
+        "disgust",
+        "fear",
+        "gratitude",
+        "helplessness",
+        "joy",
+        "loneliness",
+        "mixed",
+        "neutral",
+        "pride",
+        "relaxed",
+        "sadness",
+        "shame",
+        "surprise"
+      ],
+      "per_class": {
+        "anger": {
+          "precision": 0.686441,
+          "recall": 0.704348,
+          "f1": 0.695279,
+          "support": 115
+        },
+        "anxiety": {
+          "precision": 0.663043,
+          "recall": 0.893475,
+          "f1": 0.761202,
+          "support": 751
+        },
+        "care": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 11
+        },
+        "disgust": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 21
+        },
+        "fear": {
+          "precision": 0.611111,
+          "recall": 0.620968,
+          "f1": 0.616,
+          "support": 124
+        },
+        "gratitude": {
+          "precision": 0.803571,
+          "recall": 0.762712,
+          "f1": 0.782609,
+          "support": 118
+        },
+        "helplessness": {
+          "precision": 0.625,
+          "recall": 0.669014,
+          "f1": 0.646259,
+          "support": 142
+        },
+        "joy": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 20
+        },
+        "loneliness": {
+          "precision": 0.754717,
+          "recall": 0.695652,
+          "f1": 0.723982,
+          "support": 115
+        },
+        "mixed": {
+          "precision": 0.421053,
+          "recall": 0.045198,
+          "f1": 0.081633,
+          "support": 177
+        },
+        "neutral": {
+          "precision": 0.6,
+          "recall": 0.113208,
+          "f1": 0.190476,
+          "support": 53
+        },
+        "pride": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 40
+        },
+        "relaxed": {
+          "precision": 0.687382,
+          "recall": 0.892421,
+          "f1": 0.776596,
+          "support": 409
+        },
+        "sadness": {
+          "precision": 0.712121,
+          "recall": 0.358779,
+          "f1": 0.477157,
+          "support": 131
+        },
+        "shame": {
+          "precision": 0.754902,
+          "recall": 0.652542,
+          "f1": 0.7,
+          "support": 118
+        },
+        "surprise": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 9
+        }
+      },
+      "confusion_matrix": [
+        [
+          81,
+          20,
+          0,
+          0,
+          5,
+          0,
+          2,
+          0,
+          0,
+          2,
+          0,
+          0,
+          2,
+          1,
+          2,
+          0
+        ],
+        [
+          4,
+          671,
+          0,
+          0,
+          30,
+          2,
+          11,
+          0,
+          4,
+          1,
+          0,
+          0,
+          24,
+          0,
+          4,
+          0
+        ],
+        [
+          1,
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          11,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          3,
+          4,
+          0
+        ],
+        [
+          0,
+          40,
+          0,
+          0,
+          77,
+          0,
+          3,
+          0,
+          2,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          5,
+          0,
+          0,
+          0,
+          90,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          20,
+          0,
+          1,
+          0
+        ],
+        [
+          6,
+          29,
+          0,
+          0,
+          2,
+          0,
+          95,
+          0,
+          3,
+          0,
+          0,
+          0,
+          2,
+          4,
+          1,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          18,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          22,
+          0,
+          0,
+          7,
+          2,
+          0,
+          0,
+          80,
+          1,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        [
+          8,
+          95,
+          0,
+          0,
+          1,
+          2,
+          8,
+          0,
+          1,
+          8,
+          2,
+          0,
+          43,
+          6,
+          3,
+          0
+        ],
+        [
+          3,
+          21,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          6,
+          0,
+          21,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          9,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          29,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          24,
+          0,
+          0,
+          0,
+          15,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          365,
+          2,
+          0,
+          0
+        ],
+        [
+          3,
+          30,
+          0,
+          0,
+          1,
+          1,
+          27,
+          0,
+          11,
+          0,
+          0,
+          0,
+          4,
+          47,
+          7,
+          0
+        ],
+        [
+          1,
+          27,
+          0,
+          0,
+          3,
+          0,
+          6,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          2,
+          77,
+          0
+        ],
+        [
+          0,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0
+        ]
+      ]
+    },
+    "after": {
+      "accuracy": 0.716653,
+      "macro_f1": 0.584843,
+      "labels": [
+        "anger",
+        "anxiety",
+        "care",
+        "disgust",
+        "fear",
+        "gratitude",
+        "helplessness",
+        "joy",
+        "loneliness",
+        "mixed",
+        "neutral",
+        "pride",
+        "relaxed",
+        "sadness",
+        "shame",
+        "surprise"
+      ],
+      "per_class": {
+        "anger": {
+          "precision": 0.741071,
+          "recall": 0.721739,
+          "f1": 0.731278,
+          "support": 115
+        },
+        "anxiety": {
+          "precision": 0.745121,
+          "recall": 0.864181,
+          "f1": 0.800247,
+          "support": 751
+        },
+        "care": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 11
+        },
+        "disgust": {
+          "precision": 0.730769,
+          "recall": 0.904762,
+          "f1": 0.808511,
+          "support": 21
+        },
+        "fear": {
+          "precision": 0.615942,
+          "recall": 0.685484,
+          "f1": 0.648855,
+          "support": 124
+        },
+        "gratitude": {
+          "precision": 0.803571,
+          "recall": 0.762712,
+          "f1": 0.782609,
+          "support": 118
+        },
+        "helplessness": {
+          "precision": 0.684211,
+          "recall": 0.640845,
+          "f1": 0.661818,
+          "support": 142
+        },
+        "joy": {
+          "precision": 0.458333,
+          "recall": 0.55,
+          "f1": 0.5,
+          "support": 20
+        },
+        "loneliness": {
+          "precision": 0.789474,
+          "recall": 0.782609,
+          "f1": 0.786026,
+          "support": 115
+        },
+        "mixed": {
+          "precision": 0.461538,
+          "recall": 0.101695,
+          "f1": 0.166667,
+          "support": 177
+        },
+        "neutral": {
+          "precision": 0.375,
+          "recall": 0.339623,
+          "f1": 0.356436,
+          "support": 53
+        },
+        "pride": {
+          "precision": 0.846154,
+          "recall": 0.275,
+          "f1": 0.415094,
+          "support": 40
+        },
+        "relaxed": {
+          "precision": 0.73374,
+          "recall": 0.882641,
+          "f1": 0.801332,
+          "support": 409
+        },
+        "sadness": {
+          "precision": 0.688172,
+          "recall": 0.48855,
+          "f1": 0.571429,
+          "support": 131
+        },
+        "shame": {
+          "precision": 0.70229,
+          "recall": 0.779661,
+          "f1": 0.738956,
+          "support": 118
+        },
+        "surprise": {
+          "precision": 0.625,
+          "recall": 0.555556,
+          "f1": 0.588235,
+          "support": 9
+        }
+      },
+      "confusion_matrix": [
+        [
+          83,
+          15,
+          0,
+          2,
+          3,
+          0,
+          0,
+          0,
+          0,
+          1,
+          4,
+          0,
+          1,
+          1,
+          4,
+          1
+        ],
+        [
+          6,
+          649,
+          0,
+          0,
+          35,
+          1,
+          11,
+          1,
+          5,
+          6,
+          5,
+          0,
+          21,
+          2,
+          9,
+          0
+        ],
+        [
+          1,
+          9,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          19,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          32,
+          0,
+          0,
+          85,
+          0,
+          2,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          3,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          0,
+          0,
+          90,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          21,
+          1,
+          0,
+          0
+        ],
+        [
+          8,
+          22,
+          0,
+          2,
+          2,
+          0,
+          91,
+          0,
+          3,
+          1,
+          0,
+          0,
+          2,
+          8,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          11,
+          0,
+          1,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          12,
+          0,
+          0,
+          6,
+          1,
+          1,
+          0,
+          90,
+          1,
+          2,
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          7,
+          69,
+          0,
+          1,
+          1,
+          3,
+          6,
+          4,
+          1,
+          18,
+          10,
+          1,
+          37,
+          9,
+          8,
+          2
+        ],
+        [
+          2,
+          13,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          18,
+          0,
+          18,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          3,
+          0,
+          11,
+          20,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          14,
+          0,
+          0,
+          0,
+          14,
+          0,
+          6,
+          1,
+          2,
+          7,
+          1,
+          361,
+          3,
+          0,
+          0
+        ],
+        [
+          3,
+          15,
+          0,
+          0,
+          1,
+          1,
+          20,
+          0,
+          10,
+          4,
+          1,
+          0,
+          3,
+          64,
+          9,
+          0
+        ],
+        [
+          1,
+          13,
+          0,
+          2,
+          4,
+          0,
+          2,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          2,
+          92,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          5
+        ]
+      ]
+    },
+    "accuracy_delta": 0.038233,
+    "macro_f1_delta": 0.181643
+  },
+  "training": {
+    "optimizer_steps": 583,
+    "first_loss": 1.000268,
+    "last_loss": 1.26475,
+    "all_losses_finite": true
+  },
+  "experiment": "C Day5 emotion classification long-tail weighting candidate",
+  "comparison": {
+    "previous_day3_candidate": {
+      "weight_exponent": 0.5,
+      "accuracy": 0.709431,
+      "macro_f1": 0.573752,
+      "per_class": {
+        "anger": {
+          "precision": 0.716667,
+          "recall": 0.747826,
+          "f1": 0.731915,
+          "support": 115
+        },
+        "anxiety": {
+          "precision": 0.774235,
+          "recall": 0.808256,
+          "f1": 0.790879,
+          "support": 751
+        },
+        "care": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 11
+        },
+        "disgust": {
+          "precision": 0.9375,
+          "recall": 0.714286,
+          "f1": 0.810811,
+          "support": 21
+        },
+        "fear": {
+          "precision": 0.569697,
+          "recall": 0.758065,
+          "f1": 0.650519,
+          "support": 124
+        },
+        "gratitude": {
+          "precision": 0.778689,
+          "recall": 0.805085,
+          "f1": 0.791667,
+          "support": 118
+        },
+        "helplessness": {
+          "precision": 0.648276,
+          "recall": 0.661972,
+          "f1": 0.655052,
+          "support": 142
+        },
+        "joy": {
+          "precision": 0.5,
+          "recall": 0.45,
+          "f1": 0.473684,
+          "support": 20
+        },
+        "loneliness": {
+          "precision": 0.767241,
+          "recall": 0.773913,
+          "f1": 0.770563,
+          "support": 115
+        },
+        "mixed": {
+          "precision": 0.432099,
+          "recall": 0.19774,
+          "f1": 0.271318,
+          "support": 177
+        },
+        "neutral": {
+          "precision": 0.360656,
+          "recall": 0.415094,
+          "f1": 0.385965,
+          "support": 53
+        },
+        "pride": {
+          "precision": 0.909091,
+          "recall": 0.25,
+          "f1": 0.392157,
+          "support": 40
+        },
+        "relaxed": {
+          "precision": 0.752137,
+          "recall": 0.860636,
+          "f1": 0.802737,
+          "support": 409
+        },
+        "sadness": {
+          "precision": 0.632075,
+          "recall": 0.51145,
+          "f1": 0.565401,
+          "support": 131
+        },
+        "shame": {
+          "precision": 0.669065,
+          "recall": 0.788136,
+          "f1": 0.723735,
+          "support": 118
+        },
+        "surprise": {
+          "precision": 1.0,
+          "recall": 0.222222,
+          "f1": 0.363636,
+          "support": 9
+        }
+      }
+    },
+    "day5_candidate": {
+      "weight_exponent": 0.75,
+      "accuracy": 0.716653,
+      "macro_f1": 0.584843,
+      "per_class": {
+        "anger": {
+          "precision": 0.741071,
+          "recall": 0.721739,
+          "f1": 0.731278,
+          "support": 115
+        },
+        "anxiety": {
+          "precision": 0.745121,
+          "recall": 0.864181,
+          "f1": 0.800247,
+          "support": 751
+        },
+        "care": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 11
+        },
+        "disgust": {
+          "precision": 0.730769,
+          "recall": 0.904762,
+          "f1": 0.808511,
+          "support": 21
+        },
+        "fear": {
+          "precision": 0.615942,
+          "recall": 0.685484,
+          "f1": 0.648855,
+          "support": 124
+        },
+        "gratitude": {
+          "precision": 0.803571,
+          "recall": 0.762712,
+          "f1": 0.782609,
+          "support": 118
+        },
+        "helplessness": {
+          "precision": 0.684211,
+          "recall": 0.640845,
+          "f1": 0.661818,
+          "support": 142
+        },
+        "joy": {
+          "precision": 0.458333,
+          "recall": 0.55,
+          "f1": 0.5,
+          "support": 20
+        },
+        "loneliness": {
+          "precision": 0.789474,
+          "recall": 0.782609,
+          "f1": 0.786026,
+          "support": 115
+        },
+        "mixed": {
+          "precision": 0.461538,
+          "recall": 0.101695,
+          "f1": 0.166667,
+          "support": 177
+        },
+        "neutral": {
+          "precision": 0.375,
+          "recall": 0.339623,
+          "f1": 0.356436,
+          "support": 53
+        },
+        "pride": {
+          "precision": 0.846154,
+          "recall": 0.275,
+          "f1": 0.415094,
+          "support": 40
+        },
+        "relaxed": {
+          "precision": 0.73374,
+          "recall": 0.882641,
+          "f1": 0.801332,
+          "support": 409
+        },
+        "sadness": {
+          "precision": 0.688172,
+          "recall": 0.48855,
+          "f1": 0.571429,
+          "support": 131
+        },
+        "shame": {
+          "precision": 0.70229,
+          "recall": 0.779661,
+          "f1": 0.738956,
+          "support": 118
+        },
+        "surprise": {
+          "precision": 0.625,
+          "recall": 0.555556,
+          "f1": 0.588235,
+          "support": 9
+        }
+      }
+    },
+    "delta_day5_minus_day3": {
+      "accuracy": 0.007222,
+      "macro_f1": 0.011091
+    }
+  },
+  "artifacts": {
+    "checkpoint_path": "weights/emotion_longtail075_b1_20261016",
+    "model_sha256": "aedbacb14bced4417ac00d42c7cfccec722b64efaf84779fd9c8339f018e9e37",
+    "directory_tree_sha256": "258c43a7120741d9281e42edf0ddd8c3c543228a690a7e6c13f2549b6f6d4e79",
+    "checkpoint_bytes": 409584858,
+    "archive_path": "artifacts/C_DAY5_EMOTION_LONGTAIL075_20261016.zip",
+    "archive_sha256": "67db558687a42c6b10f31075ff1fecf14ffc6ba881c4d14d0bcd387b0ea0c526",
+    "archive_bytes": 409585966,
+    "archive_integrity_verified": true,
+    "public_release_url": "https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-day5-emotion-longtail075-20261016"
+  },
+  "limits": [
+    "Local B1 validation only; the official scoring formula and acceptance threshold are not confirmed.",
+    "Class-weight exponent 0.75 improved aggregate accuracy and macro F1 versus the Day3 exponent-0.5 candidate, while mixed F1 regressed and care F1 remained zero.",
+    "The candidate was evaluated once on the held-out validation split and was not selected by official evaluation.",
+    "Apple MPS training does not verify the competition GPU image or submission runtime."
+  ]
+}

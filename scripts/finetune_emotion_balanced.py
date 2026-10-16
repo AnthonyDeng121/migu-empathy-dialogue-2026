@@ -93,8 +93,14 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=20261015)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=5e-6)
+    parser.add_argument(
+        "--class-weight-exponent", type=float, default=0.5,
+        help="Power applied to inverse-frequency class weights (0=unweighted, 0.5=square-root).",
+    )
     parser.add_argument("--device", choices=("auto", "cpu", "mps", "cuda"), default="auto")
     args = parser.parse_args()
+    if not 0.0 <= args.class_weight_exponent <= 1.0:
+        parser.error("--class-weight-exponent must be between 0 and 1")
 
     try:
         import torch
@@ -136,9 +142,10 @@ def main() -> int:
     train_counts = torch.zeros(len(LABELS), dtype=torch.float32)
     for row in train:
         train_counts[label_to_id[row["label"]]] += 1
-    # Square-root inverse frequency is intentionally moderate: unlike full
-    # inverse weighting, it does not let the 3-20 example classes dominate.
-    class_weights = torch.sqrt(train_counts.sum() / (len(LABELS) * train_counts.clamp(min=1)))
+    # A configurable power allows one-variable comparison of long-tail emphasis.
+    class_weights = (
+        train_counts.sum() / (len(LABELS) * train_counts.clamp(min=1))
+    ).pow(args.class_weight_exponent)
     class_weights = (class_weights / class_weights.mean()).clamp(min=0.35, max=4.0).to(device)
 
     encoded = tokenizer(
@@ -219,7 +226,11 @@ def main() -> int:
         "config": {
             "seed": args.seed, "epochs": 1, "batch_size": batch_size,
             "max_length": 256, "learning_rate": args.learning_rate,
-            "loss": "cross entropy with normalized square-root inverse-frequency weights, clipped to [0.35, 4.0]",
+            "loss": (
+                "cross entropy with normalized inverse-frequency weights raised to "
+                f"exponent {args.class_weight_exponent}, clipped to [0.35, 4.0]"
+            ),
+            "class_weight_exponent": args.class_weight_exponent,
         },
         "data": {
             "train_path": str(args.train), "train_sha256": _sha256(args.train),
