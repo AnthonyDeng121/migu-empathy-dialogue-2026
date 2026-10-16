@@ -21,3 +21,17 @@ PR base 固定为 main。验收闭环 A→B→C→D→A：验收人拉取分支�
 CI 使用 Python 3.12 标准库执行编译、单元测试、Shell 语法和合成数据实验两次重跑。它不需要官方数据、GPU、权重或外部模型；完整数据和断网 Docker 验收由负责人本地完成，并由验收人复核。
 
 任务 Issue 应填写负责人、日期、输入依赖、交付文件、验收命令、验收人和状态。阻塞时写明阻塞人、所需接口、预计解除时间和降级方案；状态同步 `docs/EXECUTION_PLAN.md`。
+
+## 分支改名与"会不会覆盖我的改动"
+
+给一个**已有开放 PR** 的分支改名时，`git push <新分支名>` 再 `git push --delete <旧分支名>` 会把 PR 关掉而不是改名（开放 PR 的头分支被删即关闭）。要用 GitHub 的 branch rename 接口，或接受关闭后重开 PR 并重写正文。
+
+评估别人的 PR 会不会回退或覆盖自己的改动时，**不要看两点 diff**（`git diff origin/main..<branch>`）：它是 main 与对方分支的平面比较，不知道三方合并的 base，会把"对方分支只是落后、没有改那几行"显示成"对方把那几行改回了旧值"。用合并模拟读真实结果：
+
+```bash
+git merge-base --is-ancestor origin/main <branch>   # 对方是否只是落后
+TREE=$(git merge-tree --write-tree origin/main <branch> | head -1)
+git show "$TREE:<受关注的文件>"                        # 看合并后的真实内容
+```
+
+模拟结果干净（无 CONFLICT）就可以直接合，不必强求对方先 rebase。

@@ -147,6 +147,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             prompt_text, add_special_tokens=False, return_tensors="pt"
         )["input_ids"].to(device)
         sample_started = time.perf_counter()
+        generate_kwargs: dict[str, Any] = {}
+        if args.min_new_tokens:
+            generate_kwargs["min_new_tokens"] = int(args.min_new_tokens)
         with torch.inference_mode():
             output_ids = model.generate(
                 input_ids=prompt_ids,
@@ -154,6 +157,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 do_sample=False,
                 use_cache=True,
                 pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
+                **generate_kwargs,
             )
         latencies.append(time.perf_counter() - sample_started)
         generated = output_ids[0][prompt_ids.shape[1]:]
@@ -176,6 +180,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "input_path": str(args.input),
         "samples": len(predictions),
         "max_new_tokens": int(args.max_new_tokens),
+        "min_new_tokens": int(args.min_new_tokens),
         "total_seconds": round(total_seconds, 3),
         "mean_seconds_per_sample": round(total_seconds / len(predictions), 4),
         "p50_seconds_per_sample": round(sorted(latencies)[len(latencies) // 2], 4),
@@ -216,6 +221,16 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument("--max-new-tokens", type=int, default=256)
+    parser.add_argument(
+        "--min-new-tokens",
+        type=int,
+        default=0,
+        help=(
+            "floor on generated tokens; the D2 arm emits 32 near-empty replies "
+            "(<=6 chars, 1.4%%) that the original model never produces, so this "
+            "is the D3 probe for that failure mode"
+        ),
+    )
     parser.add_argument("--full-set-size", type=int, default=2354)
     parser.add_argument("--device", choices=("auto", "cpu", "mps", "cuda"), default="auto")
     return parser.parse_args()
