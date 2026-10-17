@@ -1,0 +1,2 @@
+PASS: artifact verification (8 samples x3, device=cuda, dtype=bfloat16); deterministic=True, pinned-file rebuild identical=True, recorded exact match=2/8, report=reports/d_day6_artifact_verification.json
+EXIT=0
