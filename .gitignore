@@ -60,3 +60,9 @@ explain.md
 !results/response_gen/d2_1p5b_val100_cap512.jsonl
 !results/response_gen/d2_1p5b_val100_cap512_report.json
 !results/response_gen/d2_val_full_as_submission.jsonl
+
+# D 岗位 Day4 2-epoch 候选证据：全量预测、性能报告、训练报告与日志、同集对比
+!results/response_gen/d4_2ep_val_full.jsonl
+!results/response_gen/d4_2ep_val_full_report.json
+!logs/D_DAY4_SFT_FULL_2EP.txt
+!logs/d4_2ep_val_full.txt
