@@ -1,0 +1,149 @@
+{
+  "version": "response_sft_prep_v2",
+  "status": "candidate training",
+  "model": {
+    "name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct",
+    "loaded_from": "external/Qwen2.5-1.5B-Instruct"
+  },
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4090",
+  "dtype": "bfloat16",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 2,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "gold",
+    "_comment": "Day4 单变量候选：与 configs/response_sft.json（D2 首轮）唯一差别是 epochs 1->2。依据：D2 训练 loss 2.969->2.159 在 epoch 末仍单调下降（欠拟合），且错误分析显示弱项在长回复内容针对性。"
+  },
+  "runtime": {
+    "python": "3.12.12",
+    "torch": "2.10.0+cu128",
+    "transformers": "4.57.6",
+    "peft": "0.21.2",
+    "training_seconds": 8168.931
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'external/response_train.jsonl' \\\n  --config 'configs/response_sft_2epoch.json' \\\n  --device cuda \\\n  --output-dir 'external/response_sft_d4_2ep' \\\n  --report-json 'external/d_day4_sft_full_2ep.json' \\\n  --report-md 'external/D_DAY4_SFT_FULL_2EP.md' \\\n  --train-format b1 \\\n  --condition-jsonl 'external/classification_train.jsonl' \\\n  --model-dir 'external/Qwen2.5-1.5B-Instruct'",
+    "code_commit": null,
+    "code_dirty": null,
+    "script_sha256": "bb501a20e27cc75f612e97ce40d5d6899dfd310b26e75378de8e1cc954929d4c"
+  },
+  "data": {
+    "train_path": "external/response_train.jsonl",
+    "train_format": "b1",
+    "train_total_samples": 18653,
+    "train_used_samples": 18653,
+    "skipped_long_samples": 0,
+    "train_sha256": "a70ca036f2ad28265bbbd3ce6882006f81e7dd7abb39a50dbf0f16cb713e2ff6",
+    "condition_train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+    "response_turn_consistency": null,
+    "condition_mode": "gold",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 116,
+      "mean": 902.0,
+      "max": 2048
+    }
+  },
+  "parameters": {
+    "trainable": 9232384,
+    "total": 1552946688,
+    "fraction": 0.005945
+  },
+  "training_speed": {
+    "optimizer_steps": 4664,
+    "micro_batches_done": 37306,
+    "mean_train_loss": 2.017,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 4661,
+    "measured_window_seconds": 8163.114,
+    "seconds_per_step": 1.751365,
+    "seconds_per_step_basis": "mean full gradient-accumulation window after warm-up",
+    "full_steps_per_epoch": 2332,
+    "estimated_full_train_seconds": 8168.369,
+    "estimated_full_train_seconds_with_30pct_margin": 10618.879,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
+  },
+  "vram_peak_bytes": 7219716608,
+  "checks": {
+    "optimizer_steps": 4664,
+    "first_loss": 2.969118,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 0.87996262,
+    "lora_tensors": 392,
+    "lora_weights_changed": true,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "external/response_sft_d4_2ep",
+      "lora_tensors_in_file": 392,
+      "lora_tensors_compared": 392,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 3,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "pp:[\"train_conv_000001\",9,1]",
+          "generated_text": "嗯，那就先不分析。\n\n那种别扭感确实挺扎心的：明明只是一个人的事，却像是连带着整个圈子都晃了一下。别人可能还在热闹里，你脑子里却已经在替他们打分了。\n\n不用急着把它理顺，也不用强迫自己立刻好起来。这里安静一会儿就好。"
+        },
+        {
+          "id": "pp:[\"train_conv_000001\",11,2]",
+          "generated_text": "那个“怕被整个圈子排除”的念头，比他态度稍微缓过来一点点更扎人。因为面子通常不会只针对一个人，它像是把大家的目光都集中到你身上，让你觉得自己的位置可能随时会被重新打量一遍。\n\n群里的正常互动，往往只是暂时没有直接冲突，不代表关系还在走回头路。可你现在的卡住，很可能是因为这部分还没松开——你一边盯着他的态度，一边也在同时盯着自己在这个圈子里的位置会不会跟着一起变薄。\n\n这种双重悬着，确实比单纯冷淡更消耗人。"
+        },
+        {
+          "id": "pp:[\"train_conv_000001\",15,3]",
+          "generated_text": "那就先按群里现在这样正常来往，不用再给自己加一层“必须谈清楚”的任务。\n\n空落落的那部分先放着，不靠紧也不靠远，等你想回头时再说。"
+        }
+      ],
+      "passed": true
+    },
+    "generation_probe": [
+      {
+        "id": "pp:[\"train_conv_000001\",9,1]",
+        "generated_text": "嗯，那就先不分析。\n\n那种别扭感确实挺扎心的：明明只是一个人的事，却像是连带着整个圈子都晃了一下。别人可能还在热闹里，你脑子里却已经在替他们打分了。\n\n不用急着把它理顺，也不用强迫自己立刻好起来。这里安静一会儿就好。"
+      },
+      {
+        "id": "pp:[\"train_conv_000001\",11,2]",
+        "generated_text": "那个“怕被整个圈子排除”的念头，比他态度稍微缓过来一点点更扎人。因为面子通常不会只针对一个人，它像是把大家的目光都集中到你身上，让你觉得自己的位置可能随时会被重新打量一遍。\n\n群里的正常互动，往往只是暂时没有直接冲突，不代表关系还在走回头路。可你现在的卡住，很可能是因为这部分还没松开——你一边盯着他的态度，一边也在同时盯着自己在这个圈子里的位置会不会跟着一起变薄。\n\n这种双重悬着，确实比单纯冷淡更消耗人。"
+      },
+      {
+        "id": "pp:[\"train_conv_000001\",15,3]",
+        "generated_text": "那就先按群里现在这样正常来往，不用再给自己加一层“必须谈清楚”的任务。\n\n空落落的那部分先放着，不靠紧也不靠远，等你想回头时再说。"
+      }
+    ],
+    "non_empty_generations": 3
+  },
+  "checkpoint_directory": "external/response_sft_d4_2ep",
+  "adapter": {
+    "file": "external/response_sft_d4_2ep/adapter_model.safetensors",
+    "bytes": 36981072,
+    "sha256": "6b75245a4eddff63da77d260a509028ce85a89c73bef58bda4e33934ca7b767e"
+  }
+}
