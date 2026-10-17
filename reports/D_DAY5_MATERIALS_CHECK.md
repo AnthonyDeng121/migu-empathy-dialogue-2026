@@ -1,8 +1,8 @@
 # D Day5：最终候选材料完整性检查（2026-10-17）
 
-分支 `feature/d-day5-materials-check`（自 `origin/main` `d741d11` 切出）。对应执行计划 10/17 D 行「不新增长训练；必要解码/长度检查；**材料 1h**」与官方要求「技术方案、实验设计/报告、训练日志、调优过程……**10/17 检查完整性**，最终镜像包含材料」。
+分支 `feature/d-day5-materials-check`（自 `origin/main` `d741d11` 切出，已合入 PR #20 合并后的 main `6778aa5`）。对应执行计划 10/17 D 行「不新增长训练；必要解码/长度检查；**材料 1h**」与官方要求「技术方案、实验设计/报告、训练日志、调优过程……**10/17 检查完整性**，最终镜像包含材料」。
 
-**结论：D 岗位材料完整、三处数字一致、交叉引用全部可达，检查通过。** 候选 v2（2-epoch）若被 18:00 门槛采用，A 的专家材料打包脚本需按 §4 增量更新；不采用则 PR #17 现有清单（D2 首轮）无需改动。
+**结论：D 岗位材料完整、三处数字一致、交叉引用全部可达，检查通过。** 候选 v2（2-epoch）已由 A 于 10/17 15:17 合并 PR #20（merge `6778aa5`）成为 main 上的交付候选；A 的专家材料打包脚本需按 §4 增量更新（PR #17 评论已知会）。
 
 ## 1. 检查方法
 
@@ -11,7 +11,7 @@
 3. **交叉引用**：报告引用的路径、Release、commit、digest 逐一可达。
 4. **权重复核**：用 `scripts/verify_response_artifact.py` 的 `artifact_digest()` 原方法复算本地 adapter 目录 digest。
 
-哈希基准：候选 v2 产物位于 PR #20 分支 HEAD `89c90a7`（合并进 main 不改变文件内容，打包前可复跑 §6 命令复核字节一致）。
+哈希基准：全部以 main（PR #20 已合并，merge `6778aa5`，2026-10-17 15:17 +08）现内容为准；下表哈希为合并前后同值复算（merge 不改文件内容；抽样 4 项已在 main 上复算逐位一致）。打包前可复跑 §6 命令复核字节一致。
 
 ## 2. D 岗位材料清单（按最终候选 v2）
 
@@ -29,7 +29,7 @@
 | `configs/response_sft_2epoch.json` | 826 | `082b70e670e557c1` | 候选 v2 训练配置（与 D2 首轮仅 epochs 1→2） |
 | `reports/D_DAY4_GPU_RUNBOOK.md` | 5,986 | `98008fdde8009af5` | 远程执行序列（含出网实测） |
 | `docs/TECHNICAL_SOLUTION.md` | 5,212 | `47c4c2d28f158fcd` | 技术方案（共享文档，设计层无逐候选数字） |
-| `weights/README.md` | 2,531 | `dd7ccc70cb96038b` | 权重 Release 指针（D2 与 v2）；main 上为合并前版本 `76df09c0…`（无 v2 行），本表基准为 §1 所述 `89c90a7` |
+| `weights/README.md` | 2,531 | `dd7ccc70cb96038b` | 权重 Release 指针（D2 与 v2）；本哈希即 main 现值（PR #20 合并后） |
 
 ### 2.2 调优过程记录（呈现完整实验设计，建议随包或留仓库）
 
@@ -80,9 +80,9 @@
 
 推理"比 D2 快 12%"：3.3176 / 3.7572（D2 首轮同机同路径）= 0.883。第二 epoch loss 降幅 6.6%：(2.159−2.017)/2.159。派生数字与独立测量同量级，交叉自洽。
 
-## 4. 对 PR #17 专家材料打包清单的增量（v2 采用时）
+## 4. 对 PR #17 专家材料打包清单的增量（v2 已成 main 交付候选）
 
-`scripts/package_expert_materials.py` 的 `MATERIALS` 元组当前只含 D2 首轮材料，`manifest.candidate` 为 `"C retrained emotion; empty profile; D Day3 1.5B LoRA"`。若 18:00 门槛采用 v2，建议改为（D 部分；C 部分由 C 定）：
+`scripts/package_expert_materials.py` 的 `MATERIALS` 元组当前只含 D2 首轮材料，`manifest.candidate` 为 `"C retrained emotion; empty profile; D Day3 1.5B LoRA"`。v2 已随 PR #20 合并（merge `6778aa5`），建议将元组改为（D 部分；C 部分由 C 定）：
 
 ```python
 MATERIALS = (
@@ -108,9 +108,7 @@ MATERIALS = (
 )
 ```
 
-并将 `candidate` 更新为 `"C retrained emotion; empty profile; D Day4 2-epoch LoRA (v2, adapter digest b3e9017e…)"`（以 A 最终决定措辞为准）。逐行大文件（§2.3）不进包，包内放摘要 txt；`reports/d_day4_2ep_comparison.json` 如需入包注意 1.3MB 体积。
-
-**若 v2 不被采用**：PR #17 清单无需改动，D2 首轮材料即交付材料。
+并将 `candidate` 更新为 `"C retrained emotion; empty profile; D Day4 2-epoch LoRA (v2, adapter digest b3e9017e…)"`（以 A 最终决定措辞为准）。逐行大文件（§2.3）不进包，包内放摘要 txt；`reports/d_day4_2ep_comparison.json` 如需入包注意 1.3MB 体积。D2 首轮材料保留在清单中作为消融基线（调优过程），不是回退交付物。
 
 ## 5. 本次检查中发现并修复的问题
 
@@ -133,7 +131,7 @@ python3 -c "import sys; sys.path.insert(0,'scripts'); from pathlib import Path; 
 
 ## 7. 边界与遗留
 
-- 本检查不替代 B2 同集指标复核与 A 的采用决策（10/17 18:00 门槛）；v2 是候选，未采用前 D2 首轮仍是交付候选。
-- v2 若采用：`configs/integrated.json` 的 adapter 与 `configs/response_artifact.json` 的 digest 更新属跨组改动，由 A 执行（PR #20 评论已知会）。
-- 执行计划 D 行的"材料检查 Done"登记待 PR #20 合并后追加到同一记录表（现在追加会与 #20 的表尾行产生合并冲突）。
+- 本检查是材料完整性核验，不替代 B2 同集指标复核（B2 可将 v2 臂纳入，预测已在 main `results/response_gen/d4_2ep_val_full.jsonl`）；v2 已由 A 合并 PR #20 成为 main 交付候选，D2 首轮保留为消融基线与回退依据。
+- v2 已采用：`configs/integrated.json` 的 adapter 与 `configs/response_artifact.json` 的 digest 更新属跨组改动，由 A 执行（PR #20/#17 评论已知会）；截至本报告 `configs/response_artifact.json` 仍固定 D2 digest `af4f0e38…`（见 §2.2）。
+- 执行计划 D 行"材料检查 Done"登记已在本 PR 追加（PR #20 合并后无表尾冲突）。
 - 专家材料最终清单以 A 的 `package_expert_materials.py` 为准，本报告 §4 为 D 侧建议。
