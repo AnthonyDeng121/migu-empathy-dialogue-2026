@@ -71,10 +71,11 @@ def artifact_digest(directory: Path) -> dict[str, Any]:
     if not directory.is_dir():
         raise FileNotFoundError(f"artifact directory not found: {directory}")
     files = sorted(
-        path
+        (path
         for path in directory.rglob("*")
         if path.is_file()
-        and not any(part.startswith(".") for part in path.relative_to(directory).parts)
+        and not any(part.startswith(".") for part in path.relative_to(directory).parts)),
+        key=lambda path: path.relative_to(directory).as_posix()
     )
     digest = hashlib.sha256()
     total_bytes = 0

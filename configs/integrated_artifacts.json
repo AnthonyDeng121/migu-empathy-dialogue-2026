@@ -1,0 +1,29 @@
+{
+  "classifier_release": "c-day5-emotion-longtail075-20261016",
+  "classifier_source_commit": "ac6d39f",
+  "classifier_files": [
+    {
+      "path": "config.json",
+      "sha256": "c4dd8bd0084559e91cd3e6b03b1aaba4acc5b1173220f81a6d34d553869f853a"
+    },
+    {
+      "path": "model.safetensors",
+      "sha256": "aedbacb14bced4417ac00d42c7cfccec722b64efaf84779fd9c8339f018e9e37"
+    },
+    {
+      "path": "tokenizer.json",
+      "sha256": "867be2cb3189c94aaf44e0cd095a871e0db5a57146441de913d489827f0e9c5a"
+    },
+    {
+      "path": "tokenizer_config.json",
+      "sha256": "18307e407ae7e1f4433c3581e4c8083fadb4639aa543e2178330b7ac6940622c"
+    }
+  ],
+  "response_base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "response_base_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "response_adapter_sha256": "6b75245a4eddff63da77d260a509028ce85a89c73bef58bda4e33934ca7b767e",
+  "response_base_weights_sha256": "dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee",
+  "response_release": "d-day4-response-sft-2ep-20261017",
+  "classifier_package_sha256": "67db558687a42c6b10f31075ff1fecf14ffc6ba881c4d14d0bcd387b0ea0c526",
+  "response_package_sha256": "e82edaf05330ba221cdfc89697df2ecf246dee42a379211a831cc94c09b05ba3"
+}
