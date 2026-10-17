@@ -26,8 +26,10 @@ def load_config(path):
         config[key] = value if value.is_absolute() else PROJECT / value
     if config.get("device") not in {"cpu", "cuda"}:
         raise ValueError("device must be cpu or cuda")
-    if config.get("classifier_format", "joint") not in {"joint", "packaged"}:
-        raise ValueError("classifier_format must be joint or packaged")
+    if config.get("classifier_format", "joint") not in {"joint", "packaged", "sequence"}:
+        raise ValueError("classifier_format must be joint, packaged or sequence")
+    if config.get("classifier_format") == "sequence" and config.get("profile_mode") != "empty":
+        raise ValueError("sequence classifier requires profile_mode=empty")
     if config.get("profile_mode", "model") not in {"model", "empty"}:
         raise ValueError("profile_mode must be model or empty")
     if type(config.get("condition_response")) is not bool:
@@ -40,6 +42,14 @@ def load_config(path):
 def check_files(config):
     from scripts.predict_emotion_profile import _metadata
     checkpoint = config["classifier_dir"]
+    if config.get("classifier_format") == "sequence":
+        for directory, names in ((checkpoint, ("config.json", "model.safetensors", "tokenizer_config.json")),
+                                 (config["response_model_dir"], ("config.json", "model.safetensors", "tokenizer_config.json")),
+                                 (config["response_adapter_dir"], ("adapter_config.json", "adapter_model.safetensors"))):
+            for name in names:
+                if not (directory / name).is_file():
+                    raise FileNotFoundError(directory / name)
+        return
     if config.get("classifier_format", "joint") == "packaged":
         metadata = json.loads((checkpoint / "checkpoint_metadata.json").read_text(encoding="utf-8"))
         if "profile_thresholds" not in metadata:
@@ -73,7 +83,16 @@ class Models:
         self.config = config
         checkpoint = config["classifier_dir"]
         self.packaged = config.get("classifier_format", "joint") == "packaged"
-        if self.packaged:
+        self.sequence = config.get("classifier_format") == "sequence"
+        if self.sequence:
+            from transformers import AutoModelForSequenceClassification
+            from src.classification.emotion_encoder import EMOTION_LABELS
+            self.c_tokenizer = AutoTokenizer.from_pretrained(checkpoint, local_files_only=True)
+            self.c_tokenizer.truncation_side = "left"
+            self.classifier = AutoModelForSequenceClassification.from_pretrained(checkpoint, local_files_only=True).to(self.device).eval()
+            if self.classifier.config.num_labels != len(EMOTION_LABELS):
+                raise ValueError("Sequence classifier must have 16 labels")
+        elif self.packaged:
             from src.classification.emotion_profile_checkpoint import EmotionProfileCheckpoint
             self.classifier = EmotionProfileCheckpoint(checkpoint, str(self.device))
         else:
@@ -96,7 +115,16 @@ class Models:
     def predict(self, row):
         from scripts.predict_emotion_profile import _predict_group
         from src.response.sft_data import build_eval_sample
-        if self.packaged:
+        if self.sequence:
+            from src.classification.emotion_encoder import EMOTION_LABELS, _format_context
+            from src.data.schema import PROFILE_LABELS
+            text = _format_context(row["history"], row["target_user_turn_id"], row["conversation_id"])
+            tokens = self.c_tokenizer(text, truncation=True, max_length=256, return_tensors="pt").to(self.device)
+            with self.torch.inference_mode():
+                label = int(self.classifier(**tokens).logits.argmax(dim=-1).item())
+            classification = {"id": row["id"], "emotion_label": EMOTION_LABELS[label],
+                              "user_profile": {key: [] for key in PROFILE_LABELS}}
+        elif self.packaged:
             classification = {"id": row["id"], **self.classifier.predict_contexts([row["history"]])[0]}
         else:
             classification = _predict_group([row], self.classifier, self.c_tokenizer, self.torch,

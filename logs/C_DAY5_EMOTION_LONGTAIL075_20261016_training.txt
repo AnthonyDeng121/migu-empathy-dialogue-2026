@@ -1,0 +1,23 @@
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 12276.19it/s]
+step=100/583 loss=1.3672
+step=200/583 loss=1.3204
+step=300/583 loss=1.2956
+step=400/583 loss=1.2112
+step=500/583 loss=1.2121
+step=583/583 loss=1.2159
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  5.33it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  5.32it/s]
+{
+  "elapsed_seconds": 1255.565,
+  "before": {
+    "accuracy": 0.67842,
+    "macro_f1": 0.4032
+  },
+  "after": {
+    "accuracy": 0.716653,
+    "macro_f1": 0.584843
+  },
+  "accuracy_delta": 0.038233,
+  "macro_f1_delta": 0.181643,
+  "checkpoint": "weights/emotion_longtail075_b1_20261016",
+  "report": "results/emotion_longtail075_b1_20261016.json"
+}

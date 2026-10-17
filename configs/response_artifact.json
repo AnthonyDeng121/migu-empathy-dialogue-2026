@@ -1,5 +1,5 @@
 {
-  "artifact": "response_d2_1p5b",
+  "artifact": "response_d4_2ep_1p5b",
   "description": "D2 首轮回复候选（Qwen2.5-1.5B-Instruct + LoRA adapter）的字节指纹。digest 覆盖目录下全部非隐藏文件（相对路径 + 逐文件 SHA-256），用于 scripts/verify_response_artifact.py 在交付/入镜像前比对，防止 adapter 被换或模型快照拷半份。",
   "base_model": {
     "path": "weights/hf/Qwen2.5-1.5B-Instruct",
@@ -11,9 +11,9 @@
     "expected_bytes": 3098955668
   },
   "adapter": {
-    "path": "weights/response_sft_d2_1p5b",
-    "adapter_model_sha256": "62a695ea594a1546e217ee5edd691131051a4e64e3ecfcec91af75de7a133fcf",
-    "expected_digest": "af4f0e38c5a4fb683a5fdd9cfefa0f40259cf9e84d00c3ae54bac1a75bd1331b",
+    "path": "weights/response_sft_d4_2ep",
+    "adapter_model_sha256": "6b75245a4eddff63da77d260a509028ce85a89c73bef58bda4e33934ca7b767e",
+    "expected_digest": "b3e9017e79bea947338730975b7490d9f432dea94c32e848ad66af1bb98f3ecb",
     "expected_files": 10,
     "expected_bytes": 52866512,
     "notes": "adapter_config.json 内 base_model_name_or_path 记录的是远程训练机路径 /root/migu-d2/weights/hf/Qwen2.5-1.5B-Instruct；digest 含该字段，A 侧副本若改写该路径需重新固定 digest。"

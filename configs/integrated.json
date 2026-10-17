@@ -1,9 +1,9 @@
 {
-  "classifier_dir": "weights/emotion_profile",
-  "classifier_format": "packaged",
+  "classifier_dir": "weights/emotion_longtail075_b1_20261016",
+  "classifier_format": "sequence",
   "profile_mode": "empty",
   "response_model_dir": "weights/hf/Qwen2.5-1.5B-Instruct",
-  "response_adapter_dir": "weights/response_sft_d2_1p5b",
+  "response_adapter_dir": "weights/response_sft_d4_2ep",
   "device": "cuda",
   "condition_response": false,
   "max_new_tokens": 256,

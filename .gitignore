@@ -77,3 +77,5 @@ reports/b1_v1_summary.md
 !results/response_gen/d4_2ep_val_full_report.json
 !logs/D_DAY4_SFT_FULL_2EP.txt
 !logs/d4_2ep_val_full.txt
+
+!logs/C_DAY5_EMOTION_LONGTAIL075_20261016_training.txt

@@ -83,3 +83,14 @@ docker build -f Dockerfile.integrated --build-arg OFFICIAL_BASE_IMAGE=<官方完
 若实例没有 Docker，通过平台保存当前实例镜像。先使用 `scripts/stage_submission.py --config configs/cloud_runtime.json --python /root/a-integration-20261015/venv/bin/python --destination /root/migu-submission-day4` 建立新目录；它复制模型并固化入口环境，不覆盖现有 `/root/participant`。验证新目录后再切换官方路径，最终必须重跑 `bash /root/participant/start.sh TEST_FILE RESULT_DIR`。保存时保留指定 Python 环境，将专家材料放入 `/root/AI技术赛道-数字人综合情感对话模型-正式队名`，并核对基础镜像来源。平台保存、安全审核、B 复核和官方成功状态仍分别记录，不能以试跑代替。
 
 验收报告仅保存在本地忽略目录 `.codex_tmp/acceptance/`，不提交或上传 GitHub。
+
+## Day6 最新候选（2026-10-17）
+
+集成配置锁定 C `c-day5-emotion-longtail075-20261016` 与 D `d-day4-response-sft-2ep-20261017`。
+C 使用 `classifier_format=sequence`，按 C 训练脚本的 `tuple(sorted(EMOTIONS))` 解释 16 类输出，保持左截断、256 token、用户/助手中文前缀；画像保持 `profile_mode=empty`。D 使用固定 Qwen2.5-1.5B-Instruct revision 加 2-epoch adapter，不使用旧 D2 adapter 或 merged 备选；不注入分类条件，最大生成 256 token。
+
+`configs/integrated_artifacts.json` 固定 C 文件哈希与 D adapter 权重哈希；`configs/response_artifact.json` 固定 D 基座/adapter 目录摘要。摘要按 POSIX 相对路径区分大小写排序。Release 的 HANDOFF/SHA256SUMS 是交接附件，不放入模型目录摘要范围。
+
+正式候选必须通过预检、两次断网冷启动、同集全量推理和 B 独立复核。局部指标回退须在选型中明确：C mixed 类 F1 下降，D 21–50 字桶 ROUGE-L 下降约 0.8%；整体指标提升不证明所有切片均改善。
+
+B 通过后，在比赛平台保存包含 `/root/participant` 实际目录及指定 Python 环境的实例镜像，记录镜像标识/digest；使用保存后的镜像恢复新实例，复核固定模型哈希并以官方两参数入口断网冷启动。原实例内目录试跑不能替代保存后恢复检查。随后选择该镜像，完成安全审核并发起官方测评，保留结果编号和截图。未确认成功状态前不能记为官方有效提交。

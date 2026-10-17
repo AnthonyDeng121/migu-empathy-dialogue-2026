@@ -23,9 +23,9 @@ def main():
     if not executable.is_file() or not re.fullmatch(r"/[A-Za-z0-9_./-]+", str(executable)):
         parser.error("Provide an existing absolute Linux Python path without shell metacharacters")
     model_dirs = {}
-    for key, relative in (("classifier_dir", "weights/emotion_profile"),
+    for key, relative in (("classifier_dir", "weights/emotion_longtail075_b1_20261016"),
                           ("response_model_dir", "weights/hf/Qwen2.5-1.5B-Instruct"),
-                          ("response_adapter_dir", "weights/response_sft_d2_1p5b")):
+                          ("response_adapter_dir", "weights/response_sft_d4_2ep")):
         source = Path(config[key])
         source = source if source.is_absolute() else PROJECT / source
         if not source.is_dir():

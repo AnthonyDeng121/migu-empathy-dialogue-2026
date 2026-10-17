@@ -1,22 +1,14 @@
 {
-  "classifier_release": "c-day3-retrained-20261015",
-  "classifier_source_commit": "54e65f026a0d4b577267ba7d48ece9f83a36fd3b",
+  "classifier_release": "c-day5-emotion-longtail075-20261016",
+  "classifier_source_commit": "ac6d39f",
   "classifier_files": [
     {
-      "path": "checkpoint_metadata.json",
-      "sha256": "ec338f3a5d4c30a5bc7a665c536fe5c5514b55dea64e0afb4d002720ebee0142"
+      "path": "config.json",
+      "sha256": "c4dd8bd0084559e91cd3e6b03b1aaba4acc5b1173220f81a6d34d553869f853a"
     },
     {
-      "path": "encoder/config.json",
-      "sha256": "cfa627f12e360886101147f58d8012fea2f1a10da88ed5bbd46a49b974ff89b7"
-    },
-    {
-      "path": "encoder/model.safetensors",
-      "sha256": "20376e0571baf16eff1036721471fb3b2224ce4e899dbaa5b612463a4f452fe2"
-    },
-    {
-      "path": "heads.safetensors",
-      "sha256": "dfd63c9475775a1b99c1d5f641c544690e1fd3c95cba477bb020e09320e44c9b"
+      "path": "model.safetensors",
+      "sha256": "aedbacb14bced4417ac00d42c7cfccec722b64efaf84779fd9c8339f018e9e37"
     },
     {
       "path": "tokenizer.json",
@@ -29,6 +21,9 @@
   ],
   "response_base_model": "Qwen/Qwen2.5-1.5B-Instruct",
   "response_base_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
-  "response_adapter_sha256": "62a695ea594a1546e217ee5edd691131051a4e64e3ecfcec91af75de7a133fcf",
-  "response_base_weights_sha256": "dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee"
+  "response_adapter_sha256": "6b75245a4eddff63da77d260a509028ce85a89c73bef58bda4e33934ca7b767e",
+  "response_base_weights_sha256": "dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee",
+  "response_release": "d-day4-response-sft-2ep-20261017",
+  "classifier_package_sha256": "67db558687a42c6b10f31075ff1fecf14ffc6ba881c4d14d0bcd387b0ea0c526",
+  "response_package_sha256": "e82edaf05330ba221cdfc89697df2ecf246dee42a379211a831cc94c09b05ba3"
 }

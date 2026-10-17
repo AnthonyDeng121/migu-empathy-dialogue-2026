@@ -20,6 +20,19 @@ class FakeModels:
 
 
 class IntegratedTests(unittest.TestCase):
+    def test_sequence_checkpoint_cannot_silently_supply_model_profiles(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "config.json"
+            config = {"classifier_dir": "c", "response_model_dir": "d", "response_adapter_dir": "a",
+                      "device": "cuda", "condition_response": False, "max_new_tokens": 256,
+                      "classifier_format": "sequence", "profile_mode": "model"}
+            path.write_text(json.dumps(config), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "requires profile_mode=empty"):
+                load_config(path)
+            config["profile_mode"] = "empty"
+            path.write_text(json.dumps(config), encoding="utf-8")
+            self.assertEqual(load_config(path)["classifier_format"], "sequence")
+
     def test_rejects_invalid_modes_before_loading_models(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "config.json"

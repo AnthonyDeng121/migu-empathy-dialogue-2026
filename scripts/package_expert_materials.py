@@ -9,6 +9,12 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
 MATERIALS = (
+    "logs/C_DAY5_EMOTION_LONGTAIL075_20261016_training.txt",
+    "reports/C_DAY5_EMOTION_LONGTAIL_OPTIMIZATION.md", "reports/c_day5_emotion_longtail075_metrics.json",
+    "reports/D_DAY4_SFT_FULL_2EP.md", "reports/d_day4_sft_full_2ep.json",
+    "logs/D_DAY4_SFT_FULL_2EP.txt", "logs/d4_2ep_val_full.txt",
+    "reports/D_DAY4_RESPONSE_ERROR_ANALYSIS.md", "reports/d_day4_2ep_comparison_summary.txt",
+    "configs/response_sft_2epoch.json", "configs/response_artifact.json",
     "docs/TECHNICAL_SOLUTION.md", "docs/TRAINING_WORKPLAN.md",
     "reports/EXPERIMENT_TEMPLATE.md", "reports/C_DAY3_EMOTION_PROFILE.md",
     "reports/C_DAY3_RETRAINED_HANDOFF_20261015.md",
@@ -40,8 +46,8 @@ def main():
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(PROJECT / name, target)
         hashes[name] = hashlib.sha256(target.read_bytes()).hexdigest()
-    manifest = {"source_commit": commit, "files": hashes,
-                "candidate": "C retrained emotion; empty profile; D Day3 1.5B LoRA",
+    manifest = {"source_commit": commit, "source_dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=PROJECT, text=True).strip()), "files": hashes,
+                "candidate": "C Day5 longtail075 emotion; empty profile; D 2-epoch 1.5B LoRA",
                 "limitations": ["Official scoring and final image approval remain pending",
                                 "C training logs embedded in metrics JSON; D raw logs included",
                                 "Acceptance records intentionally excluded"]}

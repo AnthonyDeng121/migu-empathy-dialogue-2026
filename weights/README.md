@@ -14,6 +14,11 @@
 
 ## 已发布权重（GitHub Release）
 
+2026-10-17 A 集成测试锁定最新 C Day5 与 D 2-epoch 候选。C 使用标准 sequence classification 权重（非旧 packaged 情感/画像格式）；D 仍使用固定基座加 adapter。最终采用由 A/B 全量复核决定。
+
+- C 最新：[c-day5-emotion-longtail075-20261016](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-day5-emotion-longtail075-20261016)，资产 `C_DAY5_EMOTION_LONGTAIL075_20261016.zip`，包 SHA-256 `67db558687a42c6b10f31075ff1fecf14ffc6ba881c4d14d0bcd387b0ea0c526`；模型权重 SHA-256 `aedbacb14bced4417ac00d42c7cfccec722b64efaf84779fd9c8339f018e9e37`。
+- D 最新：[d-day4-response-sft-2ep-20261017](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/d-day4-response-sft-2ep-20261017)，资产 `d4_2ep_adapter.zip`，包 SHA-256 `e82edaf05330ba221cdfc89697df2ecf246dee42a379211a831cc94c09b05ba3`；adapter SHA-256 `6b75245a4eddff63da77d260a509028ce85a89c73bef58bda4e33934ca7b767e`。模型目录仅含 10 个模型/tokenizer 文件，排除 HANDOFF/SHA256SUMS 后摘要为 `b3e9017e79bea947338730975b7490d9f432dea94c32e848ad66af1bb98f3ecb`。
+
 | 候选 | Release tag | 资产 | 关键哈希 |
 |---|---|---|---|
 | D 回复候选 D2 LoRA/SFT（Qwen2.5-1.5B-Instruct + adapter，2026-10-15） | [`d-day3-response-sft-20261015`](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/d-day3-response-sft-20261015)（Pre-release） | `D_DAY3_RESPONSE_SFT_D2_1P5B_20261015.zip`（adapter + tokenizer 10 文件 + `HANDOFF.md` + `SHA256SUMS.txt`）与 `.sha256` 边车；`…_MERGED_20261015.zip.001/.002` 为 merge 备选分卷（非字节等价，采用需同集重评，见包内 `MERGED_HANDOFF.md`） | adapter_model.safetensors `62a695ea…`；adapter 目录 digest `af4f0e38…`（固定于 `configs/response_artifact.json`）；merged 目录 digest `9dcd82e9…` |
