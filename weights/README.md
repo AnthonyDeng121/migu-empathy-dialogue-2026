@@ -17,6 +17,7 @@
 | 候选 | Release tag | 资产 | 关键哈希 |
 |---|---|---|---|
 | D 回复候选 D2 LoRA/SFT（Qwen2.5-1.5B-Instruct + adapter，2026-10-15） | [`d-day3-response-sft-20261015`](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/d-day3-response-sft-20261015)（Pre-release） | `D_DAY3_RESPONSE_SFT_D2_1P5B_20261015.zip`（adapter + tokenizer 10 文件 + `HANDOFF.md` + `SHA256SUMS.txt`）与 `.sha256` 边车；`…_MERGED_20261015.zip.001/.002` 为 merge 备选分卷（非字节等价，采用需同集重评，见包内 `MERGED_HANDOFF.md`） | adapter_model.safetensors `62a695ea…`；adapter 目录 digest `af4f0e38…`（固定于 `configs/response_artifact.json`）；merged 目录 digest `9dcd82e9…` |
+| D 回复候选 v2 LoRA/SFT 2-epoch（Qwen2.5-1.5B-Instruct + adapter，2026-10-17，**候选 v2 待 B2/A 决策，未采用前 D2 仍是交付候选**） | [`d-day4-response-sft-2ep-20261017`](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/d-day4-response-sft-2ep-20261017)（Pre-release） | `d4_2ep_adapter.zip`（adapter + tokenizer 10 文件 + `HANDOFF.md` + `SHA256SUMS`）与 `.sha256` 边车 | zip SHA-256 `e82edaf0…`；adapter 目录 digest `b3e9017e…`（10 文件 / 52,866,512 字节）；同集 val ROUGE-L 0.2598 / BLEU-4 0.1116（vs D2 0.2542/0.1075） |
 | C 情感/画像候选 Day3 重训（2026-10-15） | [`c-day3-retrained-20261015`](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-day3-retrained-20261015)（Pre-release） | `C_DAY3_RETRAINED_EMOTION_PROFILE_20261015.zip` 与 `.sha256` 边车 | 见 C 的交接报告 `reports/C_DAY3_RETRAINED_HANDOFF_20261015.md` |
 
 下载后放入 `weights/<component>/<version>/`，先跑 `sha256sum -c` 边车/包内校验再使用。

@@ -179,3 +179,25 @@ class WeightStorageNoteTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TwoEpochConfigTests(unittest.TestCase):
+    """Day4 单变量候选配置：与 D2 首轮唯一差别是 epochs。"""
+
+    def test_only_epochs_differs_from_first_round(self) -> None:
+        import json
+
+        base = json.loads(Path("configs/response_sft.json").read_text(encoding="utf-8"))
+        candidate = json.loads(Path("configs/response_sft_2epoch.json").read_text(encoding="utf-8"))
+        candidate.pop("_comment", None)
+        self.assertEqual(candidate.pop("epochs"), 2)
+        self.assertEqual(base.pop("epochs"), 1)
+        self.assertEqual(candidate, base)
+
+    def test_epoch_plan_doubles_steps(self) -> None:
+        plan_one = _epoch_micro_batches(64, 1, 1, 20261013)
+        plan_two = _epoch_micro_batches(64, 1, 2, 20261013)
+        self.assertEqual(len(plan_one), 1)
+        self.assertEqual(len(plan_two), 2)
+        self.assertEqual(len(plan_two[0]), len(plan_two[1]))
+        self.assertEqual(_steps_per_epoch(18653, 1, 8), 2332)
