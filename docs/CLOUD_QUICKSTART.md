@@ -80,7 +80,7 @@ docker build -f Dockerfile.integrated --build-arg OFFICIAL_BASE_IMAGE=<官方完
 
 构建需要可访问的软件包源；运行不需要联网。该配方需在实际官方基础镜像上构建并执行 GPU/断网回归才算验收，源码中有 Dockerfile 不代表镜像已构建成功。专家材料由明确清单打包，含技术方案、实验记录和训练日志及 SHA-256，不包含本地验收记录；需按最终候选复核材料完整性。
 
-若实例没有 Docker，通过平台保存当前实例镜像。使用 `scripts/stage_submission.py --config configs/cloud_runtime.json --python /opt/conda/envs/conda_env/bin/python --destination /root/migu-submission-latest` 建立新目录；配置中的模型路径应指向上述最新权重。此脚本不覆盖现有目录。已验证的 Day6 候选为 `/root/migu-submission-day6`，不要为更新文档重新覆盖它。验证新目录后再切换官方路径，最终必须重跑 `bash /root/participant/start.sh TEST_FILE RESULT_DIR`。保存时保留指定 Python 环境，将专家材料放入 `/root/AI技术赛道-数字人综合情感对话模型-正式队名`，并核对基础镜像来源。平台保存、安全审核、B 复核和官方成功状态仍分别记录，不能以试跑代替。
+若实例没有 Docker，在从大赛专属公有镜像创建的实例内完成部署和验证，再使用平台的「上传大赛镜像」入口。使用 `scripts/stage_submission.py --config configs/cloud_runtime.json --python /opt/conda/envs/conda_env/bin/python --destination /root/migu-submission-latest` 建立新目录；配置中的模型路径应指向上述最新权重。此脚本不覆盖现有目录。验证新目录后再切换官方路径，最终必须重跑 `bash /root/participant/start.sh TEST_FILE RESULT_DIR`。上传时保留指定 Python 环境，将专家材料放入 `/root/AI技术赛道-数字人综合情感对话模型-正式队名`。平台已明确：私有镜像创建的实例无法上传大赛镜像；「保存镜像」及私有镜像恢复不能代替参赛上传路径。上传、安全审核、B 复核和官方成功状态仍分别记录，不能以试跑代替。
 
 验收报告仅保存在本地忽略目录 `.codex_tmp/acceptance/`，不提交或上传 GitHub。
 
@@ -93,4 +93,6 @@ C 使用 `classifier_format=sequence`，按 C 训练脚本的 `tuple(sorted(EMOT
 
 正式候选必须通过预检、两次断网冷启动、同集全量推理和 B 独立复核。局部指标回退须在选型中明确：C mixed 类 F1 下降，D 21–50 字桶 ROUGE-L 下降约 0.8%；整体指标提升不证明所有切片均改善。
 
-B 通过后，在比赛平台保存包含 `/root/participant` 实际目录及指定 Python 环境的实例镜像，记录镜像标识/digest；使用保存后的镜像恢复新实例，复核固定模型哈希并以官方两参数入口断网冷启动。原实例内目录试跑不能替代保存后恢复检查。随后选择该镜像，完成安全审核并发起官方测评，保留结果编号和截图。未确认成功状态前不能记为官方有效提交。
+B 通过后，从大赛专属公有镜像实例的「上传大赛镜像」入口提交，记录平台生成的镜像标识/digest、上传和审核日志。镜像必须保留 `/root/participant` 实际目录及指定 Python 环境。上传后的镜像级验证按平台支持的方式进行，并关联上传前后的模型哈希、配置和断网官方入口证据；原实例内目录试跑不能冒充已完成上传后验证。不要为了这一步改从私有镜像创建参赛实例。审核通过后再发起官方测评，保留结果编号和截图。未确认成功状态前不能记为官方有效提交。
+
+2026-10-18 在原大赛公有实例（SSH 端口 58346）重新部署：候选目录 `/root/migu-submission-latest-20261018`，独立推理环境 `/root/migu-inference-20261018`，官方入口 `/root/participant/start.sh`。模型和推理环境都在系统盘，不依赖 `/mnt/storage`。旧候选与数据保留；不要将旧 Day4 模型路径用于本次上传。
