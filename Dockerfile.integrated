@@ -19,9 +19,9 @@ COPY scripts/ scripts/
 COPY configs/ configs/
 COPY start.sh start.sh
 # Named context must contain precisely these three model directories.
-COPY --from=model_assets /emotion_profile/ weights/emotion_profile/
+COPY --from=model_assets /emotion_longtail075_b1_20261016/ weights/emotion_longtail075_b1_20261016/
 COPY --from=model_assets /hf/Qwen2.5-1.5B-Instruct/ weights/hf/Qwen2.5-1.5B-Instruct/
-COPY --from=model_assets /response_sft_d2_1p5b/ weights/response_sft_d2_1p5b/
+COPY --from=model_assets /response_sft_d4_2ep/ weights/response_sft_d4_2ep/
 COPY --from=expert_materials / /root/AI技术赛道-数字人综合情感对话模型-${TEAM_NAME}/
 RUN chmod +x start.sh && ${PYTHON_BIN} scripts/cloud_preflight.py --files-only --verify-hashes
 ENTRYPOINT ["/root/participant/start.sh"]

@@ -6,17 +6,17 @@
 
 将完整文件夹放到项目目录下：
 
-- C：`weights/emotion_profile/`，包含 `checkpoint_metadata.json`、`heads.safetensors`、`encoder/`（配置及权重）和 tokenizer 文件。正式候选应使用 C 全量训练的产物，不用三步试跑产物替代。
+- C：`weights/emotion_longtail075_b1_20261016/`，包含 `config.json`、`model.safetensors`、`tokenizer.json` 和 `tokenizer_config.json`；使用标准 sequence classification 格式。
 - D 基座：`weights/hf/Qwen2.5-1.5B-Instruct/`，完整配置、分片权重和 tokenizer；revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306`。
-- D adapter：`weights/response_sft_d2_1p5b/`，包含 `adapter_config.json`、`adapter_model.safetensors`。当前候选 adapter SHA-256 为 `62a695ea594a1546e217ee5edd691131051a4e64e3ecfcec91af75de7a133fcf`。
+- D adapter：`weights/response_sft_d4_2ep/`，包含 `adapter_config.json`、`adapter_model.safetensors` 与交付的 tokenizer 文件。当前候选 adapter SHA-256 为 `6b75245a4eddff63da77d260a509028ce85a89c73bef58bda4e33934ca7b767e`。
 
-D 的持久交付为 GitHub Release `d-day3-response-sft-20261015`，使用资产 `D_DAY3_RESPONSE_SFT_D2_1P5B_20261015.zip`（adapter 与 tokenizer）。基座仍需固定 revision 的本地副本；完整目录指纹见 `configs/response_artifact.json`。保留包内原始 `adapter_config.json`，不要因其中训练机路径而直接改写。merged 分卷是备用方案，生成结果与基座加 adapter 不保证一致；换用须重新全量评测，当前候选继续使用基座加 adapter。
+D 的持久交付为 GitHub Release `d-day4-response-sft-2ep-20261017`，使用资产 `d4_2ep_adapter.zip`（adapter 与 tokenizer）。基座仍需固定 revision 的本地副本；完整目录指纹见 `configs/response_artifact.json`。保留原始 `adapter_config.json`。先校验包内 SHA256SUMS，再将 10 个模型/tokenizer 文件放入部署目录；HANDOFF/SHA256SUMS 不纳入模型目录摘要。旧 D2 adapter 与 merged 分卷不属于本次候选。
 
 已有云端模型不必下载再上传；在 `configs/integrated.json` 填写云端绝对路径即可。相对路径以项目根目录为准。
 
-当前 C 候选是 Release `c-day3-retrained-20261015`（包 SHA-256 `550e9c4743671eb736338c8193b7cdc3f82386c63a86ac2d143dcf034c2f7b50`），使用从 C 源 commit `54e65f0` 引入的 `EmotionProfileCheckpoint`，不能使用旧版联合头加载方式。`classifier_format=packaged` 读取每维校准阈值并采用模型记录的标签顺序。文件哈希固定在 `configs/integrated_artifacts.json`。
+当前 C 候选是 Release `c-day5-emotion-longtail075-20261016`（包 SHA-256 `67db558687a42c6b10f31075ff1fecf14ffc6ba881c4d14d0bcd387b0ea0c526`），配置 `classifier_format=sequence`，通过 `AutoModelForSequenceClassification` 加载，按训练脚本的 `tuple(sorted(EMOTIONS))` 解释输出。文件哈希固定在 `configs/integrated_artifacts.json`。
 
-该 Release 的画像完全匹配率未超过空画像基线，所以默认 `profile_mode=empty`；情感照常由 C 模型预测。`profile_mode=model` 可用于对比画像头，不代表该画像头已验收通过。
+该 checkpoint 仅预测情感，不含画像头，因此必须使用 `profile_mode=empty`；`profile_mode=model` 会被配置校验拒绝。
 
 ## 本机打包和上传
 
@@ -74,13 +74,13 @@ bash /root/participant/start.sh TEST_FILE RESULT_DIR
 另提供 `Dockerfile.integrated`，固定集成入口且不替换平台 PyTorch。待确认实际官方镜像引用、模型文件齐备后，可用 BuildKit 构建：
 
 ```bash
-python scripts/package_expert_materials.py --output artifacts/expert_materials_day4
-docker build -f Dockerfile.integrated --build-arg OFFICIAL_BASE_IMAGE=<官方完整镜像引用> --build-arg TEAM_NAME=<正式队名> --build-context model_assets=./weights --build-context expert_materials=./artifacts/expert_materials_day4 -t migu-integrated:candidate .
+python scripts/package_expert_materials.py --output artifacts/expert_materials_latest
+docker build -f Dockerfile.integrated --build-arg OFFICIAL_BASE_IMAGE=<官方完整镜像引用> --build-arg TEAM_NAME=<正式队名> --build-context model_assets=./weights --build-context expert_materials=./artifacts/expert_materials_latest -t migu-integrated:candidate .
 ```
 
 构建需要可访问的软件包源；运行不需要联网。该配方需在实际官方基础镜像上构建并执行 GPU/断网回归才算验收，源码中有 Dockerfile 不代表镜像已构建成功。专家材料由明确清单打包，含技术方案、实验记录和训练日志及 SHA-256，不包含本地验收记录；需按最终候选复核材料完整性。
 
-若实例没有 Docker，通过平台保存当前实例镜像。先使用 `scripts/stage_submission.py --config configs/cloud_runtime.json --python /root/a-integration-20261015/venv/bin/python --destination /root/migu-submission-day4` 建立新目录；它复制模型并固化入口环境，不覆盖现有 `/root/participant`。验证新目录后再切换官方路径，最终必须重跑 `bash /root/participant/start.sh TEST_FILE RESULT_DIR`。保存时保留指定 Python 环境，将专家材料放入 `/root/AI技术赛道-数字人综合情感对话模型-正式队名`，并核对基础镜像来源。平台保存、安全审核、B 复核和官方成功状态仍分别记录，不能以试跑代替。
+若实例没有 Docker，通过平台保存当前实例镜像。使用 `scripts/stage_submission.py --config configs/cloud_runtime.json --python /opt/conda/envs/conda_env/bin/python --destination /root/migu-submission-latest` 建立新目录；配置中的模型路径应指向上述最新权重。此脚本不覆盖现有目录。已验证的 Day6 候选为 `/root/migu-submission-day6`，不要为更新文档重新覆盖它。验证新目录后再切换官方路径，最终必须重跑 `bash /root/participant/start.sh TEST_FILE RESULT_DIR`。保存时保留指定 Python 环境，将专家材料放入 `/root/AI技术赛道-数字人综合情感对话模型-正式队名`，并核对基础镜像来源。平台保存、安全审核、B 复核和官方成功状态仍分别记录，不能以试跑代替。
 
 验收报告仅保存在本地忽略目录 `.codex_tmp/acceptance/`，不提交或上传 GitHub。
 
