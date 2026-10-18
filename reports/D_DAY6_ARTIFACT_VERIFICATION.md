@@ -1,6 +1,6 @@
-# D 岗位 Day 6（10/18，G5 冻结日）：候选 v2 权重/tokenizer/adapter 核对与冷启动门禁，A Day6 集成分支审查
+# D 岗位 Day 6（10/18，G5 冻结日）：候选 v2 权重/tokenizer/adapter 核对与冷启动门禁，A Day6 集成分支 D 侧技术核验
 
-**状态：Integration Gate。** 执行计划 10/18 D 行为"权重/tokenizer/adapter 核对 1–2h；故障与 review 支持 1–2h"，当天交付要求"两次预测哈希一致，性能报告完整；22:00 代码及模型冻结"（G5）。核对主体于 **10/17 16:00–17:00 提前完成**（纯 CPU/本机 4060，GPU 卡时 0），本报告 10/18 补写并对接 A 的 Day6 集成 PR（#22）。五项核对全部通过；对 A 分支的预审查已转为 PR #22 正式 review（1 P0 必修 + 4 P1）。命令、门禁结果与逐条预测均可独立复现。
+**状态：Integration Gate。** 执行计划 10/18 D 行为"权重/tokenizer/adapter 核对 1–2h；故障与 review 支持 1–2h"，当天交付要求"两次预测哈希一致，性能报告完整；22:00 代码及模型冻结"（G5）。核对主体于 **10/17 16:00–17:00 提前完成**（纯 CPU/本机 4060，GPU 卡时 0），本报告 10/18 补写并对接 A 的 Day6 集成 PR（#22）。五项核对全部通过；另以**公共接口属主身份**对 A Day6 分支做了 D 侧技术核验（该 PR 改动了 D 的 `verify_response_artifact.py` 与 `configs/response_artifact.json`，依据执行计划"相关公共接口追加模块负责人复核"），意见已提交 PR #22 供 A 修复与 B 的正式审查参考——**本 PR 的正式审查归 B（闭环 A→B→C→D→A 即"被下一环审"），D 不持有 approve 权，该定位已于 10/18 在 PR #22 评论中更正**。命令、门禁结果与逐条预测均可独立复现。
 
 ## 为什么做这项
 
@@ -101,9 +101,9 @@ adapter 包为自包含而内嵌了一份 tokenizer（Release 包的 10 个文�
 
 对照：10/17 远程 4090 全量 2,354 条为 3.3176 秒/条、24.95 tok/s；本机 4060 约为其 1/2.8 速度，量级吻合（D2 在 10/15 的同一对照为 1/1.9–1/2.7）。全量外推约 22,000s ≈ 6.1h（4060），仅作预算参考。
 
-## 对 A Day6 集成分支的审查（已作为正式 review 提交 PR #22）
+## 对 A Day6 集成分支的 D 侧技术核验（输入给 B 的正式 review；D 不持有 approve 权）
 
-A 的分支 `feature/a-day6-latest-model-integration`（tip `c6d1323`）于 10/17 夜开为 PR #22。审查方式：分支 diff 全量 + 两个并行子智能体分头实跑（分支 177/177 单测、ci_smoke、bash -n、git check-ignore）+ D 本人本地复算全部哈希。完整意见见 PR #22 review 评论，摘要：
+A 的分支 `feature/a-day6-latest-model-integration`（tip `c6d1323`）于 10/17 夜开为 PR #22。审查方式：分支 diff 全量 + 两个并行子智能体分头实跑（分支 177/177 单测、ci_smoke、bash -n、git check-ignore）+ D 本人本地复算全部哈希。完整意见见 PR #22 评论（含 10/18 的角色定位更正），摘要：
 
 **D 侧接线全部正确**（均有本机独立复算证据）：`configs/integrated.json`（v2 adapter/基座/256/无条件/sequence 分类/空画像）符合 D 全部要求；`configs/response_artifact.json` 的 v2 digest 同步正确且与本地复算逐位一致（D 此前 flag 的跨组事项已闭环）；`configs/integrated_artifacts.json` 五哈希三方一致；`run_integrated.py` 生成参数/schema/ID/memory_refs 与 D 已验证路径逐项相同；专家材料打包清单对 D 在 PR #21 §4 给的增量 21/21 全纳入；177/177 单测实跑 + ci_smoke PASS；`artifact_digest()` 排序改动对交付物中性（见核对 1）。
 
