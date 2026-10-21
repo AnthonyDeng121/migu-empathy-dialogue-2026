@@ -11,8 +11,13 @@ import zipfile
 class CloudPackageContractTests(unittest.TestCase):
     def test_official_launcher_files_survive_cloud_packaging(self):
         project = Path(__file__).resolve().parents[1]
-        subprocess.run([sys.executable, str(project / 'scripts/package_cloud.py')],
-                       check=True, capture_output=True)
+        with tempfile.TemporaryDirectory() as directory:
+            sample = Path(directory) / 'sample.jsonl'
+            sample.write_text(json.dumps({'id': 'smoke_1', 'conversation_id': 'c1',
+                                         'target_user_turn_id': 1,
+                                         'history': [{'turn_id': 1, 'role': 'user', 'content': 'hello'}]}) + '\n')
+            subprocess.run([sys.executable, str(project / 'scripts/package_cloud.py'),
+                            '--sample-input', str(sample)], check=True, capture_output=True)
         with zipfile.ZipFile(project / 'artifacts/cloud_source.zip') as archive:
             config = json.loads(archive.read('configs/inference_config.json'))
             self.assertEqual(config['backend'], 'transformers')
