@@ -67,7 +67,7 @@ bash /root/participant/start.sh TEST_FILE RESULT_DIR
 
 默认 D 回复不注入 C 预测标签，沿用 D 已验证的无条件候选。比较后才将 `condition_response` 改为 `true`；运行时不读取验证集真值。
 
-同名产物已存在时拒绝覆盖，请使用新结果目录。GPU 不可用时立即停止，先处理平台资源问题。样例通过后，再做100条、全量和容器断网检查；离线环境变量不能代替容器 `--network none`。
+结果目录可已存在；成功运行会替换 submission.jsonl 和 performance_report.json，保留其他文件。GPU 不可用时立即停止，先处理平台资源问题。样例通过后，再做100条、全量和容器断网检查；离线环境变量不能代替容器 `--network none`。
 
 最终保存镜像前，将 `INFERENCE_BACKEND=integrated`、正确的 `PYTHON_BIN` 和模型路径固化到镜像环境，确保评委只执行官方两参数命令即可启动。当前开发 Dockerfile 仍为保底镜像，不能直接作为最终集成镜像提交。
 
@@ -97,10 +97,12 @@ B 通过后，从大赛专属公有镜像实例的「上传大赛镜像」入口
 
 2026-10-18 在原大赛公有实例（SSH 端口 58346）重新部署：候选目录 `/root/migu-submission-latest-20261018`，独立推理环境 `/root/migu-inference-20261018`，官方入口 `/root/participant/start.sh`。模型和推理环境都在系统盘，不依赖 `/mnt/storage`。旧候选与数据保留；不要将旧 Day4 模型路径用于本次上传。
 
-## ??????????2026-10-21?
+## 官方配置与打包修复（2026-10-21）
 
-??????? `configs/inference_config.json`?`configs/integrated.json` ???? `run_inference.py`??????????????????????? C/D ?????stage_submission.py ????? Python ???`configs/cloud_runtime.json` ?????????? integrated.json???????????????????? `/root/participant` ??????????????????????
+部署包必须保留 `configs/inference_config.json`、`configs/integrated.json` 和根目录 `run_inference.py`。原官方启动脚本读取前者后，由兼容入口执行固定 C/D 集成推理；`stage_submission.py` 会写入所选 Python 路径。
 
-????? C Day5 longtail075?D Day4 2-epoch?condition_response=false?profile_mode=empty?max_new_tokens=256??????????????????????????????????
+`configs/cloud_runtime.json` 是运行期配置：先复制 integrated.json，再将三个模型目录改为实际绝对路径。正式 `/root/participant` 应为包含模型的实际目录，避免只保存符号链接。
 
-???????????????????? data/raw/test_inference_data.jsonl???? `python scripts/package_cloud.py --sample-input /path/to/test_inference_data.jsonl`????????????????????
+固定基线为 C Day5 longtail075、D Day4 2-epoch，`condition_response=false`、`profile_mode=empty`、`max_new_tokens=256`。新版条件开关的同集对照尚无报告，不将旧组合负结果解释为新版已验证。
+
+新克隆仓库不含官方样例数据；打包时先放入 data/raw/test_inference_data.jsonl，或执行 `python scripts/package_cloud.py --sample-input /path/to/test_inference_data.jsonl`。构建脚本会将指定样例写入固定包内路径。
