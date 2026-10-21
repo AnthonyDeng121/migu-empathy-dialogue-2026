@@ -24,6 +24,7 @@ MATERIALS = (
     "reports/d_day3_sft_full_1p5b.json", "logs/D_DAY3_SFT_FULL_1P5B.txt",
     "logs/D_DAY3_SFT_SMOKE_1P5B.txt", "configs/integrated.json",
     "configs/integrated_artifacts.json",
+    "configs/inference_config.json", "run_inference.py",
 )
 
 
@@ -49,7 +50,7 @@ def main():
     manifest = {"source_commit": commit, "source_dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=PROJECT, text=True).strip()), "files": hashes,
                 "candidate": "C Day5 longtail075 emotion; empty profile; D 2-epoch 1.5B LoRA",
                 "limitations": ["Official scoring and final image approval remain pending",
-                                "C training logs embedded in metrics JSON; D raw logs included",
+                                "C and D raw training logs included",
                                 "Acceptance records intentionally excluded"]}
     (output / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Prepared {len(hashes)} materials: {output}")

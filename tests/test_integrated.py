@@ -64,8 +64,11 @@ class IntegratedTests(unittest.TestCase):
             self.assertEqual(len(predictions), 101)
             self.assertEqual(predictions[-1]["id"], "test1_100")
             self.assertTrue((result / "performance_report.json").exists())
-            with self.assertRaises(FileExistsError):
+            (result / "keep.txt").write_text("keep", encoding="utf-8")
+            with patch("builtins.print"):
                 run(path, result, {"condition_response": False}, FakeModels)
+            self.assertEqual((result / "keep.txt").read_text(encoding="utf-8"), "keep")
+            self.assertEqual(len((result / "submission.jsonl").read_text(encoding="utf-8").splitlines()), 101)
 
     def test_invalid_prediction_does_not_publish_submission(self):
         with tempfile.TemporaryDirectory() as directory:

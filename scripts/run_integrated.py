@@ -152,9 +152,6 @@ def run(test_file, result_dir, config, factory=Models):
     if len({row["id"] for row in rows}) != len(rows):
         raise ValueError("Duplicate input IDs")
     result_dir.mkdir(parents=True, exist_ok=True)
-    for name in ("submission.jsonl", "performance_report.json"):
-        if (result_dir / name).exists():
-            raise FileExistsError(f"Use a fresh result directory: {result_dir / name}")
     started = time.perf_counter()
     models = factory(config)
     models.synchronize()

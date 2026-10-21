@@ -18,6 +18,7 @@ COPY src/ src/
 COPY scripts/ scripts/
 COPY configs/ configs/
 COPY start.sh start.sh
+COPY run_inference.py run_inference.py
 # Named context must contain precisely these three model directories.
 COPY --from=model_assets /emotion_longtail075_b1_20261016/ weights/emotion_longtail075_b1_20261016/
 COPY --from=model_assets /hf/Qwen2.5-1.5B-Instruct/ weights/hf/Qwen2.5-1.5B-Instruct/

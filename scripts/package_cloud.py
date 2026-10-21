@@ -16,7 +16,7 @@ def main():
     files = [path for directory in allowed for path in directory.rglob("*")
              if path.is_file() and path.suffix in {".py", ".sh", ".json", ".md"}
              and "__pycache__" not in path.parts and ".codex_tmp" not in path.parts]
-    files += [PROJECT / "start.sh", PROJECT / "Dockerfile.integrated", PROJECT / "data/raw/test_inference_data.jsonl"]
+    files += [PROJECT / "start.sh", PROJECT / "run_inference.py", PROJECT / "Dockerfile.integrated", PROJECT / "data/raw/test_inference_data.jsonl"]
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(files):
             archive.write(path, path.relative_to(PROJECT).as_posix())

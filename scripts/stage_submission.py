@@ -42,6 +42,11 @@ def main():
     for relative, source in model_dirs.items():
         shutil.copytree(source, destination / relative)
     (destination / "configs/integrated.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+    compatibility_path = destination / "configs/inference_config.json"
+    compatibility = json.loads(compatibility_path.read_text(encoding="utf-8"))
+    compatibility["python_bin"] = str(executable)
+    compatibility_path.write_text(json.dumps(compatibility, indent=2) + "\n", encoding="utf-8")
+    shutil.copyfile(PROJECT / "run_inference.py", destination / "run_inference.py")
     shutil.copyfile(PROJECT / "start.sh", destination / "start_backend.sh")
     wrapper = ('#!/bin/sh\nset -eu\n'
                f'export PYTHON_BIN={executable}\n'

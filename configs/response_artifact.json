@@ -1,6 +1,6 @@
 {
   "artifact": "response_d4_2ep_1p5b",
-  "description": "D2 首轮回复候选（Qwen2.5-1.5B-Instruct + LoRA adapter）的字节指纹。digest 覆盖目录下全部非隐藏文件（相对路径 + 逐文件 SHA-256），用于 scripts/verify_response_artifact.py 在交付/入镜像前比对，防止 adapter 被换或模型快照拷半份。",
+  "description": "D Day4 ?????????Qwen2.5-1.5B-Instruct + LoRA adapter??????????????????????????????????????",
   "base_model": {
     "path": "weights/hf/Qwen2.5-1.5B-Instruct",
     "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
