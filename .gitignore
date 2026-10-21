@@ -66,3 +66,6 @@ explain.md
 !results/response_gen/d4_2ep_val_full_report.json
 !logs/D_DAY4_SFT_FULL_2EP.txt
 !logs/d4_2ep_val_full.txt
+
+# D6（10/18 任务提前执行）：v2 冷启动门禁 stdout
+!logs/D_DAY6_ARTIFACT_VERIFY.txt
