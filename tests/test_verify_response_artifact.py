@@ -58,6 +58,17 @@ class OfflineEnvTests(unittest.TestCase):
 
 
 class DigestTests(unittest.TestCase):
+    def test_digest_orders_paths_by_posix_case_sensitive_names(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            expected = hashlib.sha256()
+            for name in ("README.md", "adapter_config.json"):
+                (root / name).write_bytes(name.encode())
+                expected.update(name.encode())
+                expected.update(hashlib.sha256(name.encode()).hexdigest().encode())
+            self.assertEqual(artifact_digest(root)["digest"], expected.hexdigest())
+
     def test_sha256_of_known_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "blob.bin"
