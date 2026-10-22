@@ -419,6 +419,20 @@ class BuildSftSamplesFromB1Tests(unittest.TestCase):
         sample = build_sft_samples_from_b1(rows, condition_mode="none")[0]
         self.assertEqual(sample["messages"][0]["content"], BASE_SYSTEM_PROMPT)
 
+    def test_condition_mode_none_ignores_gold_rows(self) -> None:
+        # CYCLE2 T3 单变量对照：condition_mode="none" 必须彻底忽略调用方
+        # 传入的金标条件行。即使误传 condition_rows，也不能静默回退 gold
+        # 注入，否则"部署不注入条件"的对照臂会被金标条件污染，失配实验
+        # 失去意义（配置写了 none 但代码回退 gold 的回归防线）。
+        rows = [make_b1_response_row('pp:["c",3,1]')]
+        conditions = [make_b1_classification_row('pp:["c",3,1]')]
+        sample = build_sft_samples_from_b1(
+            rows, condition_rows=conditions, condition_mode="none"
+        )[0]
+        self.assertEqual(sample["messages"][0]["content"], BASE_SYSTEM_PROMPT)
+        self.assertNotIn("anxiety", sample["messages"][0]["content"])
+        self.assertNotIn("sensitive", sample["messages"][0]["content"])
+
     def test_gold_joins_classification_rows_by_sample_id(self) -> None:
         rows = [make_b1_response_row('pp:["c",3,1]')]
         conditions = [make_b1_classification_row('pp:["c",3,1]')]

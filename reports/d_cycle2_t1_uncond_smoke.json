@@ -1,0 +1,149 @@
+{
+  "version": "response_sft_prep_v2",
+  "status": "smoke",
+  "model": {
+    "name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct",
+    "loaded_from": "weights/hf/Qwen2.5-1.5B-Instruct"
+  },
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "dtype": "bfloat16",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 2,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "none",
+    "_comment": "CYCLE2 T3 单变量对照配置：与 D4 v2（configs/response_sft_2epoch.json，金标条件两轮候选）唯一差别是 condition_mode 由 \"gold\" 改为 \"none\"，即训练时不再注入金标情感/画像条件。基座 Qwen2.5-1.5B-Instruct（revision 989aa7980e4cf806f80c7fef2b1adb7bc71aa306）、数据（B1 冻结划分）、预算（epochs 2、batch_size 1、gradient_accumulation 8、learning_rate 0.0001、warmup_ratio 0.03、seed 20261013 等全部不变）均与 D4 v2 逐项一致。目的：检验「用金标条件训练」与「部署侧不注入条件（condition_response=false）」的失配代价，作为 T3 完全无条件两轮 SFT 对照的训练侧配置；对照结论须与 D4 v2 同评测协议比较。"
+  },
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "transformers": "5.17.0",
+    "peft": "0.21.2",
+    "training_seconds": 24.185
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'data/processed/b1_full_v1/response_train.jsonl' \\\n  --config 'configs/response_sft_unconditional_2ep.json' \\\n  --device cuda \\\n  --output-dir 'results/tmp_uncond_smoke' \\\n  --report-json 'reports/d_cycle2_t1_uncond_smoke.json' \\\n  --report-md 'reports/D_CYCLE2_T1_UNCOND_SMOKE.md' \\\n  --train-format b1 \\\n  --model-dir 'weights/hf/Qwen2.5-1.5B-Instruct' \\\n  --max-train-samples 8 \\\n  --max-steps 2",
+    "code_commit": "6c44c689952743ecbc78439d233a9527fea1b1cc",
+    "code_dirty": true,
+    "script_sha256": "bb501a20e27cc75f612e97ce40d5d6899dfd310b26e75378de8e1cc954929d4c"
+  },
+  "data": {
+    "train_path": "data/processed/b1_full_v1/response_train.jsonl",
+    "train_format": "b1",
+    "train_total_samples": 18653,
+    "train_used_samples": 8,
+    "skipped_long_samples": 0,
+    "train_sha256": "a70ca036f2ad28265bbbd3ce6882006f81e7dd7abb39a50dbf0f16cb713e2ff6",
+    "condition_train_sha256": null,
+    "response_turn_consistency": null,
+    "condition_mode": "none",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 456,
+      "mean": 1075.4,
+      "max": 2042
+    }
+  },
+  "parameters": {
+    "trainable": 9232384,
+    "total": 1552946688,
+    "fraction": 0.005945
+  },
+  "training_speed": {
+    "optimizer_steps": 2,
+    "micro_batches_done": 16,
+    "mean_train_loss": 2.8365,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 0,
+    "measured_window_seconds": 0.0,
+    "seconds_per_step": 12.092742,
+    "seconds_per_step_basis": "wall-clock fallback: run shorter than the warm-up skip",
+    "full_steps_per_epoch": 2332,
+    "estimated_full_train_seconds": 56400.549,
+    "estimated_full_train_seconds_with_30pct_margin": 73320.714,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
+  },
+  "vram_peak_bytes": 7204501504,
+  "checks": {
+    "optimizer_steps": 2,
+    "first_loss": 3.120735,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 1.31778014,
+    "lora_tensors": 392,
+    "lora_weights_changed": true,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "results/tmp_uncond_smoke",
+      "lora_tensors_in_file": 392,
+      "lora_tensors_compared": 392,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 3,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "pp:[\"train_conv_000001\",9,1]",
+          "generated_text": "嗯，这种感觉挺真实的：当别人对你冷淡，你会不由自主地怀疑自己在这个圈子中的位置，甚至担心自己会不会也被甩走。\n\n这种感觉的确很不舒服，因为你在乎的不只是自己，还有周围的人怎么看自己。但换个角度看，也是个提醒：你在这里，别人也在，彼此之间都有互动，没有谁是绝对孤立的。\n\n现在你可以试试，暂时不去纠结于“冷淡”背后的具体问题，而是先关注一下自己在朋友圈里的位置感。如果发现自己越来越不自在，不妨找个时间，给自己一些空间冷静一下，看看是否真的需要调整。\n\n不管结果如何，至少现在你有了明确的目标：让自己舒服些。"
+        },
+        {
+          "id": "pp:[\"train_conv_000001\",11,2]",
+          "generated_text": "真怕被整个圈子排除在外，那才是最可怕的。因为这不仅是个人情绪的问题，也是社交网络的复杂性：一个人的情绪波动，可能很快就被放大到影响整个群体。\n\n现在他俩的关系似乎有了些缓和，但你还是担心自己会被边缘化，这种恐惧感就像一把刀，每次触碰到都会疼一下。不过，你也不必太自责，每个人都有这样的时刻，重要的是找到办法让自己重新融入。\n\n如果实在卡在这种纠结中，不妨暂时先放一放，给自己一些时间调整心态。等心情稍微好点了，再考虑下一步行动。"
+        },
+        {
+          "id": "pp:[\"train_conv_000001\",15,3]",
+          "generated_text": "明白了，那就顺其自然吧。\n\n不管最后结果如何，至少现在能给自己一个选择：既不纠结于“到底算不算得上”，也不太在乎“具体站在哪儿”。只要能让自己舒服，就挺好。"
+        }
+      ],
+      "passed": true
+    },
+    "generation_probe": [
+      {
+        "id": "pp:[\"train_conv_000001\",9,1]",
+        "generated_text": "嗯，这种感觉挺真实的：当别人对你冷淡，你会不由自主地怀疑自己在这个圈子中的位置，甚至担心自己会不会也被甩走。\n\n这种感觉的确很不舒服，因为你在乎的不只是自己，还有周围的人怎么看自己。但换个角度看，也是个提醒：你在这里，别人也在，彼此之间都有互动，没有谁是绝对孤立的。\n\n现在你可以试试，暂时不去纠结于“冷淡”背后的具体问题，而是先关注一下自己在朋友圈里的位置感。如果发现自己越来越不自在，不妨找个时间，给自己一些空间冷静一下，看看是否真的需要调整。\n\n不管结果如何，至少现在你有了明确的目标：让自己舒服些。"
+      },
+      {
+        "id": "pp:[\"train_conv_000001\",11,2]",
+        "generated_text": "真怕被整个圈子排除在外，那才是最可怕的。因为这不仅是个人情绪的问题，也是社交网络的复杂性：一个人的情绪波动，可能很快就被放大到影响整个群体。\n\n现在他俩的关系似乎有了些缓和，但你还是担心自己会被边缘化，这种恐惧感就像一把刀，每次触碰到都会疼一下。不过，你也不必太自责，每个人都有这样的时刻，重要的是找到办法让自己重新融入。\n\n如果实在卡在这种纠结中，不妨暂时先放一放，给自己一些时间调整心态。等心情稍微好点了，再考虑下一步行动。"
+      },
+      {
+        "id": "pp:[\"train_conv_000001\",15,3]",
+        "generated_text": "明白了，那就顺其自然吧。\n\n不管最后结果如何，至少现在能给自己一个选择：既不纠结于“到底算不算得上”，也不太在乎“具体站在哪儿”。只要能让自己舒服，就挺好。"
+      }
+    ],
+    "non_empty_generations": 3
+  },
+  "checkpoint_directory": "results/tmp_uncond_smoke",
+  "adapter": {
+    "file": "results/tmp_uncond_smoke/adapter_model.safetensors",
+    "bytes": 36981072,
+    "sha256": "9d16f1af17205841aa39541c30085ec88ac4d8606b81ae213098656ce842251c"
+  }
+}
