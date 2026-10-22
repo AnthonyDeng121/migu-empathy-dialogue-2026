@@ -287,6 +287,52 @@ class PredictedConditionFileTests(unittest.TestCase):
             _load_conditions(path)
         path.unlink()
 
+    def test_emotion_only_accepts_row_without_profile(self) -> None:
+        path = self._write([{"id": "eval_000001_t1", "emotion_label": "anxiety"}])
+        conditions = _load_conditions(path, fields="emotion")
+        self.assertEqual(conditions["eval_000001_t1"], {"emotion_label": "anxiety"})
+        path.unlink()
+
+    def test_emotion_only_drops_profile_when_present(self) -> None:
+        # The same C file drives both arms; the emotion arm must not silently
+        # keep injecting the profile into the prompt.
+        path = self._write(
+            [
+                {
+                    "id": "eval_000001_t1",
+                    "emotion_label": "anxiety",
+                    "user_profile": {"personality_traits": [], "interests": [], "style": []},
+                }
+            ]
+        )
+        conditions = _load_conditions(path, fields="emotion")
+        self.assertNotIn("user_profile", conditions["eval_000001_t1"])
+        path.unlink()
+
+    def test_emotion_only_still_requires_emotion_label(self) -> None:
+        path = self._write(
+            [{"id": "eval_000001_t1", "user_profile": {"personality_traits": [], "interests": [], "style": []}}]
+        )
+        with self.assertRaises(ValueError):
+            _load_conditions(path, fields="emotion")
+        path.unlink()
+
+    def test_emotion_only_prompt_omits_the_profile_line(self) -> None:
+        path = self._write([{"id": "eval_000001_t1", "emotion_label": "anxiety"}])
+        conditions = _load_conditions(path, fields="emotion")
+        sample = build_eval_sample(
+            {
+                "id": "eval_000001_t1",
+                "conversation_id": "val_conv_000001",
+                "target_user_turn_id": 1,
+                "history": [{"turn_id": 1, "role": "user", "content": "有点烦。"}],
+            },
+            condition=conditions["eval_000001_t1"],
+        )
+        self.assertIn("情感状态：anxiety", sample["messages"][0]["content"])
+        self.assertNotIn("用户画像", sample["messages"][0]["content"])
+        path.unlink()
+
     def test_empty_file_rejected(self) -> None:
         path = self._write([])
         with self.assertRaises(ValueError):
