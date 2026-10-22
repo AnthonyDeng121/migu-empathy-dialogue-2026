@@ -28,10 +28,16 @@ def load_config(path):
         raise ValueError("device must be cpu or cuda")
     if config.get("classifier_format", "joint") not in {"joint", "packaged", "sequence"}:
         raise ValueError("classifier_format must be joint, packaged or sequence")
-    if config.get("classifier_format") == "sequence" and config.get("profile_mode") != "empty":
-        raise ValueError("sequence classifier requires profile_mode=empty")
-    if config.get("profile_mode", "model") not in {"model", "empty"}:
-        raise ValueError("profile_mode must be model or empty")
+    if config.get("classifier_format") == "sequence" and config.get("profile_mode", "model") not in {"empty", "independent"}:
+        raise ValueError("sequence classifier requires profile_mode=empty or independent")
+    if config.get("profile_mode", "model") not in {"model", "empty", "independent"}:
+        raise ValueError("profile_mode must be model, empty or independent")
+    if config.get("profile_mode") == "independent":
+        directory = config.get("profile_model_dir")
+        if not isinstance(directory, str) or not directory.strip():
+            raise ValueError("independent profile requires a non-empty profile_model_dir")
+        value = Path(directory)
+        config["profile_model_dir"] = value if value.is_absolute() else PROJECT / value
     if type(config.get("condition_response")) is not bool:
         raise ValueError("condition_response must be a boolean")
     if type(config.get("max_new_tokens")) is not int or config["max_new_tokens"] < 1:
@@ -41,6 +47,9 @@ def load_config(path):
 
 def check_files(config):
     from scripts.predict_emotion_profile import _metadata
+    if config.get("profile_mode") == "independent":
+        from src.classification.emotion_profile_checkpoint import check_packaged_files
+        check_packaged_files(config["profile_model_dir"])
     checkpoint = config["classifier_dir"]
     if config.get("classifier_format") == "sequence":
         for directory, names in ((checkpoint, ("config.json", "model.safetensors", "tokenizer_config.json")),
@@ -103,6 +112,10 @@ class Models:
             if incompatible.unexpected_keys or any(not key.startswith("encoder.") for key in incompatible.missing_keys):
                 raise ValueError("Classifier heads are incompatible")
             self.classifier.to(self.device).eval()
+        self.profile_classifier = None
+        if config.get("profile_mode") == "independent":
+            from src.classification.emotion_profile_checkpoint import EmotionProfileCheckpoint
+            self.profile_classifier = EmotionProfileCheckpoint(config["profile_model_dir"], str(self.device))
         self.d_tokenizer = AutoTokenizer.from_pretrained(config["response_model_dir"], local_files_only=True)
         dtype = torch.bfloat16 if self.device.type == "cuda" and torch.cuda.is_bf16_supported() else torch.float32
         base = AutoModelForCausalLM.from_pretrained(config["response_model_dir"], local_files_only=True, torch_dtype=dtype)
@@ -111,6 +124,18 @@ class Models:
     def synchronize(self):
         if self.device.type == "cuda":
             self.torch.cuda.synchronize(self.device)
+
+    def apply_profile(self, row, classification):
+        """Replace only the profile; never trust an independent model's emotion or ID."""
+        from src.data.schema import PROFILE_LABELS, validate_classification_labels
+        classification = dict(classification)
+        mode = self.config.get("profile_mode", "model")
+        if mode == "empty":
+            classification["user_profile"] = {key: [] for key in PROFILE_LABELS}
+        elif mode == "independent":
+            classification["user_profile"] = self.profile_classifier.predict_contexts([row["history"]])[0]["user_profile"]
+        validate_classification_labels(classification["emotion_label"], classification["user_profile"])
+        return classification
 
     def predict(self, row):
         from scripts.predict_emotion_profile import _predict_group
@@ -129,8 +154,7 @@ class Models:
         else:
             classification = _predict_group([row], self.classifier, self.c_tokenizer, self.torch,
                                             self.device, int(self.metadata["max_length"]), float(self.metadata["profile_threshold"]))[0]
-        if self.config.get("profile_mode", "model") == "empty":
-            classification["user_profile"] = {key: [] for key in classification["user_profile"]}
+        classification = self.apply_profile(row, classification)
         condition = classification if self.config["condition_response"] else None
         sample = build_eval_sample(row, condition=condition)
         prompt = self.d_tokenizer.apply_chat_template(sample["messages"], tokenize=False, add_generation_prompt=True)
