@@ -11,6 +11,8 @@ full-evaluation ETA required by the training workplan.
 id (official submission-schema fields) so the training-time gold conditioning
 can be replaced by predicted conditions at inference; every eval id must be
 covered, otherwise the conditioned/unconditioned prompts would silently mix.
+--condition-fields selects which of the two condition fields enter the prompt:
+"both" (default, every recorded run) or "emotion" (cycle-2 emotion-only arm).
 
 Eval rows may be official test rows (id / history) or frozen B1 response
 rows (sample_id / context_turns); both resolve to the same prompt structure.
@@ -62,13 +64,27 @@ def _device(torch: Any, requested: str) -> Any:
     return torch.device(requested)
 
 
-def _load_conditions(path: Path) -> dict[str, dict[str, Any]]:
-    """Predicted conditions keyed by sample id (C's classification output)."""
+def _load_conditions(path: Path, fields: str = "both") -> dict[str, dict[str, Any]]:
+    """Predicted conditions keyed by sample id (C's classification output).
+
+    fields="both" is the default and reproduces every recorded run:
+    emotion_label plus a dict user_profile are both required. fields="emotion"
+    is the cycle-2 emotion-only ablation arm: the profile may be absent or
+    null and is dropped, so the prompt carries only the 情感状态 line. The
+    same C condition file drives both arms.
+    """
+    if fields not in ("both", "emotion"):
+        raise ValueError(f"unknown condition fields: {fields!r}")
     conditions: dict[str, dict[str, Any]] = {}
     for row in read_jsonl(path):
         sample_id = row.get("id")
         if not sample_id:
             raise ValueError(f"condition row without id in {path}")
+        if fields == "emotion":
+            if "emotion_label" not in row or not isinstance(row["emotion_label"], str):
+                raise ValueError(f"condition row {sample_id} lacks a string emotion_label")
+            conditions[sample_id] = {"emotion_label": row["emotion_label"]}
+            continue
         if "emotion_label" not in row or not isinstance(row.get("user_profile"), dict):
             raise ValueError(
                 f"condition row {sample_id} lacks emotion_label/user_profile"
@@ -110,7 +126,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         rows = rows[: args.max_samples]
     if not rows:
         raise ValueError("eval input contains no rows")
-    conditions = _load_conditions(args.condition_jsonl) if args.condition_jsonl else {}
+    conditions = (
+        _load_conditions(args.condition_jsonl, args.condition_fields)
+        if args.condition_jsonl
+        else {}
+    )
     if conditions:
         missing = [eval_row_id(row) for row in rows if eval_row_id(row) not in conditions]
         if missing:
@@ -176,6 +196,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "dtype": "bfloat16" if use_bf16 else "float32",
         "condition_mode": "predicted" if conditions else "none",
         "condition_source": str(args.condition_jsonl) if args.condition_jsonl else None,
+        "condition_fields": args.condition_fields if args.condition_jsonl else None,
         "condition_coverage": condition_coverage(rows, conditions),
         "input_path": str(args.input),
         "samples": len(predictions),
@@ -218,6 +239,16 @@ def parse_args() -> argparse.Namespace:
         help=(
             "predicted emotion_label/user_profile per sample id (C's output); "
             "when given, every eval id must be covered"
+        ),
+    )
+    parser.add_argument(
+        "--condition-fields",
+        choices=("both", "emotion"),
+        default="both",
+        help=(
+            "which condition fields to inject from --condition-jsonl; both "
+            "(default) reproduces every recorded run, emotion is the cycle-2 "
+            "emotion-only ablation arm (profile dropped from the prompt)"
         ),
     )
     parser.add_argument("--max-new-tokens", type=int, default=256)

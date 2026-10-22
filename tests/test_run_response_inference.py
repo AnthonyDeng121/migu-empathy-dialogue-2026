@@ -49,6 +49,42 @@ class ConditionCoverageTests(unittest.TestCase):
         self.assertIsNone(condition_coverage(B1_ROWS, {}))
 
 
+class ConditionFieldsFlagTests(unittest.TestCase):
+    """Cycle-2 T1: the off vs emotion-only ablation needs the same condition
+    file to drive both arms. ``both`` (the default) must stay byte-identical
+    to every recorded run; ``emotion`` drops the profile from the prompt."""
+
+    def _parse(self, argv: list[str]) -> argparse.Namespace:
+        saved = sys.argv
+        try:
+            sys.argv = ["run_response_inference.py", *argv]
+            return parse_args()
+        finally:
+            saved = sys.argv
+
+    def test_defaults_to_both_so_recorded_runs_are_unchanged(self) -> None:
+        args = self._parse(["--model", "m", "--output", "o", "--performance-report", "p"])
+        self.assertEqual(args.condition_fields, "both")
+
+    def test_emotion_is_parsed_when_given(self) -> None:
+        args = self._parse(
+            [
+                "--model", "m", "--output", "o", "--performance-report", "p",
+                "--condition-jsonl", "c.jsonl", "--condition-fields", "emotion",
+            ]
+        )
+        self.assertEqual(args.condition_fields, "emotion")
+
+    def test_unknown_field_rejected(self) -> None:
+        with self.assertRaises(SystemExit):
+            self._parse(
+                [
+                    "--model", "m", "--output", "o", "--performance-report", "p",
+                    "--condition-fields", "profile",
+                ]
+            )
+
+
 class MinNewTokensFlagTests(unittest.TestCase):
     """The D3 probe for the 32 near-empty replies needs the floor to actually
     reach generate(), and to be absent by default so every previously recorded

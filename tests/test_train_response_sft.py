@@ -160,6 +160,23 @@ class ReproductionCommandTests(unittest.TestCase):
         )
         self.assertIn("--train 'data/processed/b1_full_v1/response_train.jsonl'", command)
 
+    def test_b1_without_condition_file_when_mode_not_gold(self) -> None:
+        # CYCLE2 T3 无条件对照（config condition_mode="none"）跑 B1 数据时
+        # 不传 --condition-jsonl；复现命令必须反映这条路径，防止后人照抄
+        # gold 臂命令时误带条件文件。test_raw_format_omitted_by_default 只
+        # 覆盖 raw 默认路径，b1+none 路径此前无覆盖。
+        command = _reproduction_command(
+            _Args(
+                train=Path("data/processed/b1_full_v1/response_train.jsonl"),
+                train_format="b1",
+                condition_jsonl=None,
+                model_dir=Path("weights/hf/Qwen2.5-1.5B-Instruct"),
+            )
+        )
+        self.assertIn("--train-format b1", command)
+        self.assertNotIn("--condition-jsonl", command)
+        self.assertIn("--train 'data/processed/b1_full_v1/response_train.jsonl'", command)
+
 
 class TimingContractTests(unittest.TestCase):
     def test_warmup_steps_are_skipped_and_margin_applied(self) -> None:
