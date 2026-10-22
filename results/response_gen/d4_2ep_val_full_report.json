@@ -1,0 +1,22 @@
+{
+  "version": "response_generation_inference_v1",
+  "model_path": "/root/migu-d2/weights/hf/Qwen2.5-1.5B-Instruct",
+  "adapter_path": "/root/migu-d2/weights/response_sft_d4_2ep",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "condition_mode": "none",
+  "condition_source": null,
+  "condition_coverage": null,
+  "input_path": "/root/migu-d2/data/b1_full_v1/response_val.jsonl",
+  "samples": 2354,
+  "max_new_tokens": 256,
+  "min_new_tokens": 0,
+  "total_seconds": 7809.678,
+  "mean_seconds_per_sample": 3.3176,
+  "p50_seconds_per_sample": 2.2895,
+  "generated_tokens": 194850,
+  "tokens_per_second": 24.95,
+  "full_set_estimate_seconds": 7809.7,
+  "full_set_size": 2354,
+  "empty_responses": 0
+}

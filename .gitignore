@@ -23,6 +23,16 @@ __pycache__/
 .zcode/
 .zcodeignore
 explain.md
+# 验收/复核报告仅保存在本地；实验指标和技术材料仍按原规则管理。
+reports/VERIFICATION.md
+reports/B_day1复核记录.md
+reports/DAY2_A.md
+reports/b1_v1_summary.md
+**/*验收*
+**/*复核记录*
+**/*ACCEPTANCE*
+**/*acceptance*
+/reports/*VERIFICATION*
 /数字人综合情感陪伴对话模型.zip
 
 # D 岗位 Day2 审查证据：小体量日志/逐条预测，供 PR 独立核验冒烟与测速
@@ -54,3 +64,18 @@ explain.md
 !results/response_gen/d2_1p5b_val_full_minlen.jsonl
 !results/response_gen/d2_1p5b_val_full_minlen_report.json
 !logs/build_conditions.log
+
+# D 岗位 Day4 证据：错误分析报告、cap512 冒烟臂、IO 兼容校验产物
+!results/response_gen/day4_smoke_input.jsonl
+!results/response_gen/d2_1p5b_val100_cap512.jsonl
+!results/response_gen/d2_1p5b_val100_cap512_report.json
+!results/response_gen/d2_val_full_as_submission.jsonl
+
+# D 岗位 Day4 2-epoch 候选证据：全量预测、性能报告、训练报告与日志、同集对比
+!results/response_gen/d4_2ep_val_full.jsonl
+!results/response_gen/d4_2ep_val_full_report.json
+!logs/D_DAY4_SFT_FULL_2EP.txt
+!logs/d4_2ep_val_full.txt
+
+!logs/C_DAY5_EMOTION_LONGTAIL075_20261016_training.txt
+# D6（10/18 任务提前执行）：v2 冷启动门禁 stdout

@@ -1,0 +1,297 @@
+{
+  "version": "b_day3_b2_eval_v1",
+  "status": "PASS_WITH_NOT_FULL_SET_GAPS",
+  "full_set": {
+    "name": "frozen B1 validation",
+    "prediction_points": 2354,
+    "raw_val_sha256": "097c0639ef7370a18a54670ec3c8390ce5dc87c1ed95f436cef07b68dfed7668",
+    "b1_response_val_sha256": "ddf76588ee2be4912b7c7bd5e9070ef1a9bc967e59378b911f13cf2cfc3078e2"
+  },
+  "classification": {
+    "majority_baseline": {
+      "status": "FULL SET",
+      "metrics": {
+        "accuracy": 0.3190314358538658,
+        "macro_f1": 0.03023349436392915,
+        "per_class_recall": {
+          "anger": 0.0,
+          "anxiety": 1.0,
+          "care": 0.0,
+          "disgust": 0.0,
+          "fear": 0.0,
+          "gratitude": 0.0,
+          "helplessness": 0.0,
+          "joy": 0.0,
+          "loneliness": 0.0,
+          "mixed": 0.0,
+          "neutral": 0.0,
+          "pride": 0.0,
+          "relaxed": 0.0,
+          "sadness": 0.0,
+          "shame": 0.0,
+          "surprise": 0.0
+        },
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.618522,
+          "interests": 0.748938,
+          "style": 0.517417
+        },
+        "per_dimension_micro_f1": {
+          "personality_traits": 0.0,
+          "interests": 0.0,
+          "style": 0.0
+        },
+        "profile_macro_exact_match_accuracy": 0.628292
+      }
+    },
+    "emotion_encoder_baseline": {
+      "status": "FULL SET",
+      "recompute_status": "REPORT_ONLY_NO_PREDICTION_JSONL",
+      "metrics": {
+        "accuracy": 0.67842,
+        "macro_f1": 0.4032,
+        "per_class_recall": {
+          "anger": 0.704348,
+          "anxiety": 0.893475,
+          "care": 0.0,
+          "disgust": 0.0,
+          "fear": 0.620968,
+          "gratitude": 0.762712,
+          "helplessness": 0.669014,
+          "joy": 0.0,
+          "loneliness": 0.695652,
+          "mixed": 0.045198,
+          "neutral": 0.113208,
+          "pride": 0.0,
+          "relaxed": 0.892421,
+          "sadness": 0.358779,
+          "shame": 0.652542,
+          "surprise": 0.0
+        }
+      }
+    },
+    "emotion_profile_day3": {
+      "status": "NOT FULL SET",
+      "used_train_samples": 96,
+      "used_val_samples": 32,
+      "recompute_status": "REPORT_ONLY_DRY_RUN",
+      "metrics": {
+        "accuracy": 0.3125,
+        "macro_f1": 0.029762,
+        "per_class_recall": {
+          "anger": 0.0,
+          "anxiety": 1.0,
+          "care": 0.0,
+          "disgust": 0.0,
+          "fear": 0.0,
+          "gratitude": 0.0,
+          "helplessness": 0.0,
+          "joy": 0.0,
+          "loneliness": 0.0,
+          "mixed": 0.0,
+          "neutral": 0.0,
+          "pride": 0.0,
+          "relaxed": 0.0,
+          "sadness": 0.0,
+          "shame": 0.0,
+          "surprise": 0.0
+        },
+        "profile": {
+          "per_dimension": {
+            "personality_traits": {
+              "exact_match_accuracy": 0.0,
+              "micro_f1": 0.111888,
+              "label_count": 10,
+              "gold_positive_count": 16,
+              "predicted_positive_count": 127
+            },
+            "interests": {
+              "exact_match_accuracy": 0.0,
+              "micro_f1": 0.016393,
+              "label_count": 12,
+              "gold_positive_count": 6,
+              "predicted_positive_count": 116
+            },
+            "style": {
+              "exact_match_accuracy": 0.0,
+              "micro_f1": 0.11236,
+              "label_count": 11,
+              "gold_positive_count": 17,
+              "predicted_positive_count": 161
+            }
+          },
+          "profile_macro_exact_match_accuracy": 0.0,
+          "empty_set_baseline": {
+            "per_dimension_exact_match_accuracy": {
+              "personality_traits": 0.59375,
+              "interests": 0.84375,
+              "style": 0.5625
+            },
+            "profile_macro_exact_match_accuracy": 0.666667
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "retrieval_baseline": {
+      "status": "FULL SET",
+      "recompute_status": "REPORT_ONLY_FULL_PREDICTION_FILE_ABSENT",
+      "metrics": {
+        "samples": 2354,
+        "emotion_accuracy": 0.15590484282073067,
+        "profile_dimension_accuracy": 0.4505805720758992,
+        "bleu4_char": 0.029366730327728467,
+        "rouge_l_char_f1": 0.14386961818840596,
+        "warning": "Official tokenization, smoothing, BERTScore model and metric weights are not published in supplied files; these scores are diagnostic only."
+      }
+    },
+    "original_qwen_1p5b": {
+      "status": "NOT FULL SET",
+      "metrics": {
+        "samples": 100,
+        "bleu4_char": 0.03768599401287548,
+        "rouge_l_char_f1": 0.1564767823524387,
+        "empty_outputs": 0
+      },
+      "reported_metrics": {
+        "version": "response_generation_inference_v1",
+        "model_path": "weights/hf/Qwen2.5-1.5B-Instruct",
+        "adapter_path": null,
+        "device": "cuda",
+        "dtype": "bfloat16",
+        "condition_mode": "none",
+        "input_path": "data/processed/val_eval_input.jsonl",
+        "samples": 100,
+        "max_new_tokens": 256,
+        "total_seconds": 241.356,
+        "mean_seconds_per_sample": 2.4136,
+        "p50_seconds_per_sample": 1.9328,
+        "generated_tokens": 8617,
+        "tokens_per_second": 35.7,
+        "full_set_estimate_seconds": 5681.5,
+        "full_set_size": 2354,
+        "empty_responses": 0
+      }
+    },
+    "original_qwen_0p5b": {
+      "status": "NOT FULL SET",
+      "metrics": {
+        "samples": 100,
+        "bleu4_char": 0.025923291231897544,
+        "rouge_l_char_f1": 0.1377015188114601,
+        "empty_outputs": 0
+      },
+      "reported_metrics": {
+        "version": "response_generation_inference_v1",
+        "model_path": "weights/hf/Qwen2.5-0.5B-Instruct",
+        "adapter_path": null,
+        "device": "cuda",
+        "dtype": "bfloat16",
+        "condition_mode": "none",
+        "input_path": "data/processed/val_eval_input.jsonl",
+        "samples": 100,
+        "max_new_tokens": 256,
+        "total_seconds": 147.157,
+        "mean_seconds_per_sample": 1.4716,
+        "p50_seconds_per_sample": 1.183,
+        "generated_tokens": 6344,
+        "tokens_per_second": 43.11,
+        "full_set_estimate_seconds": 3464.1,
+        "full_set_size": 2354,
+        "empty_responses": 0
+      }
+    },
+    "finetuned_qwen_1p5b_lora": {
+      "status": "FULL SET",
+      "metrics": {
+        "samples": 2354,
+        "bleu4_char": 0.10746824758231767,
+        "rouge_l_char_f1": 0.25418414815608487,
+        "empty_outputs": 0
+      },
+      "performance_report": {
+        "version": "response_generation_inference_v1",
+        "model_path": "/root/migu-d2/weights/hf/Qwen2.5-1.5B-Instruct",
+        "adapter_path": "/root/migu-d2/weights/response_sft_d2_1p5b",
+        "device": "cuda",
+        "dtype": "bfloat16",
+        "condition_mode": "none",
+        "condition_source": null,
+        "condition_coverage": null,
+        "input_path": "/root/migu-d2/data/b1_full_v1/response_val.jsonl",
+        "samples": 2354,
+        "max_new_tokens": 256,
+        "total_seconds": 8844.469,
+        "mean_seconds_per_sample": 3.7572,
+        "p50_seconds_per_sample": 2.5452,
+        "generated_tokens": 197717,
+        "tokens_per_second": 22.35,
+        "full_set_estimate_seconds": 8844.5,
+        "full_set_size": 2354,
+        "empty_responses": 0
+      },
+      "low_metric_examples": [
+        {
+          "id": "pp:[\"val_conv_000180\",21,3]",
+          "bleu4": 1.083089471611634e-40,
+          "rouge_l": 0.005376344086021505,
+          "gold_prefix": "这种“怎么选都是错”的感觉，往往是因为你试图在“照顾他们的感受”和“照顾自己的生存”之间找一个两全其美的平衡点，但现实里，这两个需求此刻是互斥的。\n\n你怕的不是他们真的会崩溃，而是你无法承受成为那个“打破平衡的人”的内疚感。你一直在这段关系",
+          "prediction_prefix": "我听着。"
+        },
+        {
+          "id": "pp:[\"val_conv_000180\",15,2]",
+          "bleu4": 1.915253192151618e-125,
+          "rouge_l": 0.006920415224913494,
+          "gold_prefix": "明白，不讲道理，只说能立刻减轻负担的具体动作。\n\n1. **把“换工作”这件事物理隔离**：今天之内，把简历、面试记录、新工作的offer或相关文档，从手机相册、电脑桌面、微信聊天框里全部移到一个加密文件夹或冷备份里。如果还没投简历，把那些",
+          "prediction_prefix": "有。"
+        },
+        {
+          "id": "pp:[\"val_conv_000322\",7,1]",
+          "bleu4": 1.7112725505117414e-23,
+          "rouge_l": 0.009345794392523366,
+          "gold_prefix": "这种被一本书“绑架”的感觉确实很消耗人，尤其是当你觉得自己的状态已经影响到其他事情时，那种失控感会比阅读本身更让人难受。\n\n你现在的纠结其实是在两种恐惧之间拉扯：一种是怕“硬撑”会让自己更累、更讨厌阅读，另一种是怕“停下来”就彻底断了，之前",
+          "prediction_prefix": "我听着。"
+        },
+        {
+          "id": "pp:[\"val_conv_000255\",3,1]",
+          "bleu4": 2.201957908181094e-23,
+          "rouge_l": 0.01892744479495268,
+          "gold_prefix": "门一关，那个安静确实容易把人一下子拽进那种空落落的感觉里。\n\n刚把压了三个月的大事啃下来，紧绷的弦突然松了，那种“没了着落”的空虚感其实挺常见的。你刚才说的那份底气，和此刻这种面对空房间的恐惧，其实是两件事。前者是你对自己能力的确认，后者更",
+          "prediction_prefix": "嗯，我在听。"
+        },
+        {
+          "id": "pp:[\"val_conv_000218\",9,2]",
+          "bleu4": 2.133546033775789e-15,
+          "rouge_l": 0.02898550724637681,
+          "gold_prefix": "你说得对，这确实不公平。\n\n你鼓起勇气把心里最柔软、最真实的部分摊开，是带着期待和信任的。而他那种轻飘飘的回应，不仅没有接住这份信任，反而让你觉得自己像是在对着空气呐喊，甚至还得反过来怀疑是不是自己“太敏感”或“太较真”。\n\n那种“我明明很",
+          "prediction_prefix": "嗯，我在听。"
+        }
+      ]
+    }
+  },
+  "recommendation": {
+    "formally_comparable": [
+      "majority_baseline",
+      "emotion_encoder_baseline",
+      "retrieval_baseline",
+      "finetuned_qwen_1p5b_lora"
+    ],
+    "recommended": "emotion_encoder_baseline for classification; finetuned_qwen_1p5b_lora for response generation",
+    "not_fairly_comparable": [
+      "emotion_profile_day3",
+      "original_qwen_1p5b",
+      "original_qwen_0p5b"
+    ],
+    "missing": [
+      "C full-val prediction JSONL",
+      "D retrieval full prediction JSONL",
+      "D original 1.5B full-val output"
+    ],
+    "gpu_rerun_needed": true
+  },
+  "tests": {
+    "pytest": "unavailable",
+    "unittest": "67/67 PASS"
+  }
+}

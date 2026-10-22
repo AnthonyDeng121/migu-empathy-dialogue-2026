@@ -1,0 +1,11 @@
+{
+  "backend": "transformers",
+  "model_path": "./weights/hf/Qwen2.5-1.5B-Instruct",
+  "trust_remote_code": false,
+  "device_map": "auto",
+  "torch_dtype": "auto",
+  "generation": {"max_new_tokens": 256, "do_sample": false},
+  "performance_rounds": 100,
+  "hardware_label": "RTX 4090",
+  "integrated_config": "configs/integrated.json"
+}
