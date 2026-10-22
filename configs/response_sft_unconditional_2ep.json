@@ -1,0 +1,21 @@
+{
+  "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "max_length": 2048,
+  "max_new_tokens": 512,
+  "epochs": 2,
+  "batch_size": 1,
+  "gradient_accumulation": 8,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.01,
+  "warmup_ratio": 0.03,
+  "seed": 20261013,
+  "lora_r": 8,
+  "lora_alpha": 16,
+  "lora_dropout": 0.05,
+  "lora_target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+  "gradient_checkpointing": true,
+  "max_history_turns": 20,
+  "condition_mode": "none",
+  "_comment": "CYCLE2 T3 单变量对照配置：与 D4 v2（configs/response_sft_2epoch.json，金标条件两轮候选）唯一差别是 condition_mode 由 \"gold\" 改为 \"none\"，即训练时不再注入金标情感/画像条件。基座 Qwen2.5-1.5B-Instruct（revision 989aa7980e4cf806f80c7fef2b1adb7bc71aa306）、数据（B1 冻结划分）、预算（epochs 2、batch_size 1、gradient_accumulation 8、learning_rate 0.0001、warmup_ratio 0.03、seed 20261013 等全部不变）均与 D4 v2 逐项一致。目的：检验「用金标条件训练」与「部署侧不注入条件（condition_response=false）」的失配代价，作为 T3 完全无条件两轮 SFT 对照的训练侧配置；对照结论须与 D4 v2 同评测协议比较。"
+}

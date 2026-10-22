@@ -1,0 +1,160 @@
+{
+  "version": "t2_stratified_subset_v1",
+  "purpose": "Fixed stratified screening subset for the cycle-2 D condition arms (conditions off vs emotion-only), frozen before any new results were seen.",
+  "seed": 20261022,
+  "target_size": 160,
+  "actual_size": 160,
+  "target_reached": true,
+  "min_per_cell": 2,
+  "sources": {
+    "response_val": {
+      "path": "/mnt/d/migu-empathy-dialogue-2026/data/processed/b1_full_v1/response_val.jsonl",
+      "sha256": "ddf76588ee2be4912b7c7bd5e9070ef1a9bc967e59378b911f13cf2cfc3078e2",
+      "record_count": 2354
+    },
+    "classification_val": {
+      "path": "/mnt/d/migu-empathy-dialogue-2026/data/processed/b1_full_v1/classification_val.jsonl",
+      "sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+      "record_count": 2354
+    }
+  },
+  "stratification": {
+    "history_length": {
+      "short": "len(context_turns) <= 4",
+      "mid": "5 <= len(context_turns) <= 12",
+      "long": "len(context_turns) > 12"
+    },
+    "gold_profile": {
+      "empty": "personality_traits, interests and style are all empty lists",
+      "non_empty": "at least one of the three dimensions is non-empty"
+    },
+    "emotion": {
+      "major": [
+        "anxiety",
+        "relaxed",
+        "mixed",
+        "helplessness",
+        "sadness"
+      ],
+      "rare": [
+        "anger",
+        "care",
+        "disgust",
+        "fear",
+        "gratitude",
+        "joy",
+        "loneliness",
+        "neutral",
+        "pride",
+        "shame",
+        "surprise"
+      ]
+    }
+  },
+  "gold_labels_note": "Gold emotion_label/user_profile from the classification split are used for stratification only and never enter any model input; selected rows are copied verbatim from the response split.",
+  "selection_rules": "Target rows are allocated across the 12 cells in proportion to cell size (largest remainder, ties broken by larger cell then canonical cell order), with a floor of 2 per non-empty cell. Within each cell, candidates are ordered by sample_id and shuffled with random.Random(seed) before the quota is filled, skipping any conversation_id already used elsewhere in the selection (at most one row per conversation). If de-duplication leaves the selection short of the target, a second round tops it up from the largest cells, again skipping used conversations; if the distinct conversation pool itself is smaller than the target the script fails instead of padding. Output rows are sorted by sample_id.",
+  "cells": [
+    {
+      "history_length": "short",
+      "gold_profile": "empty",
+      "emotion": "major",
+      "size": 184,
+      "quota": 12,
+      "selected": 12
+    },
+    {
+      "history_length": "short",
+      "gold_profile": "empty",
+      "emotion": "rare",
+      "size": 75,
+      "quota": 5,
+      "selected": 5
+    },
+    {
+      "history_length": "short",
+      "gold_profile": "non_empty",
+      "emotion": "major",
+      "size": 143,
+      "quota": 10,
+      "selected": 10
+    },
+    {
+      "history_length": "short",
+      "gold_profile": "non_empty",
+      "emotion": "rare",
+      "size": 76,
+      "quota": 5,
+      "selected": 5
+    },
+    {
+      "history_length": "mid",
+      "gold_profile": "empty",
+      "emotion": "major",
+      "size": 291,
+      "quota": 20,
+      "selected": 20
+    },
+    {
+      "history_length": "mid",
+      "gold_profile": "empty",
+      "emotion": "rare",
+      "size": 132,
+      "quota": 9,
+      "selected": 9
+    },
+    {
+      "history_length": "mid",
+      "gold_profile": "non_empty",
+      "emotion": "major",
+      "size": 555,
+      "quota": 38,
+      "selected": 38
+    },
+    {
+      "history_length": "mid",
+      "gold_profile": "non_empty",
+      "emotion": "rare",
+      "size": 255,
+      "quota": 17,
+      "selected": 17
+    },
+    {
+      "history_length": "long",
+      "gold_profile": "empty",
+      "emotion": "major",
+      "size": 127,
+      "quota": 9,
+      "selected": 9
+    },
+    {
+      "history_length": "long",
+      "gold_profile": "empty",
+      "emotion": "rare",
+      "size": 66,
+      "quota": 4,
+      "selected": 4
+    },
+    {
+      "history_length": "long",
+      "gold_profile": "non_empty",
+      "emotion": "major",
+      "size": 310,
+      "quota": 21,
+      "selected": 21
+    },
+    {
+      "history_length": "long",
+      "gold_profile": "non_empty",
+      "emotion": "rare",
+      "size": 140,
+      "quota": 10,
+      "selected": 10
+    }
+  ],
+  "conversations": {
+    "distinct": 160,
+    "rows": 160,
+    "max_rows_per_conversation": 1
+  },
+  "command": "python scripts/build_stratified_subset.py --response-input /mnt/d/migu-empathy-dialogue-2026/data/processed/b1_full_v1/response_val.jsonl --label-input /mnt/d/migu-empathy-dialogue-2026/data/processed/b1_full_v1/classification_val.jsonl --output /mnt/d/migu-empathy-dialogue-2026/results/response_gen/t2_selection_input.jsonl --manifest /mnt/d/migu-empathy-dialogue-2026/results/response_gen/t2_selection_manifest.json --target 160 --seed 20261022 --min-per-cell 2"
+}
