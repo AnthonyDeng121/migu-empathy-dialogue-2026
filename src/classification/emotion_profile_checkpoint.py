@@ -2,10 +2,49 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any, Sequence
 
 from src.data.schema import EMOTIONS, PROFILE_LABELS
+
+
+def read_packaged_metadata(checkpoint_dir: str | Path) -> dict[str, Any]:
+    """Validate the existing per-dimension format without importing ML dependencies.
+
+    Metadata label order defines head indices; permutations are valid, duplicates are not.
+    """
+    metadata = json.loads((Path(checkpoint_dir) / "checkpoint_metadata.json").read_text(encoding="utf-8"))
+    emotions = metadata.get("emotion_labels")
+    if not isinstance(emotions, list) or len(emotions) != len(EMOTIONS) or set(emotions) != EMOTIONS:
+        raise ValueError("checkpoint emotion labels do not match the official schema")
+    profiles = metadata.get("profile_labels")
+    if not isinstance(profiles, dict) or set(profiles) != set(PROFILE_LABELS):
+        raise ValueError("checkpoint profile dimensions do not match the official schema")
+    for dim, allowed in PROFILE_LABELS.items():
+        labels = profiles[dim]
+        if not isinstance(labels, list) or len(labels) != len(allowed) or set(labels) != allowed:
+            raise ValueError(f"checkpoint labels do not match the official {dim} schema")
+    thresholds = metadata.get("profile_thresholds")
+    if not isinstance(thresholds, dict) or set(thresholds) != set(PROFILE_LABELS):
+        raise ValueError("checkpoint must include one calibrated threshold per dimension")
+    for dim, value in thresholds.items():
+        if type(value) not in (int, float) or not math.isfinite(value) or not 0 <= value <= 1:
+            raise ValueError(f"invalid checkpoint profile_thresholds.{dim}; expected a number in [0, 1]")
+    if type(metadata.get("max_length")) is not int or metadata["max_length"] < 1:
+        raise ValueError("checkpoint max_length must be a positive integer")
+    return metadata
+
+
+def check_packaged_files(checkpoint_dir: str | Path) -> None:
+    path = Path(checkpoint_dir)
+    read_packaged_metadata(path)
+    for name in ("heads.safetensors", "encoder/config.json", "tokenizer_config.json"):
+        if not (path / name).is_file():
+            raise FileNotFoundError(f"Missing profile model file: {path / name}")
+    encoder = path / "encoder"
+    if not any(encoder.glob("*.safetensors")) and not any(encoder.glob("pytorch_model*.bin")):
+        raise FileNotFoundError(f"Missing profile encoder weights in {encoder}")
 
 
 class EmotionProfileCheckpoint:
@@ -24,27 +63,10 @@ class EmotionProfileCheckpoint:
         self._torch = torch
         self.device = torch.device(device)
         self.path = Path(checkpoint_dir)
-        self.metadata = json.loads(
-            (self.path / "checkpoint_metadata.json").read_text(encoding="utf-8")
-        )
+        self.metadata = read_packaged_metadata(self.path)
         self.emotion_labels = tuple(self.metadata["emotion_labels"])
-        self.profile_labels = {
-            dim: tuple(labels)
-            for dim, labels in self.metadata["profile_labels"].items()
-        }
-        if set(self.emotion_labels) != EMOTIONS:
-            raise ValueError("checkpoint emotion labels do not match the official schema")
-        if set(self.profile_labels) != set(PROFILE_LABELS):
-            raise ValueError("checkpoint profile dimensions do not match the official schema")
-        for dim, labels in self.profile_labels.items():
-            if set(labels) != PROFILE_LABELS[dim]:
-                raise ValueError(f"checkpoint labels do not match the official {dim} schema")
-        self.thresholds = {
-            dim: float(value)
-            for dim, value in self.metadata["profile_thresholds"].items()
-        }
-        if set(self.thresholds) != set(self.profile_labels):
-            raise ValueError("checkpoint must include one calibrated threshold per dimension")
+        self.profile_labels = {dim: tuple(labels) for dim, labels in self.metadata["profile_labels"].items()}
+        self.thresholds = {dim: float(value) for dim, value in self.metadata["profile_thresholds"].items()}
 
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.path, local_files_only=True
