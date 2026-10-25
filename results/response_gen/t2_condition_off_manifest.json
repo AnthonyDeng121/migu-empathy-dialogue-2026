@@ -1,0 +1,24 @@
+{
+  "version": "t2_condition_off_v1",
+  "purpose": "Conditions-off arm for the T2 subset, extracted by id from the D Day4 v2 full-val predictions (adapter digest b3e9017e..., conditions off, empty profile, max_new_tokens 256 -- the deployed configuration). Reused, not recomputed: no GPU was spent and the responses are byte-identical to the historical baseline.",
+  "arm": "off",
+  "sources": {
+    "subset": {
+      "path": "/mnt/d/migu-empathy-dialogue-2026/results/response_gen/t2_selection_input.jsonl",
+      "sha256": "014e52ab7d176c84a91b1c2a830b456c829d062c05dfeba80f670a309bc86a53",
+      "record_count": 160
+    },
+    "predictions": {
+      "path": "/mnt/d/migu-empathy-dialogue-2026/results/response_gen/d4_2ep_val_full.jsonl",
+      "sha256": "6eb7509decfd589db43769ced9a7b3a094f1a6801ad04866c6d83090904a5378",
+      "record_count": 2354
+    }
+  },
+  "result": {
+    "record_count": 160,
+    "predictions_outside_subset": 2194,
+    "first_id": "pp:[\"val_conv_000016\",5,2]",
+    "last_id": "pp:[\"val_conv_000896\",5,1]"
+  },
+  "command": "python scripts/extract_off_arm_subset.py"
+}
