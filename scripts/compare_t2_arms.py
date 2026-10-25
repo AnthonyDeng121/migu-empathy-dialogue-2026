@@ -78,12 +78,13 @@ def compare_arms(
     only_off = sorted(set(off) - set(emotion))
     only_emotion = sorted(set(emotion) - set(off))
     missing_gold = sorted((set(off) | set(emotion)) - set(gold))
-    if only_off or only_emotion or missing_gold:
+    missing_predictions = sorted(set(gold) - (set(off) & set(emotion)))
+    if only_off or only_emotion or missing_gold or missing_predictions:
         raise ValueError(
             "arm id sets differ from each other or from the selection: "
             f"only_off={len(only_off)} only_emotion={len(only_emotion)} "
-            f"missing_gold={len(missing_gold)} (first: "
-            f"{(only_off or only_emotion or missing_gold)[0]!r})"
+            f"missing_gold={len(missing_gold)} missing_predictions={len(missing_predictions)} (first: "
+            f"{(only_off or only_emotion or missing_gold or missing_predictions)[0]!r})"
         )
 
     per_id: list[dict[str, Any]] = []

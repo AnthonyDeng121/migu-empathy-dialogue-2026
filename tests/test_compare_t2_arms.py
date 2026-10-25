@@ -83,6 +83,17 @@ class CompareArmsTests(unittest.TestCase):
                 [{"sample_id": "b", "response_text": "z"}],
             )
 
+    def test_both_arms_missing_selection_id_are_refused(self) -> None:
+        with self.assertRaisesRegex(ValueError, "missing_predictions=1"):
+            compare_arms(
+                [{"id": "a", "response_text": "x"}],
+                [{"id": "a", "response_text": "x"}],
+                [
+                    {"sample_id": "a", "response_text": "x"},
+                    {"sample_id": "b", "response_text": "y"},
+                ],
+            )
+
     def test_duplicate_id_is_refused(self) -> None:
         with self.assertRaisesRegex(ValueError, "duplicate"):
             compare_arms(
