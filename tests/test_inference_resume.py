@@ -13,6 +13,8 @@ from unittest.mock import Mock, patch
 from scripts import run_integrated as integrated
 from scripts import run_response_inference as response
 from src.common.inference_resume import Journal, fingerprint, tree_digest
+from src.common.inference_resume import atomic_json, file_digest
+from src.common.inference_publication import marker_path, publish_prediction_report, validate_publication
 
 
 class ResumeTests(unittest.TestCase):
@@ -285,6 +287,120 @@ with Journal(sys.argv[1], {'v': 1}, ['a', 'b'], _validate_response) as journal:
             args.condition_jsonl.write_text(args.condition_jsonl.read_text().replace("neutral", "joy"))
             with self.assertRaisesRegex(ValueError, "fingerprint mismatch"):
                 response.run(args)
+
+    def seed_old_publication(self, output, report):
+        output.parent.mkdir(parents=True, exist_ok=True)
+        staged = output.with_name("old.tmp")
+        staged.write_text('{"id":"old","response_text":"old"}\n', encoding="utf-8")
+        publish_prediction_report(staged, output, report,
+                                  {"samples": 1, "complete": True, "full_set_estimate_seconds": 9999,
+                                   "submission_sha256": file_digest(staged)}, ["old"])
+        validate_publication(output, report)
+
+    def publication_failure(self, output, report, cut):
+        original_replace = os.replace
+
+        def replace(source, destination):
+            destination = Path(destination)
+            if destination == output:
+                invalidated = json.loads(report.read_bytes())
+                self.assertIs(invalidated["complete"], False)
+                self.assertNotIn("full_set_estimate_seconds", invalidated)
+                self.assertNotIn("submission_sha256", invalidated)
+                self.assertEqual(json.loads(marker_path(report).read_bytes())["state"], "publishing")
+            target = report if cut == "report" else marker_path(report)
+            if destination == target:
+                staged = json.loads(Path(source).read_bytes())
+                state = staged.get("publication", {}).get("state") if cut == "report" else staged.get("state")
+                if state == "complete":
+                    self.assertEqual(len(output.read_text(encoding="utf-8").splitlines()), len(self.rows))
+                    with self.assertRaises(ValueError):
+                        validate_publication(output, report)
+                    current = json.loads(report.read_bytes())
+                    if cut == "report":
+                        self.assertIs(current["complete"], False)
+                        self.assertNotIn("full_set_estimate_seconds", current)
+                        self.assertNotIn("submission_sha256", current)
+                    raise RuntimeError("injected publication interruption")
+            return original_replace(source, destination)
+
+        return patch("src.common.inference_publication.os.replace", side_effect=replace)
+
+    def test_integrated_publication_interruptions_invalidate_old_report_and_resume_without_recompute(self):
+        for cut in ("report", "marker"):
+            with self.subTest(cut=cut):
+                self.result = self.root / ("integrated-" + cut)
+                self.cache = self.root / ("cache-" + cut)
+                output = self.result / "submission.jsonl"
+                report = self.result / "performance_report.json"
+                self.seed_old_publication(output, report)
+                with self.publication_failure(output, report, cut):
+                    with self.assertRaisesRegex(RuntimeError, "publication interruption"):
+                        self.run_integrated()
+                with self.assertRaises(ValueError):
+                    validate_publication(output, report)
+                calls = len(self.calls)
+                result = self.run_integrated()
+                self.assertEqual(len(self.calls), calls)
+                self.assertEqual(result["resume"]["new_samples"], 0)
+                self.assertEqual(validate_publication(output, report, [r["id"] for r in self.rows]), result)
+                self.assertEqual(result["output_sha256"], result["submission_sha256"])
+
+    def test_response_publication_interruptions_invalidate_old_report_and_resume_without_recompute(self):
+        for cut in ("report", "marker"):
+            with self.subTest(cut=cut):
+                args = self.response_args()
+                args.output = self.root / ("response-" + cut + ".jsonl")
+                args.performance_report = self.root / ("response-" + cut + ".json")
+                args.resume_dir = self.root / ("cache-response-" + cut)
+                self.seed_old_publication(args.output, args.performance_report)
+                with patch.object(response, "_load_optional_dependencies", side_effect=self.response_deps):
+                    with self.publication_failure(args.output, args.performance_report, cut):
+                        with self.assertRaisesRegex(RuntimeError, "publication interruption"):
+                            response.run(args)
+                    with self.assertRaises(ValueError):
+                        validate_publication(args.output, args.performance_report)
+                    calls = len(self.calls)
+                    result = response.run(args)
+                self.assertEqual(len(self.calls), calls)
+                self.assertEqual(result["resume"]["new_samples"], 0)
+                self.assertIsNone(result["full_set_estimate_seconds"])
+                self.assertEqual(validate_publication(args.output, args.performance_report,
+                                                      [r["id"] for r in self.rows]), result)
+                self.assertEqual(result["output_sha256"], file_digest(args.output))
+
+    def test_publication_reader_and_cli_reject_missing_marker_modified_files_and_wrong_counts(self):
+        self.run_integrated()
+        output = self.result / "submission.jsonl"
+        report = self.result / "performance_report.json"
+        marker = marker_path(report)
+        original_output, original_report, original_marker = [p.read_bytes() for p in (output, report, marker)]
+        command = [sys.executable, str(integrated.PROJECT / "scripts/validate_inference_publication.py"),
+                   "--prediction", str(output), "--performance-report", str(report)]
+        self.assertEqual(subprocess.run(command, capture_output=True).returncode, 0)
+        output.write_bytes(original_output.replace(b"test_0", b"test_x", 1))
+        with self.assertRaisesRegex(ValueError, "prediction hash mismatch"):
+            validate_publication(output, report)
+        self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
+        output.write_bytes(original_output)
+        report.write_bytes(original_report.replace(b'"samples": 5', b'"samples": 4'))
+        with self.assertRaisesRegex(ValueError, "report does not match"):
+            validate_publication(output, report)
+        commit = json.loads(original_marker)
+        commit["report_sha256"] = file_digest(report)
+        atomic_json(marker, commit)
+        with self.assertRaisesRegex(ValueError, "sample count"):
+            validate_publication(output, report)
+        report.write_bytes(original_report)
+        marker.write_bytes(original_marker)
+        commit = json.loads(original_marker)
+        commit["samples"] = 4
+        atomic_json(marker, commit)
+        with self.assertRaisesRegex(ValueError, "sample count"):
+            validate_publication(output, report)
+        marker.unlink()
+        with self.assertRaises(ValueError):
+            validate_publication(output, report)
 
 
 if __name__ == "__main__":

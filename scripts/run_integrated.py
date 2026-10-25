@@ -238,10 +238,9 @@ def _run(test_file, result_dir, config, factory, journal=None):
             report.update(version="integrated_transformers_resume_v1", complete=False,
                           timing_scope="cumulative successful sample compute across attempts; not a cold-start benchmark",
                           resume=journal.summary())
-        os.replace(temporary, destination)
-        from src.common.inference_resume import atomic_json
-        atomic_json(result_dir / "performance_report.json", report)
-        return report
+        from src.common.inference_publication import publish_prediction_report
+        return publish_prediction_report(temporary, destination, result_dir / "performance_report.json",
+                                         report, [row["id"] for row in rows])
     finally:
         Path(temporary).unlink(missing_ok=True)
 

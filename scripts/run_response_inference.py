@@ -216,19 +216,6 @@ def _run(args: argparse.Namespace, journal=None) -> dict[str, Any]:
         predictions.append(prediction)
     total_seconds = time.perf_counter() - started
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    if journal:
-        import os
-        import tempfile
-        descriptor, temporary = tempfile.mkstemp(dir=args.output.parent, suffix=".tmp")
-        os.close(descriptor)
-        try:
-            write_jsonl(Path(temporary), predictions)
-            os.replace(temporary, args.output)
-        finally:
-            Path(temporary).unlink(missing_ok=True)
-    else:
-        write_jsonl(args.output, predictions)
     report = {
         "version": "response_generation_inference_v1",
         "model_path": str(args.model),
@@ -263,9 +250,18 @@ def _run(args: argparse.Namespace, journal=None) -> dict[str, Any]:
                       tokens_per_second=round(generated_tokens / cumulative, 2) if cumulative else None,
                       full_set_estimate_seconds=None)
         total_seconds = cumulative
-    args.performance_report.parent.mkdir(parents=True, exist_ok=True)
-    from src.common.inference_resume import atomic_json
-    atomic_json(args.performance_report, report)
+    import os
+    import tempfile
+    from src.common.inference_publication import publish_prediction_report
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(dir=args.output.parent, suffix=".tmp")
+    os.close(descriptor)
+    try:
+        write_jsonl(Path(temporary), predictions)
+        report = publish_prediction_report(temporary, args.output, args.performance_report, report,
+                                           [eval_row_id(row) for row in rows])
+    finally:
+        Path(temporary).unlink(missing_ok=True)
     print(
         f"PASS: {len(predictions)} samples in {total_seconds:.1f}s "
         f"({report['mean_seconds_per_sample']:.3f}s/sample, "
