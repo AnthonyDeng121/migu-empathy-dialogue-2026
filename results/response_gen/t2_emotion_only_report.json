@@ -1,0 +1,23 @@
+{
+  "version": "response_generation_inference_v1",
+  "model_path": "weights/hf/Qwen2.5-1.5B-Instruct",
+  "adapter_path": "weights/response_sft_d4_2ep",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "condition_mode": "predicted",
+  "condition_source": "results/response_gen/c5_conditions_val_full.jsonl",
+  "condition_fields": "emotion",
+  "condition_coverage": "160/160",
+  "input_path": "results/response_gen/t2_selection_input.jsonl",
+  "samples": 160,
+  "max_new_tokens": 256,
+  "min_new_tokens": 0,
+  "total_seconds": 710.302,
+  "mean_seconds_per_sample": 4.4394,
+  "p50_seconds_per_sample": 3.0361,
+  "generated_tokens": 12655,
+  "tokens_per_second": 17.82,
+  "full_set_estimate_seconds": 10450.3,
+  "full_set_size": 2354,
+  "empty_responses": 0
+}
