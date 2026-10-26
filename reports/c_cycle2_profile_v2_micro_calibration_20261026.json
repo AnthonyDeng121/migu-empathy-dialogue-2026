@@ -1,0 +1,122 @@
+{
+  "status": "T3 threshold-only calibration comparison; encoder weights unchanged",
+  "variable": "per-dimension exact-match calibration (v1) -> per-dimension micro-F1 calibration (v2)",
+  "threshold_source": "B T1 frozen training-only conversation-disjoint calibration partition",
+  "calibration_validation_used_for_selection": false,
+  "thresholds": {
+    "personality_traits": 0.45,
+    "interests": 0.61,
+    "style": 0.38
+  },
+  "calibration_metrics": {
+    "per_dimension": {
+      "personality_traits": {
+        "exact_match_accuracy": 0.557032,
+        "micro_f1": 0.446043,
+        "gold_positive_count": 1530,
+        "predicted_positive_count": 1945
+      },
+      "interests": {
+        "exact_match_accuracy": 0.750461,
+        "micro_f1": 0.55427,
+        "gold_positive_count": 858,
+        "predicted_positive_count": 957
+      },
+      "style": {
+        "exact_match_accuracy": 0.438169,
+        "micro_f1": 0.372414,
+        "gold_positive_count": 1559,
+        "predicted_positive_count": 2356
+      }
+    },
+    "profile_macro_exact_match_accuracy": 0.581888,
+    "empty_set_baseline": {
+      "per_dimension_exact_match_accuracy": {
+        "personality_traits": 0.589516,
+        "interests": 0.710594,
+        "style": 0.505722
+      },
+      "profile_macro_exact_match_accuracy": 0.601944
+    }
+  },
+  "calibration_macro_micro_f1": 0.45757566666666666,
+  "validation_metrics_pre_b_recheck": {
+    "per_dimension": {
+      "personality_traits": {
+        "exact_match_accuracy": 0.54503,
+        "micro_f1": 0.282667,
+        "gold_positive_count": 1143,
+        "predicted_positive_count": 1107
+      },
+      "interests": {
+        "exact_match_accuracy": 0.787596,
+        "micro_f1": 0.586924,
+        "gold_positive_count": 643,
+        "predicted_positive_count": 703
+      },
+      "style": {
+        "exact_match_accuracy": 0.448173,
+        "micro_f1": 0.364615,
+        "gold_positive_count": 1333,
+        "predicted_positive_count": 1640
+      }
+    },
+    "profile_macro_exact_match_accuracy": 0.5936,
+    "empty_set_baseline": {
+      "per_dimension_exact_match_accuracy": {
+        "personality_traits": 0.618522,
+        "interests": 0.748938,
+        "style": 0.517417
+      },
+      "profile_macro_exact_match_accuracy": 0.628292
+    }
+  },
+  "validation_macro_micro_f1_pre_b_recheck": 0.411402,
+  "data": {
+    "calibration_rows": 2709,
+    "validation_rows": 2354,
+    "split_manifest_sha256": "9ca24895f05486afddde712ba2d455127273e6ec6e6932c8781a2b6056a259dc",
+    "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201"
+  },
+  "v1_probability_source_sha256": "4327bcb3fcb796b8e414b5c40931fe0b6fd5eb274a5b8141a65df471583eecb8",
+  "calibration_probability_source_sha256": "75ca94d02232721d88f08c4093587c63b96df7cd251e28dc2a8da336b5f9e89c",
+  "v2_predictions": "results/profile_encoder_v2_micro_thresholds_20261026_val.jsonl",
+  "v2_predictions_sha256": "546915147aeb8dfea88c3c87acee8cc8e2de99b0715b1c66ae329d590ba67df6",
+  "decision": "no-go; keep exact-calibrated v1. Micro-F1 threshold calibration raised label F1 but lowered primary macro exact below the frozen empty baseline.",
+  "validation_evaluation": {
+    "tool": "scripts/b_profile_eval.py compare",
+    "report": ".codex_tmp/acceptance/cycle2/c_v2_b_eval.json",
+    "report_sha256": "e5c76f054ce51580304f1f31d594daa40ce99cecc1347e286d9074f55438f0e6",
+    "candidate_macro_exact_unrounded": 0.5935995468705749,
+    "empty_baseline_macro_exact_unrounded": 0.6282922684791844,
+    "delta": -0.03469272160860948,
+    "passed_primary_gate": false,
+    "candidate_per_dimension_exact": {
+      "interests": 0.787596,
+      "personality_traits": 0.54503,
+      "style": 0.448173
+    },
+    "candidate_per_dimension_micro_f1": {
+      "interests": 0.586924,
+      "personality_traits": 0.282667,
+      "style": 0.364615
+    },
+    "paired_conversations": {
+      "loss_rate": 0.3244444444444444,
+      "losses": 292,
+      "mean_paired_delta": -0.04271031746031746,
+      "ties": 413,
+      "total": 900,
+      "win_rate": 0.21666666666666667,
+      "wins": 195
+    },
+    "validation_id_coverage": {
+      "complete": true,
+      "duplicate_ids": [],
+      "extra_ids": [],
+      "missing_ids": [],
+      "rows": 2354,
+      "unique_ids": 2354
+    }
+  }
+}
