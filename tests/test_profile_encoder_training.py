@@ -5,7 +5,23 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.train_profile_encoder import partition_by_manifest
+from scripts.train_profile_encoder import PROJECT, _portable_path, partition_by_manifest
+
+
+class PortableProfileEncoderReportPathTests(unittest.TestCase):
+    def test_keeps_repository_paths_relative(self) -> None:
+        path = PROJECT / "reports" / "predictions.jsonl"
+
+        self.assertEqual(_portable_path(path), "reports/predictions.jsonl")
+
+    def test_hides_external_machine_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="private-user-") as temporary:
+            path = Path(temporary) / "checkpoint"
+
+            portable = _portable_path(path)
+
+        self.assertEqual(portable, "external/checkpoint")
+        self.assertNotIn("private-user-", portable)
 
 
 class ProfileEncoderTrainingManifestTests(unittest.TestCase):

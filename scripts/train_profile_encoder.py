@@ -32,6 +32,14 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _portable_path(path: Path) -> str:
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(PROJECT.resolve()).as_posix()
+    except ValueError:
+        return f"external/{resolved.name}"
+
+
 def partition_by_manifest(
     examples: Sequence[dict[str, Any]], manifest_path: Path
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -452,9 +460,9 @@ def main() -> int:
             "validation": _mean_micro_f1(validation_metrics),
             "calibration": _mean_micro_f1(calibration_metrics),
         },
-        "prediction_output": str(args.predictions),
-        "calibration_probability_output": str(calibration_output),
-        "checkpoint": str(args.output_dir),
+        "prediction_output": _portable_path(args.predictions),
+        "calibration_probability_output": _portable_path(calibration_output),
+        "checkpoint": _portable_path(args.output_dir),
         "packaged_reload_check": {
             "passed": True,
             "rows_checked": len(reloaded),
@@ -468,8 +476,9 @@ def main() -> int:
         "validation_macro_exact": validation_metrics["profile_macro_exact_match_accuracy"],
         "empty_macro_exact": empty_validation["profile_macro_exact_match_accuracy"],
         "validation_macro_micro_f1": _mean_micro_f1(validation_metrics),
-        "report": str(args.report), "checkpoint": str(args.output_dir),
-        "predictions": str(args.predictions),
+        "report": _portable_path(args.report),
+        "checkpoint": _portable_path(args.output_dir),
+        "predictions": _portable_path(args.predictions),
     }, ensure_ascii=False, indent=2), flush=True)
     return 0
 
