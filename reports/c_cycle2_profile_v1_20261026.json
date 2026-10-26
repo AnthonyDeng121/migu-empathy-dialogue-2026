@@ -1,0 +1,254 @@
+{
+  "status": "full profile v1 training",
+  "decision": "internal candidate pass; pending independent B/D review; not an official score or blind-test result",
+  "device": "mps",
+  "runtime": {
+    "python": "3.12.14",
+    "system": "Darwin",
+    "torch": "2.14.0",
+    "transformers": "5.17.0",
+    "mps_available": true
+  },
+  "data": {
+    "train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+    "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+    "split_manifest_sha256": "9ca24895f05486afddde712ba2d455127273e6ec6e6932c8781a2b6056a259dc",
+    "train_rows": 18653,
+    "fit_rows": 15944,
+    "calibration_rows": 2709,
+    "validation_rows": 2354,
+    "fit_calibration_conversation_overlap": 0,
+    "train_validation_conversation_overlap": 0,
+    "smoke_subset": false
+  },
+  "training": {
+    "seed": 20261026,
+    "epochs_requested": 1,
+    "max_length": 256,
+    "batch_size": 16,
+    "learning_rate": 2e-05,
+    "positive_weight_exponent": 0.5,
+    "optimizer_steps": 997,
+    "elapsed_seconds": 1531.851,
+    "first_loss": 0.703715980052948,
+    "last_loss": 0.28155815601348877,
+    "all_losses_finite": true,
+    "encoder_trainable": true,
+    "loss": "mean of three profile-only weighted binary cross-entropies"
+  },
+  "initialization": {
+    "base_model_weights_sha256": "db0506d985574b80c33eec1cf13bd4c130585568753175871095ca13dbad9e23",
+    "base_model_config_sha256": "648c8a2b51c12551f94bae19a66c21a59c9bd8aa0ebb99f2a0af7236cdb99daa",
+    "profile_encoder_initialized_from_task_finetuned_checkpoint": false,
+    "emotion_head_source": "weights/emotion_longtail075_b1_20261016",
+    "emotion_head_ignored_by_independent_profile_mode": true,
+    "base_model_id": "hfl/chinese-macbert-base",
+    "base_model_revision": "a986e004d2a7f2a1c2f5a3edef4e20604a974ed1"
+  },
+  "calibration": {
+    "threshold_source": "B T1 frozen training-only conversation-disjoint calibration partition",
+    "validation_used_for_threshold_selection": false,
+    "thresholds": {
+      "personality_traits": 0.64,
+      "interests": 0.81,
+      "style": 0.56
+    },
+    "metrics": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.618309,
+          "micro_f1": 0.32525,
+          "gold_positive_count": 1530,
+          "predicted_positive_count": 573
+        },
+        "interests": {
+          "exact_match_accuracy": 0.773348,
+          "micro_f1": 0.48048,
+          "gold_positive_count": 858,
+          "predicted_positive_count": 474
+        },
+        "style": {
+          "exact_match_accuracy": 0.534884,
+          "micro_f1": 0.223697,
+          "gold_positive_count": 1559,
+          "predicted_positive_count": 551
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.64218,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.589516,
+          "interests": 0.710594,
+          "style": 0.505722
+        },
+        "profile_macro_exact_match_accuracy": 0.601944
+      }
+    },
+    "empty_baseline": {
+      "per_dimension": {
+        "personality_traits": {
+          "exact_match_accuracy": 0.589516,
+          "micro_f1": 0.0,
+          "gold_positive_count": 1530,
+          "predicted_positive_count": 0
+        },
+        "interests": {
+          "exact_match_accuracy": 0.710594,
+          "micro_f1": 0.0,
+          "gold_positive_count": 858,
+          "predicted_positive_count": 0
+        },
+        "style": {
+          "exact_match_accuracy": 0.505722,
+          "micro_f1": 0.0,
+          "gold_positive_count": 1559,
+          "predicted_positive_count": 0
+        }
+      },
+      "profile_macro_exact_match_accuracy": 0.601944,
+      "empty_set_baseline": {
+        "per_dimension_exact_match_accuracy": {
+          "personality_traits": 0.589516,
+          "interests": 0.710594,
+          "style": 0.505722
+        },
+        "profile_macro_exact_match_accuracy": 0.601944
+      }
+    }
+  },
+  "validation": {
+    "per_dimension": {
+      "personality_traits": {
+        "exact_match_accuracy": 0.607052,
+        "micro_f1": 0.076984,
+        "gold_positive_count": 1143,
+        "predicted_positive_count": 130
+      },
+      "interests": {
+        "exact_match_accuracy": 0.819456,
+        "micro_f1": 0.491304,
+        "gold_positive_count": 643,
+        "predicted_positive_count": 277
+      },
+      "style": {
+        "exact_match_accuracy": 0.514019,
+        "micro_f1": 0.151199,
+        "gold_positive_count": 1333,
+        "predicted_positive_count": 294
+      }
+    },
+    "profile_macro_exact_match_accuracy": 0.646842,
+    "empty_set_baseline": {
+      "per_dimension_exact_match_accuracy": {
+        "personality_traits": 0.618522,
+        "interests": 0.748938,
+        "style": 0.517417
+      },
+      "profile_macro_exact_match_accuracy": 0.628292
+    }
+  },
+  "empty_set_baseline": {
+    "per_dimension": {
+      "personality_traits": {
+        "exact_match_accuracy": 0.618522,
+        "micro_f1": 0.0,
+        "gold_positive_count": 1143,
+        "predicted_positive_count": 0
+      },
+      "interests": {
+        "exact_match_accuracy": 0.748938,
+        "micro_f1": 0.0,
+        "gold_positive_count": 643,
+        "predicted_positive_count": 0
+      },
+      "style": {
+        "exact_match_accuracy": 0.517417,
+        "micro_f1": 0.0,
+        "gold_positive_count": 1333,
+        "predicted_positive_count": 0
+      }
+    },
+    "profile_macro_exact_match_accuracy": 0.628292,
+    "empty_set_baseline": {
+      "per_dimension_exact_match_accuracy": {
+        "personality_traits": 0.618522,
+        "interests": 0.748938,
+        "style": 0.517417
+      },
+      "profile_macro_exact_match_accuracy": 0.628292
+    }
+  },
+  "macro_micro_f1": {
+    "validation": 0.239829,
+    "calibration": 0.3431423333333334
+  },
+  "prediction_output": "results/profile_encoder_v1_b1_20261026_val.jsonl",
+  "calibration_probability_output": "results/calibration_probabilities.jsonl",
+  "checkpoint": "weights/profile_encoder_v1_b1_20261026",
+  "packaged_reload_check": {
+    "passed": true,
+    "rows_checked": 4,
+    "loader": "src.classification.emotion_profile_checkpoint.EmotionProfileCheckpoint"
+  },
+  "internal_gate": {
+    "rule": "macro exact must strictly exceed same-protocol empty-profile baseline on all 2354 fixed validation IDs",
+    "baseline_macro_exact_unrounded": 0.6282922684791844,
+    "candidate_macro_exact_unrounded": 0.6468422543188899,
+    "delta": 0.018549985839705463,
+    "passed": true,
+    "candidate_per_dimension_exact": {
+      "interests": 0.819456,
+      "personality_traits": 0.607052,
+      "style": 0.514019
+    },
+    "baseline_per_dimension_exact": {
+      "interests": 0.748938,
+      "personality_traits": 0.618522,
+      "style": 0.517417
+    },
+    "paired_conversations": {
+      "loss_rate": 0.12222222222222222,
+      "losses": 110,
+      "mean_paired_delta": 0.015356848912404467,
+      "ties": 639,
+      "total": 900,
+      "win_rate": 0.16777777777777778,
+      "wins": 151
+    },
+    "validation_id_coverage": {
+      "complete": true,
+      "duplicate_ids": [],
+      "extra_ids": [],
+      "missing_ids": [],
+      "rows": 2354,
+      "unique_ids": 2354
+    }
+  },
+  "validation_evaluator": {
+    "tool": "scripts/b_profile_eval.py compare",
+    "summary_report": "reports/c_cycle2_profile_v1_b_eval_summary.json",
+    "summary_sha256": "9ab615ec229366a5ebb6e91a3da2e2c5ee5b044bc8e7fce133260e9052995579",
+    "full_output_local_path": ".codex_tmp/acceptance/cycle2/c_v1_b_eval_full.json",
+    "full_output_sha256": "0ab2e74e287b50659bfa16a7f04076d3ab1f0ca82ef33339b9b6d1d0c261890c"
+  },
+  "checkpoint_integrity": {
+    "tree_sha256": "a8dfb90341c4a5d8ad72a6fd38f5741489114b24efd4898805d0f63ca0542bf7",
+    "bytes": 409686876,
+    "heads_sha256": "6faf23e98adb4693b4ef02c4f14b8e427212b749439c67e81747d837c9ff272b",
+    "metadata_sha256": "d31094c6d634c1fb09d3a47d3f7bc230740cb1196404bd4fcb03c54ddd448d33"
+  },
+  "prediction_output_sha256": "4327bcb3fcb796b8e414b5c40931fe0b6fd5eb274a5b8141a65df471583eecb8",
+  "limitations": [
+    "The 2354-row B1 validation set has been used by earlier experiments and is not blind.",
+    "This is local MPS evidence; it does not establish official evaluation or deployment-image compatibility.",
+    "The macro exact gain is concentrated in interests; personality_traits and style exact are below the empty baseline.",
+    "No confidence interval or significance test was run."
+  ],
+  "model_archive": {
+    "path": ".codex_tmp/acceptance/cycle2/C_CYCLE2_PROFILE_V1_20261026.zip",
+    "bytes": 379744801,
+    "sha256": "761761f619643fd8209d309d0d4cbc684d1aa2374c9542c26283ba961e514060",
+    "zip_test": "passed",
+    "public_release": "not published"
+  }
+}

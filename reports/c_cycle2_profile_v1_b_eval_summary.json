@@ -1,0 +1,93 @@
+{
+  "evaluator": "scripts/b_profile_eval.py compare",
+  "full_output_local_path": ".codex_tmp/acceptance/cycle2/c_v1_b_eval_full.json",
+  "full_output_sha256": "0ab2e74e287b50659bfa16a7f04076d3ab1f0ca82ef33339b9b6d1d0c261890c",
+  "inputs": {
+    "baseline": {
+      "sha256": "fde59a6f70dd920caa0a15b27a6044181bd5b9521333b68d27a176d4e3e94d26"
+    },
+    "manifest": {
+      "sha256": "644c9aa6a79ebb72dd462a4543535ec513fad63bb208967dfb52bc177d6274f1"
+    },
+    "prediction": {
+      "sha256": "4327bcb3fcb796b8e414b5c40931fe0b6fd5eb274a5b8141a65df471583eecb8"
+    },
+    "reference": {
+      "sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201"
+    }
+  },
+  "id_coverage": {
+    "baseline": {
+      "complete": true,
+      "duplicate_ids": [],
+      "extra_ids": [],
+      "missing_ids": [],
+      "rows": 2354,
+      "unique_ids": 2354
+    },
+    "candidate": {
+      "complete": true,
+      "duplicate_ids": [],
+      "extra_ids": [],
+      "missing_ids": [],
+      "rows": 2354,
+      "unique_ids": 2354
+    }
+  },
+  "baseline": {
+    "macro_exact_unrounded": 0.6282922684791844,
+    "per_dimension_exact": {
+      "interests": 0.748938,
+      "personality_traits": 0.618522,
+      "style": 0.517417
+    },
+    "per_dimension_micro_f1": {
+      "interests": 0.0,
+      "personality_traits": 0.0,
+      "style": 0.0
+    },
+    "per_dimension_predicted_nonempty_rate": {
+      "interests": 0.0,
+      "personality_traits": 0.0,
+      "style": 0.0
+    },
+    "global_micro": {
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    }
+  },
+  "candidate": {
+    "macro_exact_unrounded": 0.6468422543188899,
+    "per_dimension_exact": {
+      "interests": 0.819456,
+      "personality_traits": 0.607052,
+      "style": 0.514019
+    },
+    "per_dimension_micro_f1": {
+      "interests": 0.491304,
+      "personality_traits": 0.076984,
+      "style": 0.151199
+    },
+    "per_dimension_predicted_nonempty_rate": {
+      "interests": 0.11767204757858964,
+      "personality_traits": 0.04715378079864061,
+      "style": 0.12107051826677995
+    },
+    "global_micro": {
+      "f1": 0.20837696335078534,
+      "precision": 0.5677603423680456,
+      "recall": 0.12760500160307792
+    }
+  },
+  "paired_conversations": {
+    "loss_rate": 0.12222222222222222,
+    "losses": 110,
+    "mean_paired_delta": 0.015356848912404467,
+    "ties": 639,
+    "total": 900,
+    "win_rate": 0.16777777777777778,
+    "wins": 151
+  },
+  "full_output_contains_detailed_conversation_rows": true
+}
