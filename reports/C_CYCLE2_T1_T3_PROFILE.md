@@ -37,9 +37,9 @@ CPU 小样例冒烟运行 2 个 optimizer step，完成概率输出、保存及�
 | interests | 0.748938 | 0.819456 | 0.491304 |
 | style | 0.517417 | 0.514019 | 0.151199 |
 
-模型保存在被 `.gitignore` 忽略的 `weights/profile_encoder_v1_b1_20261026/`。目录树 SHA-256：`e7a996a95c723301f85c4e11326d02450de6e221042234abc43913b60e783e33`。checkpoint 真实重载检查通过。逐条验证预测（含 2354 个 ID、三维标签概率及阈值解码画像）保存在 `reports/c_cycle2_profile_v1_predictions.jsonl`，供 B 复核；B 工具摘要在 `reports/c_cycle2_profile_v1_b_eval_summary.json`；逐会话完整 JSON 留在本机 `.codex_tmp/acceptance/cycle2/c_v1_b_eval_full.json`，SHA-256 `0ab2e74e287b50659bfa16a7f04076d3ab1f0ca82ef33339b9b6d1d0c261890c`。
+模型保存在被 `.gitignore` 忽略的 `weights/profile_encoder_v1_b1_20261026/`。目录树 SHA-256：`a8dfb90341c4a5d8ad72a6fd38f5741489114b24efd4898805d0f63ca0542bf7`。checkpoint 真实重载检查通过。逐条验证预测（含 2354 个 ID、三维标签概率及阈值解码画像）保存在 `reports/c_cycle2_profile_v1_predictions.jsonl`，供 B 复核；B 工具摘要在 `reports/c_cycle2_profile_v1_b_eval_summary.json`；逐会话完整 JSON 留在本机 `.codex_tmp/acceptance/cycle2/c_v1_b_eval_full.json`，SHA-256 `0ab2e74e287b50659bfa16a7f04076d3ab1f0ca82ef33339b9b6d1d0c261890c`。
 
-给组长交接的 ZIP 已在本机打包并通过 `unzip -t`：`.codex_tmp/acceptance/cycle2/C_CYCLE2_PROFILE_V1_20261026.zip`，379,744,878 字节，SHA-256 `2e1a187aa97446a2df22a641e9e39f56fe24d019885e658728c6af64fac96aea`。它目前尚未发布到公开 GitHub Release。
+给组长交接的 ZIP 已在本机打包并通过 `unzip -t`：`.codex_tmp/acceptance/cycle2/C_CYCLE2_PROFILE_V1_20261026.zip`，379,744,801 字节，SHA-256 `761761f619643fd8209d309d0d4cbc684d1aa2374c9542c26283ba961e514060`。ZIP 中记录的是仓库相对 manifest 路径和模型 ID/Revision，不包含本机绝对路径。它目前尚未发布到公开 GitHub Release。
 
 ## T3：单变量阈值目标对照
 

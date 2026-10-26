@@ -189,6 +189,8 @@ def main() -> int:
     parser.add_argument("--val", type=Path, default=PROJECT / "data/processed/b1_full_v1/classification_val.jsonl")
     parser.add_argument("--split-manifest", type=Path, default=PROJECT / "reports/b_t1_train_internal_split.jsonl")
     parser.add_argument("--base-model", type=Path, required=True, help="Local generic pretrained MacBERT snapshot")
+    parser.add_argument("--base-model-id", default="hfl/chinese-macbert-base")
+    parser.add_argument("--base-model-revision", default="a986e004d2a7f2a1c2f5a3edef4e20604a974ed1")
     parser.add_argument("--emotion-checkpoint", type=Path, default=PROJECT / "weights/emotion_longtail075_b1_20261016")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
@@ -239,6 +241,15 @@ def main() -> int:
         val = val[: args.smoke_samples]
     if not fit_rows or not calibration_rows or not val:
         raise ValueError("smoke sample limit leaves an empty fit/calibration/validation split")
+
+    try:
+        split_manifest_reference = args.split_manifest.resolve().relative_to(PROJECT.resolve()).as_posix()
+    except ValueError:
+        split_manifest_reference = args.split_manifest.name
+    try:
+        emotion_checkpoint_reference = args.emotion_checkpoint.resolve().relative_to(PROJECT.resolve()).as_posix()
+    except ValueError:
+        emotion_checkpoint_reference = args.emotion_checkpoint.name
 
     tokenizer = AutoTokenizer.from_pretrained(args.base_model, local_files_only=True)
     tokenizer.truncation_side = "left"
@@ -357,7 +368,8 @@ def main() -> int:
     save_file(head_state, str(args.output_dir / "heads.safetensors"))
     metadata = {
         "format_version": 2,
-        "base_model": str(args.base_model.resolve()),
+        "base_model": args.base_model_id,
+        "base_model_revision": args.base_model_revision,
         "profile_training_objective": "mean of three profile-only weighted BCE losses; encoder trainable",
         "emotion_labels": list(EMOTION_LABELS),
         "profile_labels": {dimension: list(labels) for dimension, labels in PROFILE_LABELS_BY_DIMENSION.items()},
@@ -366,7 +378,7 @@ def main() -> int:
         "pooling": "BertModel.pooler_output",
         "max_length": args.max_length,
         "emotion_head_role": "format-compatibility only; independent profile mode ignores this emotion output",
-        "calibration_split_manifest": str(args.split_manifest.resolve()),
+        "calibration_split_manifest": split_manifest_reference,
     }
     (args.output_dir / "checkpoint_metadata.json").write_text(
         json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -416,11 +428,12 @@ def main() -> int:
             "loss": "mean of three profile-only weighted binary cross-entropies",
         },
         "initialization": {
-            "base_model_path": str(args.base_model.resolve()),
+            "base_model_id": args.base_model_id,
+            "base_model_revision": args.base_model_revision,
             "base_model_weights_sha256": sha256_file(base_weight_path),
             "base_model_config_sha256": sha256_file(args.base_model / "config.json"),
             "profile_encoder_initialized_from_task_finetuned_checkpoint": False,
-            "emotion_head_source": str(args.emotion_checkpoint.resolve()),
+            "emotion_head_source": emotion_checkpoint_reference,
             "emotion_head_ignored_by_independent_profile_mode": True,
         },
         "calibration": {

@@ -37,12 +37,13 @@
     "loss": "mean of three profile-only weighted binary cross-entropies"
   },
   "initialization": {
-    "base_model_path": "/Users/7bacslash/.cache/huggingface/hub/models--hfl--chinese-macbert-base/snapshots/a986e004d2a7f2a1c2f5a3edef4e20604a974ed1",
     "base_model_weights_sha256": "db0506d985574b80c33eec1cf13bd4c130585568753175871095ca13dbad9e23",
     "base_model_config_sha256": "648c8a2b51c12551f94bae19a66c21a59c9bd8aa0ebb99f2a0af7236cdb99daa",
     "profile_encoder_initialized_from_task_finetuned_checkpoint": false,
-    "emotion_head_source": "/Users/7bacslash/Documents/Codex/2026-10-12/end/work/migu-empathy-dialogue-2026/weights/emotion_longtail075_b1_20261016",
-    "emotion_head_ignored_by_independent_profile_mode": true
+    "emotion_head_source": "weights/emotion_longtail075_b1_20261016",
+    "emotion_head_ignored_by_independent_profile_mode": true,
+    "base_model_id": "hfl/chinese-macbert-base",
+    "base_model_revision": "a986e004d2a7f2a1c2f5a3edef4e20604a974ed1"
   },
   "calibration": {
     "threshold_source": "B T1 frozen training-only conversation-disjoint calibration partition",
@@ -231,10 +232,10 @@
     "full_output_sha256": "0ab2e74e287b50659bfa16a7f04076d3ab1f0ca82ef33339b9b6d1d0c261890c"
   },
   "checkpoint_integrity": {
-    "tree_sha256": "e7a996a95c723301f85c4e11326d02450de6e221042234abc43913b60e783e33",
+    "tree_sha256": "a8dfb90341c4a5d8ad72a6fd38f5741489114b24efd4898805d0f63ca0542bf7",
     "bytes": 409686876,
     "heads_sha256": "6faf23e98adb4693b4ef02c4f14b8e427212b749439c67e81747d837c9ff272b",
-    "metadata_sha256": "1169a41a5a4ee9dc24e00cb43aebeea16ca65aced335b612bc344ae76db03af9"
+    "metadata_sha256": "d31094c6d634c1fb09d3a47d3f7bc230740cb1196404bd4fcb03c54ddd448d33"
   },
   "prediction_output_sha256": "4327bcb3fcb796b8e414b5c40931fe0b6fd5eb274a5b8141a65df471583eecb8",
   "limitations": [
@@ -245,8 +246,8 @@
   ],
   "model_archive": {
     "path": ".codex_tmp/acceptance/cycle2/C_CYCLE2_PROFILE_V1_20261026.zip",
-    "bytes": 379744878,
-    "sha256": "2e1a187aa97446a2df22a641e9e39f56fe24d019885e658728c6af64fac96aea",
+    "bytes": 379744801,
+    "sha256": "761761f619643fd8209d309d0d4cbc684d1aa2374c9542c26283ba961e514060",
     "zip_test": "passed",
     "public_release": "not published"
   }
