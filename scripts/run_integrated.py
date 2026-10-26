@@ -166,7 +166,24 @@ class Models:
         return {**classification, "response_text": text, "memory_refs": []}
 
 
-def run(test_file, result_dir, config, factory=Models):
+def run(test_file, result_dir, config, factory=Models, *, resume_dir=None):
+    from src.common.inference_resume import Journal, fingerprint
+    if resume_dir is None:
+        return _run(test_file, result_dir, config, factory)
+    rows = read_jsonl(test_file)
+    for row in rows:
+        validate_test_row(row)
+    ids = [row["id"] for row in rows]
+    if not ids or len(set(ids)) != len(ids):
+        raise ValueError("Resume input must have nonempty unique IDs")
+    identity = fingerprint(PROJECT, {"test": test_file}, config,
+                           {key: config.get(key) for key in
+                            ("classifier_dir", "response_model_dir", "response_adapter_dir", "profile_model_dir")})
+    with Journal(resume_dir, identity, ids, validate_prediction) as journal:
+        return _run(test_file, result_dir, config, factory, journal)
+
+
+def _run(test_file, result_dir, config, factory, journal=None):
     test_file, result_dir = Path(test_file), Path(result_dir)
     rows = read_jsonl(test_file)
     if not rows:
@@ -180,18 +197,25 @@ def run(test_file, result_dir, config, factory=Models):
     models = factory(config)
     models.synchronize()
     loading = time.perf_counter() - started
-    latencies = []
+    cached = list(journal.records) if journal else []
+    latencies = [record["seconds"] * 1000 for record in cached[:100]]
     descriptor, temporary = tempfile.mkstemp(dir=result_dir, suffix=".tmp")
     destination = result_dir / "submission.jsonl"
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+            for record in cached:
+                handle.write(json.dumps(record["prediction"], ensure_ascii=False, separators=(",", ":")) + "\n")
             for index, row in enumerate(rows):
+                if index < len(cached):
+                    continue
                 models.synchronize()
                 started = time.perf_counter()
                 prediction = models.predict(row)
                 validate_prediction(prediction, row["id"])
                 models.synchronize()
                 elapsed = (time.perf_counter() - started) * 1000
+                if journal:
+                    journal.append(prediction, elapsed / 1000)
                 if index < 100:
                     latencies.append(elapsed)
                 handle.write(json.dumps(prediction, ensure_ascii=False, separators=(",", ":")) + "\n")
@@ -210,9 +234,13 @@ def run(test_file, result_dir, config, factory=Models):
             "condition_mode": "predicted" if config["condition_response"] else "none",
             "profile_mode": config.get("profile_mode", "model"),
         }
-        os.replace(temporary, destination)
-        (result_dir / "performance_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        return report
+        if journal:
+            report.update(version="integrated_transformers_resume_v1", complete=False,
+                          timing_scope="cumulative successful sample compute across attempts; not a cold-start benchmark",
+                          resume=journal.summary())
+        from src.common.inference_publication import publish_prediction_report
+        return publish_prediction_report(temporary, destination, result_dir / "performance_report.json",
+                                         report, [row["id"] for row in rows])
     finally:
         Path(temporary).unlink(missing_ok=True)
 
@@ -222,11 +250,12 @@ def main():
     parser.add_argument("test_file", type=Path)
     parser.add_argument("result_dir", type=Path)
     parser.add_argument("--config", type=Path, default=PROJECT / "configs/integrated.json")
+    parser.add_argument("--resume-dir", type=Path, help="opt-in durable progress directory; reuse only with identical inputs/assets/code/environment")
     args = parser.parse_args()
     os.environ.update(HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1", TOKENIZERS_PARALLELISM="false")
     config = load_config(args.config)
     check_files(config)
-    run(args.test_file, args.result_dir, config)
+    run(args.test_file, args.result_dir, config, resume_dir=args.resume_dir)
 
 
 if __name__ == "__main__":

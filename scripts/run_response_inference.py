@@ -80,6 +80,8 @@ def _load_conditions(path: Path, fields: str = "both") -> dict[str, dict[str, An
         sample_id = row.get("id")
         if not sample_id:
             raise ValueError(f"condition row without id in {path}")
+        if sample_id in conditions:
+            raise ValueError(f"duplicate condition id {sample_id!r} in {path}")
         if fields == "emotion":
             if "emotion_label" not in row or not isinstance(row["emotion_label"], str):
                 raise ValueError(f"condition row {sample_id} lacks a string emotion_label")
@@ -114,7 +116,31 @@ def condition_coverage(
     return f"{covered}/{len(rows)}"
 
 
+def _validate_response(prediction, expected_id):
+    if (set(prediction) != {"id", "response_text"} or prediction["id"] != expected_id
+            or not isinstance(prediction["response_text"], str) or not prediction["response_text"].strip()):
+        raise ValueError("Invalid response prediction or ID")
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    from src.common.inference_resume import Journal, fingerprint
+    if getattr(args, "resume_dir", None) is None:
+        return _run(args)
+    rows = read_jsonl(args.input)
+    if args.max_samples is not None:
+        rows = rows[:args.max_samples]
+    ids = [eval_row_id(row) for row in rows]
+    if not ids or any(not isinstance(i, str) or not i for i in ids) or len(set(ids)) != len(ids):
+        raise ValueError("Resume input must have nonempty unique IDs")
+    config = {key: value for key, value in vars(args).items()
+              if key not in {"output", "performance_report", "resume_dir"}}
+    identity = fingerprint(PROJECT, {"input": args.input, "conditions": args.condition_jsonl},
+                           config, {"model": args.model, "adapter": args.adapter})
+    with Journal(args.resume_dir, identity, ids, _validate_response) as journal:
+        return _run(args, journal)
+
+
+def _run(args: argparse.Namespace, journal=None) -> dict[str, Any]:
     deps = _load_optional_dependencies()
     torch = deps["torch"]
     AutoModelForCausalLM = deps["AutoModelForCausalLM"]
@@ -153,11 +179,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     model.to(device)
     model.eval()
 
-    predictions: list[dict[str, Any]] = []
-    latencies: list[float] = []
-    generated_tokens = 0
+    cached = list(journal.records) if journal else []
+    predictions: list[dict[str, Any]] = [r["prediction"] for r in cached]
+    latencies: list[float] = [r["seconds"] for r in cached]
+    generated_tokens = sum(r["tokens"] for r in cached)
     started = time.perf_counter()
-    for row in rows:
+    for row in rows[len(cached):]:
         row_id = eval_row_id(row)
         sample = build_eval_sample(row, condition=conditions.get(row_id))
         prompt_text = tokenizer.apply_chat_template(
@@ -183,11 +210,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         generated = output_ids[0][prompt_ids.shape[1]:]
         generated_tokens += int(generated.numel())
         text = tokenizer.decode(generated, skip_special_tokens=True).strip()
-        predictions.append({"id": row_id, "response_text": text})
+        prediction = {"id": row_id, "response_text": text}
+        if journal:
+            journal.append(prediction, latencies[-1], int(generated.numel()))
+        predictions.append(prediction)
     total_seconds = time.perf_counter() - started
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    write_jsonl(args.output, predictions)
     report = {
         "version": "response_generation_inference_v1",
         "model_path": str(args.model),
@@ -213,13 +241,31 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "full_set_size": int(args.full_set_size),
         "empty_responses": sum(1 for item in predictions if not item["response_text"]),
     }
-    args.performance_report.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    if journal:
+        cumulative = sum(latencies)
+        report.update(version="response_generation_inference_resume_v1", resume=journal.summary(),
+                      timing_scope="cumulative successful generate calls across attempts; excludes prompts/loading; not cold-start throughput",
+                      total_seconds=round(cumulative, 3),
+                      mean_seconds_per_sample=round(cumulative / len(predictions), 4),
+                      tokens_per_second=round(generated_tokens / cumulative, 2) if cumulative else None,
+                      full_set_estimate_seconds=None)
+        total_seconds = cumulative
+    import os
+    import tempfile
+    from src.common.inference_publication import publish_prediction_report
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(dir=args.output.parent, suffix=".tmp")
+    os.close(descriptor)
+    try:
+        write_jsonl(Path(temporary), predictions)
+        report = publish_prediction_report(temporary, args.output, args.performance_report, report,
+                                           [eval_row_id(row) for row in rows])
+    finally:
+        Path(temporary).unlink(missing_ok=True)
     print(
         f"PASS: {len(predictions)} samples in {total_seconds:.1f}s "
         f"({report['mean_seconds_per_sample']:.3f}s/sample, "
-        f"{report['tokens_per_second']:.1f} tok/s)",
+        f"{report['tokens_per_second'] or 0:.1f} tok/s)",
         flush=True,
     )
     return report
@@ -233,6 +279,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--performance-report", type=Path, required=True)
     parser.add_argument("--max-samples", type=int)
+    parser.add_argument("--resume-dir", type=Path, help="opt-in durable progress; same directory resumes verified completed samples")
     parser.add_argument(
         "--condition-jsonl",
         type=Path,
