@@ -244,6 +244,39 @@ def _steps_per_epoch(examples: int, batch_size: int, accumulation: int) -> int:
     return math.ceil(micro_batches / accumulation)
 
 
+def _flatten_epoch_plan(epoch_plan: list[list[list[int]]]) -> list[tuple[int, int]]:
+    """(epoch_index, micro_index) for every micro batch, in training order."""
+    return [
+        (epoch_index, micro_index)
+        for epoch_index, micro_batches in enumerate(epoch_plan)
+        for micro_index in range(len(micro_batches))
+    ]
+
+
+def _resume_start(
+    epoch_plan: list[list[list[int]]], completed_micro_batches: int
+) -> tuple[int, int]:
+    """Position to continue from after `completed_micro_batches` micro batches.
+
+    The plan is regenerated from the same seed, so a global micro-batch
+    counter maps back to the exact (epoch, micro) position without storing
+    the plan itself. Raises when the checkpoint already covers every micro
+    batch: resuming a finished run would silently train nothing.
+    """
+    positions = _flatten_epoch_plan(epoch_plan)
+    if completed_micro_batches >= len(positions):
+        raise ValueError(
+            "checkpoint covers the full training plan; nothing to resume "
+            f"({completed_micro_batches} >= {len(positions)} micro batches)"
+        )
+    return positions[completed_micro_batches]
+
+
+def _checkpoint_path(output_dir: Path, optimizer_steps: int) -> Path:
+    """Directory holding a resumable checkpoint at `optimizer_steps`."""
+    return output_dir / "checkpoints" / f"step_{optimizer_steps:06d}"
+
+
 def _generate_samples(
     model: Any,
     tokenizer: Any,
@@ -317,11 +350,96 @@ def _reproduction_command(args: argparse.Namespace) -> str:
         parts.append(f"--max-train-samples {args.max_train_samples}")
     if args.max_steps is not None:
         parts.append(f"--max-steps {args.max_steps}")
+    if args.checkpoint_every:
+        parts.append(f"--checkpoint-every {args.checkpoint_every}")
+    if args.resume_from is not None:
+        parts.append(f"--resume-from '{_portable_path(args.resume_from)}'")
     if args.eval_prompts != 3:
         parts.append(f"--eval-prompts {args.eval_prompts}")
     if args.local_files_only:
         parts.append("--local-files-only")
     return " \\\n  ".join(parts)
+
+
+def _save_checkpoint(
+    deps: dict[str, Any],
+    model: Any,
+    tokenizer: Any,
+    optimizer: Any,
+    scheduler: Any,
+    checkpoint_dir: Path,
+    progress: dict[str, Any],
+) -> None:
+    """Adapter + optimizer + scheduler + RNG + position into one directory.
+
+    Rented GPU pods get reclaimed without warning and the training loop
+    saves only at the very end; a checkpoint every few minutes turns a pod
+    restart into a seconds-long resume instead of a full retrain.
+    """
+    torch = deps["torch"]
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    model.save_pretrained(str(checkpoint_dir))
+    tokenizer.save_pretrained(str(checkpoint_dir))
+    torch.save(
+        {
+            "optimizer": optimizer.state_dict(),
+            "scheduler": scheduler.state_dict(),
+            "rng": torch.get_rng_state(),
+            "python_rng": random.getstate(),
+            "cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+        },
+        checkpoint_dir / "trainer_state.pt",
+    )
+    (checkpoint_dir / "progress.json").write_text(
+        json.dumps(progress, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+
+def _load_checkpoint(
+    deps: dict[str, Any],
+    model: Any,
+    optimizer: Any,
+    scheduler: Any,
+    checkpoint_dir: Path,
+) -> dict[str, Any]:
+    """Restore adapter, optimizer/scheduler and RNG from a checkpoint.
+
+    Returns the progress dict. The adapter tensors on disk are compared
+    against the live model after loading: a silent key mismatch would
+    otherwise resume from the base weights while reporting success.
+    """
+    torch = deps["torch"]
+    from peft import set_peft_model_state_dict
+    from safetensors.torch import load_file
+
+    progress = json.loads((checkpoint_dir / "progress.json").read_text(encoding="utf-8"))
+    saved = load_file(checkpoint_dir / "adapter_model.safetensors")
+    # peft saves adapter tensors without the adapter name in the key; this
+    # API maps them back onto the live model (plain load_state_dict silently
+    # matches nothing).
+    set_peft_model_state_dict(model, saved)
+    live = _lora_state(model)
+    missing = sorted(set(saved) - set(live))
+    unmatched = sorted(
+        name
+        for name in set(saved) & set(live)
+        if not torch.equal(saved[name], live[_normalize_adapter_key(name)])
+    )
+    if missing or unmatched:
+        raise RuntimeError(
+            "checkpoint adapter does not match the live model: "
+            f"missing={missing} unmatched={unmatched}"
+        )
+    state = torch.load(
+        checkpoint_dir / "trainer_state.pt", map_location="cpu", weights_only=False
+    )
+    optimizer.load_state_dict(state["optimizer"])
+    scheduler.load_state_dict(state["scheduler"])
+    torch.set_rng_state(state["rng"])
+    random.setstate(state["python_rng"])
+    if state["cuda_rng"]:
+        torch.cuda.set_rng_state_all(state["cuda_rng"])
+    return progress
 
 
 def _verify_adapter_reload(
@@ -410,6 +528,21 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 
     config = json.loads(args.config.read_text(encoding="utf-8"))
     _validate_run_limits(args.max_train_samples, args.max_steps, args.eval_prompts)
+    if args.checkpoint_every < 0:
+        raise ValueError("--checkpoint-every must be non-negative")
+    resume_dir: Path | None = args.resume_from
+    resume_progress: dict[str, Any] | None = None
+    if resume_dir is not None:
+        for required in ("progress.json", "adapter_model.safetensors", "trainer_state.pt"):
+            if not (resume_dir / required).is_file():
+                raise FileNotFoundError(
+                    f"resume checkpoint is missing {required}: {resume_dir}"
+                )
+        progress = json.loads((resume_dir / "progress.json").read_text(encoding="utf-8"))
+        for field in ("micro_batches_done", "optimizer_steps"):
+            if field not in progress:
+                raise ValueError(f"resume checkpoint progress.json lacks {field}")
+        resume_progress = progress
     train_rows = read_jsonl(args.train)
     condition_sha256: str | None = None
     if args.train_format == "b1":
@@ -446,7 +579,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("training set contains no samples")
     smoke_mode = args.max_train_samples is not None or args.max_steps is not None
 
-    if args.output_dir.exists() and any(args.output_dir.iterdir()):
+    # Resuming writes into the same output directory the checkpoints live in,
+    # so the emptiness guard only applies to fresh runs.
+    if (
+        args.resume_from is None
+        and args.output_dir.exists()
+        and any(args.output_dir.iterdir())
+    ):
         raise FileExistsError(f"output directory is not empty: {args.output_dir}")
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -546,9 +685,35 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     timed_optimizer_steps = 0
     loss_accumulator = 0.0
     micro_batches_done = 0
+    micro_batches_trained = 0
     training_started = time.perf_counter()
     model.train()
     stop = False
+
+    resume_position: tuple[int, int] | None = None
+    resume_info: dict[str, Any] | None = None
+    checkpoints_saved: list[Path] = []
+    if resume_progress is not None and resume_dir is not None:
+        resume_position = _resume_start(
+            epoch_plan, int(resume_progress["micro_batches_done"])
+        )
+        optimizer_steps = int(resume_progress["optimizer_steps"])
+        _load_checkpoint(deps, model, optimizer, scheduler, resume_dir)
+        resume_info = {
+            "from": _portable_path(resume_dir),
+            "skipped_micro_batches": int(resume_progress["micro_batches_done"]),
+            "optimizer_steps_at_resume": optimizer_steps,
+            "resume_position": {
+                "epoch": resume_position[0],
+                "micro_batch": resume_position[1],
+            },
+        }
+        print(
+            f"resume: from {args.resume_from} at epoch {resume_position[0]} "
+            f"micro-batch {resume_position[1]} (optimizer step {optimizer_steps})",
+            flush=True,
+        )
+
     for epoch_index, micro_batches in enumerate(epoch_plan):
         print(
             f"epoch={epoch_index + 1}/{epochs} micro_batches={len(micro_batches)} "
@@ -557,6 +722,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         )
         optimizer.zero_grad(set_to_none=True)
         for micro_index, indices in enumerate(micro_batches):
+            if resume_position is not None and (epoch_index, micro_index) < resume_position:
+                micro_batches_done += 1
+                continue
             if args.max_steps is not None and optimizer_steps >= args.max_steps:
                 stop = True
                 break
@@ -579,6 +747,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             loss.backward()
             loss_accumulator += loss_value
             micro_batches_done += 1
+            micro_batches_trained += 1
             is_last_micro = micro_index == len(micro_batches) - 1
             if (micro_index + 1) % accumulation == 0 or is_last_micro:
                 if optimizer_steps == 0:
@@ -605,15 +774,34 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 if optimizer_steps > TIMING_WARMUP_STEPS:
                     measured_window_seconds += window_seconds
                     timed_optimizer_steps += 1
-                if args.max_steps is not None and optimizer_steps >= args.max_steps:
-                    stop = True
-                    break
                 if optimizer_steps % 10 == 0:
                     print(
                         f"step={optimizer_steps}/{effective_total_steps} "
-                        f"train_loss={loss_accumulator / max(micro_batches_done, 1):.4f} device={device}",
+                        f"train_loss={loss_accumulator / max(micro_batches_trained, 1):.4f} device={device}",
                         flush=True,
                     )
+                if args.checkpoint_every and optimizer_steps % args.checkpoint_every == 0:
+                    checkpoint_dir = _checkpoint_path(args.output_dir, optimizer_steps)
+                    _save_checkpoint(
+                        deps,
+                        model,
+                        tokenizer,
+                        optimizer,
+                        scheduler,
+                        checkpoint_dir,
+                        {
+                            "optimizer_steps": optimizer_steps,
+                            "micro_batches_done": micro_batches_done,
+                            "epoch_index": epoch_index,
+                            "micro_index": micro_index,
+                            "elapsed_seconds": round(time.perf_counter() - training_started, 3),
+                        },
+                    )
+                    checkpoints_saved.append(checkpoint_dir)
+                    print(f"checkpoint: {checkpoint_dir}", flush=True)
+                if args.max_steps is not None and optimizer_steps >= args.max_steps:
+                    stop = True
+                    break
         if stop:
             break
     training_seconds = time.perf_counter() - training_started
@@ -736,7 +924,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "training_speed": {
             "optimizer_steps": optimizer_steps,
             "micro_batches_done": micro_batches_done,
-            "mean_train_loss": round(loss_accumulator / max(micro_batches_done, 1), 4),
+            "micro_batches_trained": micro_batches_trained,
+            "mean_train_loss": round(loss_accumulator / max(micro_batches_trained, 1), 4),
             "timing_warmup_steps": TIMING_WARMUP_STEPS,
             "timed_optimizer_steps": timed_optimizer_steps,
             "measured_window_seconds": round(measured_window_seconds, 3),
@@ -769,6 +958,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "adapter_reload": reload_check,
             "generation_probe": generation_results,
             "non_empty_generations": non_empty_generations,
+        },
+        "resume": resume_info,
+        "checkpointing": {
+            "every_steps": args.checkpoint_every or None,
+            "saved": [_portable_path(path) for path in checkpoints_saved],
         },
         "checkpoint_directory": _portable_path(args.output_dir),
         "adapter": {
@@ -883,6 +1077,22 @@ def _render_report(report: dict[str, Any]) -> str:
     for item in checks["generation_probe"]:
         preview = item["generated_text"][:120].replace("\n", " ")
         lines.append(f"- `{item['id']}`：{preview}…")
+    if report.get("resume"):
+        resume = report["resume"]
+        lines.append(
+            f"断点恢复：自 `{resume['from']}` 继续（跳过 "
+            f"{resume['skipped_micro_batches']} 个 micro batch，恢复时 optimizer "
+            f"step {resume['optimizer_steps_at_resume']}，位置 epoch "
+            f"{resume['resume_position']['epoch']} micro-batch "
+            f"{resume['resume_position']['micro_batch']}）。"
+        )
+    checkpointing = report.get("checkpointing") or {}
+    if checkpointing.get("every_steps"):
+        lines.append(
+            f"周期存档：每 {checkpointing['every_steps']} optimizer step 一次，"
+            f"本次运行共保存 {len(checkpointing['saved'])} 个"
+            f"（{_portable_path(Path(report['checkpoint_directory']))}/checkpoints/）。"
+        )
     lines.extend(
         [
             "",
@@ -929,6 +1139,22 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--max-train-samples", type=int)
     parser.add_argument("--max-steps", type=int)
+    parser.add_argument(
+        "--checkpoint-every",
+        type=int,
+        default=0,
+        help="save a resumable checkpoint (adapter + optimizer + scheduler + "
+             "RNG + position) every N optimizer steps; 0 disables. Checkpoints "
+             "land in <output-dir>/checkpoints/step_N and are meant for pod "
+             "restarts: the training loop itself only saves at the end.",
+    )
+    parser.add_argument(
+        "--resume-from",
+        type=Path,
+        help="checkpoint directory from an interrupted run; the epoch plan is "
+             "regenerated from the same seed and training continues after the "
+             "checkpoint's micro-batch position",
+    )
     parser.add_argument(
         "--eval-prompts",
         type=int,
