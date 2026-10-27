@@ -12,6 +12,7 @@ from scripts.train_response_sft import (
     _checkpoint_path,
     _epoch_micro_batches,
     _flatten_epoch_plan,
+    _manifest_mismatches,
     _normalize_adapter_key,
     _reproduction_command,
     _resume_start,
@@ -284,6 +285,84 @@ class CheckpointReproductionTests(unittest.TestCase):
         )
 
 
+class ManifestMismatchTests(unittest.TestCase):
+    """Resume must refuse to continue a different experiment (A review P1)."""
+
+    def _manifest(self) -> dict:
+        return {
+            "format_version": 1,
+            "train_format": "b1",
+            "train_sha256": "a" * 64,
+            "condition_sha256": None,
+            "config": {"seed": 20261013, "epochs": 2, "lora_r": 8},
+            "model_fingerprint": {"config.json": "b" * 64, "model.safetensors": "c" * 64},
+            "budget": {
+                "epochs": 2,
+                "batch_size": 1,
+                "gradient_accumulation": 8,
+                "max_train_samples": None,
+                "max_steps": None,
+                "optimizer_steps_per_epoch": 2332,
+                "effective_total_steps": 4664,
+            },
+        }
+
+    def test_identical_manifest_has_no_mismatch(self) -> None:
+        self.assertEqual(_manifest_mismatches(self._manifest(), self._manifest()), [])
+
+    def test_changed_seed_is_reported_with_path(self) -> None:
+        current = self._manifest()
+        current["config"]["seed"] = 20261014
+        diffs = _manifest_mismatches(self._manifest(), current)
+        self.assertEqual(len(diffs), 1)
+        self.assertIn("config.seed", diffs[0])
+
+    def test_changed_budget_is_reported(self) -> None:
+        for field, value in (
+            ("max_steps", 4),
+            ("max_train_samples", 6),
+            ("gradient_accumulation", 4),
+            ("effective_total_steps", 4),
+        ):
+            current = self._manifest()
+            current["budget"][field] = value
+            diffs = _manifest_mismatches(self._manifest(), current)
+            self.assertTrue(
+                any(f"budget.{field}" in diff for diff in diffs),
+                f"{field} change must be reported: {diffs}",
+            )
+
+    def test_changed_train_data_is_reported(self) -> None:
+        current = self._manifest()
+        current["train_sha256"] = "d" * 64
+        diffs = _manifest_mismatches(self._manifest(), current)
+        self.assertEqual(len(diffs), 1)
+        self.assertIn("train_sha256", diffs[0])
+
+    def test_changed_condition_file_is_reported(self) -> None:
+        current = self._manifest()
+        current["condition_sha256"] = "e" * 64
+        diffs = _manifest_mismatches(self._manifest(), current)
+        self.assertEqual(len(diffs), 1)
+        self.assertIn("condition_sha256", diffs[0])
+
+    def test_changed_base_weights_are_reported_per_file(self) -> None:
+        current = self._manifest()
+        current["model_fingerprint"]["model.safetensors"] = "f" * 64
+        diffs = _manifest_mismatches(self._manifest(), current)
+        self.assertEqual(len(diffs), 1)
+        self.assertIn("model_fingerprint.model.safetensors", diffs[0])
+
+    def test_missing_and_extra_keys_are_reported(self) -> None:
+        saved = self._manifest()
+        del saved["budget"]["epochs"]
+        current = self._manifest()
+        current["budget"]["extra"] = 1
+        diffs = _manifest_mismatches(saved, current)
+        self.assertTrue(any("budget.epochs" in diff for diff in diffs))
+        self.assertTrue(any("budget.extra" in diff for diff in diffs))
+
+
 _TRAINING_DEPS_AVAILABLE = True
 try:
     import torch  # noqa: F401
@@ -422,56 +501,146 @@ class CheckpointResumeEndToEndTests(unittest.TestCase):
         values.update(overrides)
         return self._argparse.Namespace(**values)
 
-    def test_interrupted_run_resumes_from_checkpoint(self) -> None:
-        import hashlib
-
+    def _reference_adapter(self) -> str:
+        """Uninterrupted full run: the trajectory a resume must reproduce."""
         from scripts.train_response_sft import run
 
-        first = run(self._args(max_steps=2, checkpoint_every=1))
+        run(self._args(checkpoint_every=1))
+        return self._sha256(self.output_dir / "adapter_model.safetensors")
+
+    def _crash_after_first_checkpoint(self) -> Path:
+        """Simulate a pod reclaim: checkpoint lands, then the process dies."""
+        import scripts.train_response_sft as module
+
+        original = module._save_checkpoint
+        state = {"crashed": False}
+
+        def crashing_save(*args, **kwargs):
+            original(*args, **kwargs)
+            if not state["crashed"]:
+                state["crashed"] = True
+                raise RuntimeError("simulated pod reclaim after checkpoint")
+
+        module._save_checkpoint = crashing_save
+        try:
+            with self.assertRaises(RuntimeError):
+                module.run(self._args(checkpoint_every=1))
+        finally:
+            module._save_checkpoint = original
         checkpoints = sorted((self.output_dir / "checkpoints").iterdir())
-        self.assertEqual(
-            [path.name for path in checkpoints], ["step_000001", "step_000002"]
-        )
-        for path in checkpoints:
+        self.assertEqual([path.name for path in checkpoints], ["step_000001"])
+        return checkpoints[0]
+
+    @staticmethod
+    def _sha256(path: Path) -> str:
+        import hashlib
+
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+
+    def test_crashed_run_resumes_and_reproduces_uninterrupted_trajectory(self) -> None:
+        from scripts.train_response_sft import run
+
+        reference_adapter = self._reference_adapter()
+        reference_output = self.output_dir
+        self.output_dir = self.root / "out_crashed"
+        try:
+            checkpoint = self._crash_after_first_checkpoint()
             for required in (
                 "progress.json",
                 "adapter_model.safetensors",
                 "trainer_state.pt",
+                "manifest.json",
             ):
-                self.assertTrue((path / required).is_file(), f"{path} lacks {required}")
-        progress = self._json.loads(
-            (checkpoints[1] / "progress.json").read_text(encoding="utf-8")
-        )
-        self.assertEqual(progress["optimizer_steps"], 2)
-        self.assertEqual(progress["micro_batches_done"], 4)
-        self.assertEqual(first["checkpointing"]["every_steps"], 1)
-        self.assertIsNone(first["resume"])
+                self.assertTrue(
+                    (checkpoint / required).is_file(), f"{checkpoint} lacks {required}"
+                )
+            progress = self._json.loads(
+                (checkpoint / "progress.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(progress["optimizer_steps"], 1)
+            self.assertEqual(progress["micro_batches_done"], 2)
 
-        second = run(
-            self._args(max_steps=4, resume_from=checkpoints[1], checkpoint_every=1)
-        )
-        self.assertEqual(second["resume"]["skipped_micro_batches"], 4)
-        self.assertEqual(second["resume"]["optimizer_steps_at_resume"], 2)
-        self.assertEqual(
-            second["resume"]["resume_position"], {"epoch": 0, "micro_batch": 4}
-        )
-        self.assertEqual(second["training_speed"]["optimizer_steps"], 4)
-        self.assertEqual(second["training_speed"]["micro_batches_done"], 8)
-        self.assertEqual(second["training_speed"]["micro_batches_trained"], 4)
-        self.assertTrue(second["checks"]["adapter_reload"]["passed"])
-        resumed_names = {Path(p).name for p in second["checkpointing"]["saved"]}
-        self.assertEqual(resumed_names, {"step_000003", "step_000004"})
+            resumed = run(
+                self._args(checkpoint_every=1, resume_from=checkpoint)
+            )
+            self.assertTrue(resumed["resume"]["identity_verified"])
+            self.assertEqual(resumed["resume"]["identity_mismatches"], [])
+            self.assertEqual(resumed["resume"]["optimizer_steps_at_resume"], 1)
+            self.assertEqual(resumed["resume"]["skipped_micro_batches"], 2)
+            self.assertEqual(
+                resumed["resume"]["resume_position"], {"epoch": 0, "micro_batch": 2}
+            )
+            self.assertEqual(resumed["training_speed"]["optimizer_steps"], 6)
+            self.assertEqual(resumed["training_speed"]["micro_batches_done"], 12)
+            self.assertEqual(resumed["training_speed"]["micro_batches_trained"], 10)
+            manifest = resumed["checkpointing"]["manifest"]
+            self.assertEqual(manifest["budget"]["effective_total_steps"], 6)
+            self.assertEqual(manifest["train_format"], "b1")
+            self.assertIn("model.safetensors", manifest["model_fingerprint"])
+            # The resume continues the original experiment: same final weights
+            # as an uninterrupted run of the identical command.
+            self.assertEqual(
+                self._sha256(self.output_dir / "adapter_model.safetensors"),
+                reference_adapter,
+            )
+        finally:
+            self.output_dir = reference_output
 
-        def sha256(path: Path) -> str:
-            digest = hashlib.sha256()
-            with path.open("rb") as handle:
-                for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-                    digest.update(chunk)
-            return digest.hexdigest()
+    def _resume_with_identity_change(self, checkpoint: Path, **overrides) -> None:
+        from scripts.train_response_sft import run
 
-        resumed_adapter = sha256(self.output_dir / "adapter_model.safetensors")
-        checkpoint_adapter = sha256(checkpoints[1] / "adapter_model.safetensors")
-        self.assertNotEqual(resumed_adapter, checkpoint_adapter)
+        with self.assertRaises(ValueError) as caught:
+            run(self._args(checkpoint_every=1, resume_from=checkpoint, **overrides))
+        self.assertIn("different experiment", str(caught.exception))
+
+    def test_resume_rejects_a_changed_seed(self) -> None:
+        checkpoint = self._crash_after_first_checkpoint()
+        config = self._json.loads(self.config_path.read_text(encoding="utf-8"))
+        config["seed"] = config["seed"] + 1
+        self.config_path.write_text(self._json.dumps(config), encoding="utf-8")
+        self._resume_with_identity_change(checkpoint)
+
+    def test_resume_rejects_a_changed_budget(self) -> None:
+        checkpoint = self._crash_after_first_checkpoint()
+        self._resume_with_identity_change(checkpoint, max_steps=4)
+
+    def test_resume_rejects_reordered_training_data(self) -> None:
+        checkpoint = self._crash_after_first_checkpoint()
+        rows = [
+            self._json.loads(line)
+            for line in self.train_path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        rows.reverse()
+        self.train_path.write_text(
+            "".join(self._json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
+            encoding="utf-8",
+        )
+        self._resume_with_identity_change(checkpoint)
+
+    def test_resume_rejects_a_different_base_model(self) -> None:
+        import shutil
+
+        checkpoint = self._crash_after_first_checkpoint()
+        variant = self.root / "tiny_model_variant"
+        shutil.copytree(self.model_dir, variant)
+        tokenizer_config = variant / "tokenizer_config.json"
+        payload = self._json.loads(tokenizer_config.read_text(encoding="utf-8"))
+        payload["_identity_probe"] = True
+        tokenizer_config.write_text(self._json.dumps(payload), encoding="utf-8")
+        self._resume_with_identity_change(checkpoint, model_dir=variant)
+
+    def test_resume_rejects_a_checkpoint_without_manifest(self) -> None:
+        from scripts.train_response_sft import run
+
+        checkpoint = self._crash_after_first_checkpoint()
+        (checkpoint / "manifest.json").unlink()
+        with self.assertRaises(FileNotFoundError):
+            run(self._args(checkpoint_every=1, resume_from=checkpoint))
 
     def test_resume_rejects_a_checkpoint_that_is_not_a_checkpoint(self) -> None:
         from scripts.train_response_sft import run

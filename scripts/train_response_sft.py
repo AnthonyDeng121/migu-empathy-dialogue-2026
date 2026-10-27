@@ -277,6 +277,65 @@ def _checkpoint_path(output_dir: Path, optimizer_steps: int) -> Path:
     return output_dir / "checkpoints" / f"step_{optimizer_steps:06d}"
 
 
+def _model_fingerprint(model_dir: Path) -> dict[str, str]:
+    """Content fingerprint of a local model directory: relpath -> sha256.
+
+    Hashing every file (the 3G safetensors included) costs seconds once per
+    run and makes "same base weights" a byte-level fact instead of a
+    directory-name assumption.
+    """
+    fingerprint: dict[str, str] = {}
+    for path in sorted(model_dir.rglob("*")):
+        if path.is_file():
+            fingerprint[path.relative_to(model_dir).as_posix()] = _sha256(path)
+    return fingerprint
+
+
+def _run_manifest(
+    args: argparse.Namespace,
+    config: dict[str, Any],
+    train_sha256: str,
+    condition_sha256: str | None,
+    model_fingerprint: dict[str, str],
+    budget: dict[str, Any],
+) -> dict[str, Any]:
+    """Experiment identity of a training run.
+
+    A resume is only legitimate when the continuing run is the *same*
+    experiment: same training data (row order included), same condition
+    file, same config, same base model/tokenizer bytes and same effective
+    budget. Anything else must be refused rather than silently continuing
+    one experiment's optimizer/scheduler state inside another.
+    """
+    return {
+        "format_version": 1,
+        "train_format": str(args.train_format),
+        "train_sha256": train_sha256,
+        "condition_sha256": condition_sha256,
+        "config": config,
+        "model_fingerprint": model_fingerprint,
+        "budget": budget,
+    }
+
+
+def _manifest_mismatches(saved: Any, current: Any, prefix: str = "") -> list[str]:
+    """Leaf-level differences between two manifests, as readable strings."""
+    if isinstance(saved, dict) and isinstance(current, dict):
+        diffs: list[str] = []
+        for key in sorted(set(saved) | set(current)):
+            path = f"{prefix}{key}"
+            if key not in saved:
+                diffs.append(f"{path}: absent in checkpoint")
+            elif key not in current:
+                diffs.append(f"{path}: absent in current run")
+            else:
+                diffs.extend(_manifest_mismatches(saved[key], current[key], f"{path}."))
+        return diffs
+    if saved != current:
+        return [f"{prefix.rstrip('.')}: {saved!r} != {current!r}"]
+    return []
+
+
 def _generate_samples(
     model: Any,
     tokenizer: Any,
@@ -369,12 +428,15 @@ def _save_checkpoint(
     scheduler: Any,
     checkpoint_dir: Path,
     progress: dict[str, Any],
+    manifest: dict[str, Any],
 ) -> None:
     """Adapter + optimizer + scheduler + RNG + position into one directory.
 
     Rented GPU pods get reclaimed without warning and the training loop
     saves only at the very end; a checkpoint every few minutes turns a pod
-    restart into a seconds-long resume instead of a full retrain.
+    restart into a seconds-long resume instead of a full retrain. The run
+    manifest rides along so a resume can prove it is continuing the same
+    experiment instead of grafting optimizer state onto a different one.
     """
     torch = deps["torch"]
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -392,6 +454,9 @@ def _save_checkpoint(
     )
     (checkpoint_dir / "progress.json").write_text(
         json.dumps(progress, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    (checkpoint_dir / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
 
@@ -533,7 +598,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     resume_dir: Path | None = args.resume_from
     resume_progress: dict[str, Any] | None = None
     if resume_dir is not None:
-        for required in ("progress.json", "adapter_model.safetensors", "trainer_state.pt"):
+        for required in (
+            "progress.json",
+            "adapter_model.safetensors",
+            "trainer_state.pt",
+            "manifest.json",
+        ):
             if not (resume_dir / required).is_file():
                 raise FileNotFoundError(
                     f"resume checkpoint is missing {required}: {resume_dir}"
@@ -544,6 +614,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 raise ValueError(f"resume checkpoint progress.json lacks {field}")
         resume_progress = progress
     train_rows = read_jsonl(args.train)
+    train_sha256 = _sha256(args.train)
     condition_sha256: str | None = None
     if args.train_format == "b1":
         # Frozen B1 response split: gold conditions live in the classification
@@ -633,6 +704,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     total_parameters = sum(p.numel() for p in model.parameters())
     model.print_trainable_parameters()
     initial_lora_state = _lora_state(model)
+    # Byte-level identity of the base weights/tokenizer for the manifest.
+    if args.model_dir:
+        model_fingerprint = _model_fingerprint(Path(load_name))
+    else:
+        model_fingerprint = {"hub": load_name, "revision": model_revision}
 
     train_encoded: list[dict[str, Any]] = []
     context_trimmed = 0
@@ -657,6 +733,23 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     epochs = int(config["epochs"])
     total_steps = optimizer_steps_per_epoch * epochs
     effective_total_steps = args.max_steps or total_steps
+    budget = {
+        "epochs": epochs,
+        "batch_size": batch_size,
+        "gradient_accumulation": accumulation,
+        "max_train_samples": args.max_train_samples,
+        "max_steps": args.max_steps,
+        "optimizer_steps_per_epoch": optimizer_steps_per_epoch,
+        "effective_total_steps": effective_total_steps,
+    }
+    run_manifest = _run_manifest(
+        args,
+        config,
+        train_sha256,
+        condition_sha256,
+        model_fingerprint,
+        budget,
+    )
     warmup_steps = max(1, int(effective_total_steps * float(config["warmup_ratio"])))
 
     optimizer = torch.optim.AdamW(
@@ -694,6 +787,20 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     resume_info: dict[str, Any] | None = None
     checkpoints_saved: list[Path] = []
     if resume_progress is not None and resume_dir is not None:
+        # Identity check before any state is loaded: a checkpoint may only
+        # continue the experiment that produced it. Refusing here keeps one
+        # run's optimizer/scheduler state out of another run's plan.
+        saved_manifest = json.loads(
+            (resume_dir / "manifest.json").read_text(encoding="utf-8")
+        )
+        identity_diffs = _manifest_mismatches(saved_manifest, run_manifest)
+        if identity_diffs:
+            raise ValueError(
+                "refusing to resume: the checkpoint was produced by a "
+                "different experiment ("
+                + "; ".join(identity_diffs)
+                + f"): {resume_dir}"
+            )
         resume_position = _resume_start(
             epoch_plan, int(resume_progress["micro_batches_done"])
         )
@@ -707,6 +814,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "epoch": resume_position[0],
                 "micro_batch": resume_position[1],
             },
+            "identity_verified": True,
+            "identity_mismatches": [],
         }
         print(
             f"resume: from {args.resume_from} at epoch {resume_position[0]} "
@@ -796,6 +905,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                             "micro_index": micro_index,
                             "elapsed_seconds": round(time.perf_counter() - training_started, 3),
                         },
+                        run_manifest,
                     )
                     checkpoints_saved.append(checkpoint_dir)
                     print(f"checkpoint: {checkpoint_dir}", flush=True)
@@ -963,6 +1073,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "checkpointing": {
             "every_steps": args.checkpoint_every or None,
             "saved": [_portable_path(path) for path in checkpoints_saved],
+            "manifest": run_manifest,
         },
         "checkpoint_directory": _portable_path(args.output_dir),
         "adapter": {
@@ -1086,6 +1197,11 @@ def _render_report(report: dict[str, Any]) -> str:
             f"{resume['resume_position']['epoch']} micro-batch "
             f"{resume['resume_position']['micro_batch']}）。"
         )
+        if resume.get("identity_verified"):
+            lines.append(
+                "实验身份校验：通过（恢复前比对 manifest——训练数据含顺序、条件文件、"
+                "配置、基座/tokenizer 内容指纹、有效训练预算全部一致才允许加载状态）。"
+            )
     checkpointing = report.get("checkpointing") or {}
     if checkpointing.get("every_steps"):
         lines.append(
@@ -1093,6 +1209,17 @@ def _render_report(report: dict[str, Any]) -> str:
             f"本次运行共保存 {len(checkpointing['saved'])} 个"
             f"（{_portable_path(Path(report['checkpoint_directory']))}/checkpoints/）。"
         )
+        if checkpointing.get("manifest"):
+            manifest = checkpointing["manifest"]
+            budget = manifest["budget"]
+            lines.append(
+                f"每个 checkpoint 附带 manifest.json（实验身份：训练数据 SHA-256 "
+                f"`{manifest['train_sha256'][:12]}…`、条件文件 "
+                f"`{(manifest['condition_sha256'] or '无')[:12]}`、配置、基座 "
+                f"{len(manifest['model_fingerprint'])} 个文件的内容指纹、预算 "
+                f"epochs={budget['epochs']}/steps={budget['effective_total_steps']}）；"
+                "恢复时逐项比对，任何不一致即拒绝续跑。"
+            )
     lines.extend(
         [
             "",
