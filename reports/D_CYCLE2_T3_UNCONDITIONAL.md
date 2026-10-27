@@ -63,11 +63,11 @@ T3/D4v2 两臂的长度特性与 D4 v2 全量 val（2,354 条）误例分析结�
 
 ## 五、验证证据索引
 
-- 单测：`python -m unittest tests.test_compare_response_arms` → **6 tests, OK**（新增）；全套 `python -m unittest discover -s tests` → **358 tests, OK**（含 manifest 比对 7 项 + checkpoint/resume e2e 7 项，主会话实跑）。
+- 单测：`python -m unittest tests.test_compare_response_arms` → **6 tests, OK**（新增）；全套 `python -m unittest discover -s tests` → **364 tests, OK**（含 manifest 比对 7 项 + checkpoint/resume e2e 7 项 + 远程守护脚本 6 项，主会话实跑）。
 - CI 等价检查实跑：`python -m compileall -q src scripts tests`、`bash -n start.sh`、`python scripts/ci_smoke.py` 均 PASS（提 PR 前复跑 `.github/workflows/ci.yml` 全部检查）。
 - 主会话独立复验（非采信子智能体结论）：两臂行数/id 集合/非空、生成报告 device/dtype/max_new_tokens 回显、训练报告 checks 全段、取回后 sha256 双侧核验（adapter、两个 jsonl、报告 json 四项全 OK）均由主会话重跑确认。
 - **恢复/故障注入证据（可复现）**：`tests/test_train_response_sft.py::CheckpointResumeEndToEndTests` 在 tiny Qwen2.5 上模拟「存档后进程死亡」，恢复后最终 adapter 与未中断运行**逐字节一致**（sha256 相等）；反向用例覆盖换 seed、换 max_steps、数据行序颠倒、换基座目录、删 manifest，全部按设计拒绝。该测试在装 torch/transformers/peft 的环境实跑通过，裸解释器按设计 skip。
-- **守护脚本（随仓库交付）**：`scripts/remote/`（train_resilient.sh 进程级自动续跑 / watch_and_generate.sh 守候后顺序生成 / supervisor.sh cron 自愈 + README），参数经环境变量注入，T3 实例的用法记在 README。
+- **守护脚本（随仓库交付）**：`scripts/remote/`（train_resilient.sh 进程级自动续跑 / watch_and_generate.sh 守候后顺序生成 / supervisor.sh cron 自愈 + README），参数经环境变量注入，T3 实例的用法记在 README；`tests/test_remote_scripts.py` 6 项覆盖语法/可执行位/resume 替换/失败不再重试。
 - 产物（随 commit 入库）：`results/response_gen/t3_unconditional.jsonl(+_report.json)`、`t3_d4v2_off_samedevice.jsonl(+_report.json)`、`t3_arms_comparison_same_device.json`、`reports/t3_uncond_2ep_report.{json,md}`、`scripts/compare_response_arms.py`、`tests/test_compare_response_arms.py`、`scripts/remote/`。
 - 权重不入 Git：`weights/t3_unconditional_2ep/adapter_model.safetensors`（sha256 `0fa04f2d…`，36,981,072 B）已发布 GitHub Release [`d-cycle2-t3-unconditional-2ep-20261027`](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/d-cycle2-t3-unconditional-2ep-20261027)（Pre-release，zip sha256 `9ba1a006…`，发布后经 API 资产端点下载核验通过）。
 - 本地 BLEU-4/ROUGE-L 为字符级诊断实现（`src/evaluation/metrics.py`），官方指标未公布，本报告所有分数不冒充官方分数。
