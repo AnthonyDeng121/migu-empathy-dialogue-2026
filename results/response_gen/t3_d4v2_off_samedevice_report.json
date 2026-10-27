@@ -1,0 +1,29 @@
+{
+  "version": "response_generation_inference_v1",
+  "model_path": "base_qwen15b",
+  "adapter_path": "weights/response_sft_d4_2ep",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "condition_mode": "none",
+  "condition_source": null,
+  "condition_fields": null,
+  "condition_coverage": null,
+  "input_path": "results/response_gen/t2_selection_input.jsonl",
+  "samples": 160,
+  "max_new_tokens": 256,
+  "min_new_tokens": 0,
+  "total_seconds": 749.948,
+  "mean_seconds_per_sample": 4.6872,
+  "p50_seconds_per_sample": 3.2589,
+  "generated_tokens": 12733,
+  "tokens_per_second": 16.98,
+  "full_set_estimate_seconds": 11033.6,
+  "full_set_size": 2354,
+  "empty_responses": 0,
+  "output_sha256": "72389fe49528d86772b573e3e03f19c8108a116fa685d989896caeb87b589796",
+  "publication": {
+    "version": 1,
+    "id": "bc9d234855564040b6b6f01f3d68dd15",
+    "state": "complete"
+  }
+}
