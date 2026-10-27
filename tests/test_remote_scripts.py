@@ -30,12 +30,16 @@ class RemoteScriptSyntaxTests(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_scripts_are_executable(self) -> None:
+    def test_scripts_are_invoked_via_bash(self) -> None:
+        """Repo convention: scripts ship as 644 and run via `bash script.sh`
+        (core.fileMode=false, so the exec bit is never recorded)."""
         for script in sorted(REMOTE.glob("*.sh")):
             with self.subTest(script=script.name):
-                self.assertTrue(
-                    script.stat().st_mode & 0o111, f"{script.name} is not executable"
-                )
+                text = script.read_text(encoding="utf-8")
+                self.assertTrue(text.startswith("#!"), f"{script.name} lacks a shebang")
+        supervisor = (REMOTE / "supervisor.sh").read_text(encoding="utf-8")
+        self.assertIn('bash "$(dirname "$0")/train_resilient.sh"', supervisor)
+        self.assertIn('bash "$(dirname "$0")/watch_and_generate.sh"', supervisor)
 
     def test_supervisor_relaunches_both_siblings(self) -> None:
         text = (REMOTE / "supervisor.sh").read_text(encoding="utf-8")
