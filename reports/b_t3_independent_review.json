@@ -27,7 +27,7 @@
   "decisions": {
     "T5_profile_third_arm_supported": false,
     "T5_reason": "macro exact gate passed, but complete profile reliability for prompt injection is not established; interests-only gated ablation would be a new future candidate, not this v1 result",
-    "T5_statement": "???????? T5 ????????",
+    "T5_statement": "当前没有证据支持 T5 使用画像第三臂。",
     "emotion_only": "NO-GO",
     "emotion_scope": "keep response conditions off for current candidate; small-set diagnostic evidence does not establish quality equivalence",
     "profile_conditions": [
@@ -10735,85 +10735,6 @@
       },
       "note": "historical 4090 off vs local4060 off; one contrast cannot establish noise floor or a general device causality rule"
     },
-    "examples": [
-      {
-        "emotion_only": "嗯，今晚先停搜、明天再看复诊是个清楚的安排，不必因为“又忍不住确认”而责怪自己。你愿意把这些说出来，也说明你已经在认真面对这件事了。",
-        "gold": "这不丢脸，也不用把它解释成什么严重的问题。你今晚先不搜，已经是在照顾自己了；出不出门的决定也可以先放一放，等明天再处理。今晚就做点不用反复确认的小事，轻松过完这一晚。",
-        "gold_emotion": "shame",
-        "history": "short_1_5",
-        "id": "pp:[\"val_conv_000539\",3,2]",
-        "off": "嗯，今晚先停搜、明天再看复诊是个清楚的安排，不必因为“有点丢脸”就把这件事放大成什么问题。你已经在认真照顾自己的感受了，不是没用。",
-        "predicted_condition": "shame",
-        "rouge_delta": -0.1228913477235625,
-        "selection_note": "two largest overlap losses, two largest gains, then up to three mixed/care examples; diagnostic selection, no quality winner"
-      },
-      {
-        "emotion_only": "好，先说到这儿。你已经把这块说出来。",
-        "gold": "好，先说到这儿就行。你把这层拧着的感觉说出来了。",
-        "gold_emotion": "anxiety",
-        "history": "medium_6_15",
-        "id": "pp:[\"val_conv_000747\",11,2]",
-        "off": "好，先说到这儿。你已经把这层拧着的东西说出来了。",
-        "predicted_condition": "anxiety",
-        "rouge_delta": -0.11904761904761907,
-        "selection_note": "two largest overlap losses, two largest gains, then up to three mixed/care examples; diagnostic selection, no quality winner"
-      },
-      {
-        "emotion_only": "这个安排很稳：明天起床时间固定，手机也提前移到客厅，不让它再半夜进来。今晚按你定好的来就行，不必再加码。",
-        "gold": "定死起床时间、手机放到客厅，这两步已经把“夜里手闲不住”和“第二天继续往后拖”拆开了。今晚不必再加新规矩，就按你说的做就行。\n\n睡着早晚可以先不管，明天闹钟响了再起来。这一晚先把手机隔开，已经够了。",
-        "gold_emotion": "mixed",
-        "history": "short_1_5",
-        "id": "pp:[\"val_conv_000829\",5,1]",
-        "off": "这个安排很稳：明天起床时间固定，今晚不再往前挪，手机也移到客厅。手会先停住，困意也会晚一点来，不是为了证明自己能睡好，而是给身体一个明确信号：现在是休息时段，不是继续打游戏的时间。\n\n早点关灯、少碰屏幕，今晚就按这个节奏走。",
-        "predicted_condition": "anxiety",
-        "rouge_delta": 0.10206529844697335,
-        "selection_note": "two largest overlap losses, two largest gains, then up to three mixed/care examples; diagnostic selection, no quality winner"
-      },
-      {
-        "emotion_only": "好，我先不给方案。你能把这些话说完就好，我会等你说完再听。",
-        "gold": "好，我先不提方案。你慢慢把想说的说完。",
-        "gold_emotion": "loneliness",
-        "history": "medium_6_15",
-        "id": "pp:[\"val_conv_000395\",9,2]",
-        "off": "好，我先不给方案。你已经把这份空落感和担心都讲出来了，我会接着听。",
-        "predicted_condition": "loneliness",
-        "rouge_delta": 0.1602564102564103,
-        "selection_note": "two largest overlap losses, two largest gains, then up to three mixed/care examples; diagnostic selection, no quality winner"
-      },
-      {
-        "emotion_only": "创业失败时还能借钱周转，这本身就证明了老周这个人对你来说，有着非常稳固的信任基础。这份信任是你现在能抓住的唯一锚点，也是支撑你往前走的动力。\n\n既然心里松快了一些，那就先把注意力收回到眼前的小事上。下周的结果出来，不管好坏，你都已经做好了准备，不再是在“不知道该说什么”的空白期里挣扎。\n\n今晚好好休息，不用逼自己立刻做决定。",
-        "gold": "老周以前在你最难的时候借过钱，这份情分确实比“降薪”这个事实重得多。你心里有数就好，不用为了维护一个并不存在的“完美形象”去背负额外的心理包袱。\n\n下周的结果出来前，这几天就把自己从“决策模式”里摘出来一会儿。调岗已经定了，老周也是知根知底的人，你的底牌其实并没有你想象中那么脆弱。\n\n松快一点就好。如果后面结果出来了，或者又觉得堵得慌，随时来聊。",
-        "gold_emotion": "mixed",
-        "history": "medium_6_15",
-        "id": "pp:[\"val_conv_000164\",15,3]",
-        "off": "创业失败时还能借钱周转，这本身就证明了老周这个人对你来说，有着非常稳固的信任基础。这份信任是你现在能抓住的唯一锚点，也是支撑你往前走的动力。\n\n既然心里松快了一些，那就先把注意力收回到眼前的小事上。下周的结果出来，不管好坏，你都已经做好了准备，不再是在“不知道该说什么”的空白期里挣扎。\n\n今晚好好休息，不用逼自己立刻做决定。",
-        "predicted_condition": "anxiety",
-        "rouge_delta": 0.0,
-        "selection_note": "two largest overlap losses, two largest gains, then up to three mixed/care examples; diagnostic selection, no quality winner"
-      },
-      {
-        "emotion_only": "这其实是一个很聪明的调整——从“必须搞定”变成“轻量级沟通”。既保留了见面的可能性，也给了自己缓冲的空间，不需要在期待和失望之间反复消耗精力。\n\n如果只是发一条简单的问候，比如：“刚到这边，天气不错，要不要一起吃顿好的？”你觉得语气上稍微加一点轻松感，会不会让对方更容易回应？",
-        "gold": "这个调整很务实。把“约饭”降级为“发消息”，既保留了连接的通道，又卸下了筹备和赴约的心理负担。\n\n你最后有把那条消息发出去吗？",
-        "gold_emotion": "mixed",
-        "history": "short_1_5",
-        "id": "pp:[\"val_conv_000251\",5,2]",
-        "off": "这其实是一个很聪明的调整：既保留了和朋友建立连接的机会，也给自己留出了缓冲空间。\n\n发一条简单的问候，不需要刻意制造热闹，只需要确认对方的状态就好。这样既不会让关系变得沉重，也不会因为期待对方回应而消耗太多精力。",
-        "predicted_condition": "anger",
-        "rouge_delta": -0.0010459929241655175,
-        "selection_note": "two largest overlap losses, two largest gains, then up to three mixed/care examples; diagnostic selection, no quality winner"
-      },
-      {
-        "emotion_only": "你昨晚盯着屏幕，是因为你一直在替对方验证“他说的是实话”，而不是替自己验证“我说得对”。\n\n但对方回的“收到，没问题”，本质上是个中性信号。它没有否定你之前的边界，也没有肯定你现在的做法，只是一个“记下了”的动作。你发出去的那条消息，只是把“问题存在”从模糊变成了具体。\n\n至于“到时候真出事了还是按原来的来”，这不是你这条消息的责任。你发出去的目的是让对方知道“我这边已经确认过，有问题我会跟进”，而不是“我必须保证所有细节都完美无缺”。\n\n所以，你现在失眠，是因为你在替对方验证“他是不是真的放心了”，而不是替你自己验证“我是不是已经把边界说清楚了”。\n\n你不需要等到对方开口才安心。你已经把边界说出来了，这就足够了。",
-        "gold": "这四个字确实像一块石头落了地，但落地的声音太轻，轻到让人忍不住去猜底下是不是空的。\n\n不过你想想，你发这条消息的目的，从来不是让他承诺“绝对不出事”，而是让他“知悉”并“确认”。他回了“收到，没问题”，这个动作本身就已经完成了。他如果真想按原来的来，他当时就可以说“这里还是按之前的流程走”，但他没有。他选择了接受你的边界。\n\n至于他是不是“走个过场”，你没法控制，也没必要控制。你能控制的只有：我有没有把该说的说清楚，我有没有留下痕迹。这两点你都做到了。\n\n现在睡不着，可能不是因为那条消息没解决所有问题，而是因为你终于把那个悬了两天的东西扔出去了，身体从紧绷状态突然松下来，反而有点不适应。这种“后怕”其实是大脑在消化刚才那一下的紧张感，是正常的生理反应，不代表事情真的还有隐患。\n\n你不需要去验证他是不是“真的没问题”，你只需要相信：在那个时刻，他看到了，他确认了，这就够了。剩下的，交给时间，也交给那个“万一”真的发生时，你手里这条记录。",
-        "gold_emotion": "mixed",
-        "history": "long_16_plus",
-        "id": "pp:[\"val_conv_000286\",19,2]",
-        "off": "你昨晚盯着屏幕，是因为你一直在替对方验证“他说的话是否真实可信”，而不是在验证自己是否做得对。\n\n对方回“收到，没问题”，这个反馈本身就有三个维度：\n\n1. **语速**：十分钟后才回，说明他至少在听，并且没有立刻否定。\n2. **语气**：“没问题”这三个字很轻，没有“必须”、“绝对”这样的强制性要求。\n3. **沉默**：对方没有继续追问细节，也没有立即提出修改意见，这通常意味着他默认了你的边界。\n\n你现在的恐惧，其实是把“对方没回”当成了“他没在意/没认可”，然后把“我这条消息”当成“我的全部价值”。\n\n但事实上，对方只是给了一个“可以继续推进”的信号。你发出去的那条消息，已经完成了“边界确认”的动作。即使后面真出了问题，你也有了可追溯的依据（比如“我这边确认了XX，您看如何”），而不是“我单方面扛着”。\n\n你不需要等到对方开口，就可以给自己一个心理上的“解绑”。既然他已经回了，那就把它当成一个结案的标点，放下手机，去做点别的。",
-        "predicted_condition": "anxiety",
-        "rouge_delta": 0.022206277055544427,
-        "selection_note": "two largest overlap losses, two largest gains, then up to three mixed/care examples; diagnostic selection, no quality winner"
-      }
-    ],
     "integrity": {
       "B_T1_screening_is_same_set": false,
       "b_t1_screening_overlap": 11,
