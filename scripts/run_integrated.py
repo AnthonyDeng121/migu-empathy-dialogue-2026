@@ -40,9 +40,24 @@ def load_config(path):
         config["profile_model_dir"] = value if value.is_absolute() else PROJECT / value
     if type(config.get("condition_response")) is not bool:
         raise ValueError("condition_response must be a boolean")
+    if config.get("condition_fields", "both") not in {"emotion", "both"}:
+        raise ValueError("condition_fields must be emotion or both")
     if type(config.get("max_new_tokens")) is not int or config["max_new_tokens"] < 1:
         raise ValueError("max_new_tokens must be a positive integer")
     return config
+
+
+def response_condition(config, classification):
+    """Select predicted prompt fields independently of submission fields."""
+    fields = config.get("condition_fields", "both")
+    if fields not in {"emotion", "both"}:
+        raise ValueError("condition_fields must be emotion or both")
+    if not config["condition_response"]:
+        return None
+    condition = {"emotion_label": classification["emotion_label"]}
+    if fields == "both":
+        condition["user_profile"] = classification["user_profile"]
+    return condition
 
 
 def check_files(config):
@@ -155,7 +170,7 @@ class Models:
             classification = _predict_group([row], self.classifier, self.c_tokenizer, self.torch,
                                             self.device, int(self.metadata["max_length"]), float(self.metadata["profile_threshold"]))[0]
         classification = self.apply_profile(row, classification)
-        condition = classification if self.config["condition_response"] else None
+        condition = response_condition(self.config, classification)
         sample = build_eval_sample(row, condition=condition)
         prompt = self.d_tokenizer.apply_chat_template(sample["messages"], tokenize=False, add_generation_prompt=True)
         inputs = self.d_tokenizer(prompt, add_special_tokens=False, return_tensors="pt").to(self.device)
@@ -232,6 +247,7 @@ def _run(test_file, result_dir, config, factory, journal=None):
             "test_file_sha256": hashlib.sha256(test_file.read_bytes()).hexdigest(), "submission_sha256": digest,
             "samples": len(rows), "parse_failure_count": 0, "parse_failure_ids": [],
             "condition_mode": "predicted" if config["condition_response"] else "none",
+            "condition_fields": config.get("condition_fields", "both") if config["condition_response"] else "none",
             "profile_mode": config.get("profile_mode", "model"),
         }
         if journal:

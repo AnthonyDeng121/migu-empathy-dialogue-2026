@@ -40,7 +40,8 @@ class IntegratedTests(unittest.TestCase):
                       "device": "cuda", "condition_response": False, "max_new_tokens": 256,
                       "classifier_format": "packaged", "profile_mode": "empty"}
             for key, value in [("device", "auto"), ("profile_mode", "typo"), ("classifier_format", "typo"),
-                               ("condition_response", "false"), ("max_new_tokens", 0)]:
+                               ("condition_response", "false"), ("condition_fields", "typo"),
+                               ("condition_fields", None), ("max_new_tokens", 0)]:
                 path.write_text(json.dumps({**config, key: value}), encoding="utf-8")
                 with self.subTest(key=key), self.assertRaises(ValueError):
                     load_config(path)
