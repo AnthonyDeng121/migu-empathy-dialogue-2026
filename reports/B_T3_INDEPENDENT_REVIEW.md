@@ -175,16 +175,7 @@ ROUGE gold-overlap 逐条增加 63、减少 60、持平 37（容差 1e-9），�
 
 sadness n=7、relaxed n=36 两个诊断指标均正；anger/mixed 等仅 ROUGE 正、BLEU 负。care n=2、fear n=6、disgust n=4、shame n=10 有负信号，样本不足以稳定判定。anxiety n=51 的 ROUGE 几乎持平而 BLEU 下降；长历史 n=26 两个指标均退步，短/中历史 ROUGE 微正但 BLEU 均负。整体没有平均改善，也不能宣称主要类别全面稳定。mixed 7 条的冲突指标及 care 2 条不足以支持继续按类别开启。
 
-### 有限代表样本
-
-按 ROUGE delta 最小两条、最大两条，另取最多三条 mixed/care（按 ID 排序优先出现者）选例。完整 gold/off/emotion 文本在正式 JSON `response.examples`；这是透明的诊断抽样，不能代表总体质量。
-
-| sample ID | gold / predicted emotion | Δ ROUGE | 观察 |
-|---|---|---:|---|
-| pp:["val_conv_000539",3,2] | shame / shame | −0.122891 | 由“不必因有点丢脸放大问题”改为“不必因忍不住确认责怪自己”，都是支持性措辞，overlap 下降不能证明质量下降 |
-| pp:["val_conv_000747",11,2] | anxiety / anxiety | −0.119048 | 将“这层拧着的东西”概括为“这块”，gold-overlap 降低 |
-| pp:["val_conv_000829",5,1] | mixed / anxiety | +0.102065 | 回复明显缩短并保留固定起床/手机移出卧室安排；指标正差发生在情感标签误判时，不能据此证明 mixed 条件有效 |
-| pp:["val_conv_000395",9,2] | loneliness / loneliness | +0.160256 | 更强调等用户说完再听，gold-overlap 增加；仍无自动质量裁判 |
+逐样本正文已省略，仅保留聚合统计。
 
 ## 采用建议及 T5 边界
 
