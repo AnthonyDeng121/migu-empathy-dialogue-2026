@@ -63,7 +63,7 @@ T3/D4v2 两臂的长度特性与 D4 v2 全量 val（2,354 条）误例分析结�
 - CI 等价检查实跑：`python -m compileall -q src scripts tests`、`bash -n start.sh`、`python scripts/ci_smoke.py` 均 PASS（提 PR 前复跑 `.github/workflows/ci.yml` 全部检查）。
 - 主会话独立复验（非采信子智能体结论）：两臂行数/id 集合/非空、生成报告 device/dtype/max_new_tokens 回显、训练报告 checks 全段、取回后 sha256 双侧核验（adapter、两个 jsonl、报告 json 四项全 OK）均由主会话重跑确认。
 - 产物（随 commit 入库）：`results/response_gen/t3_unconditional.jsonl(+_report.json)`、`t3_d4v2_off_samedevice.jsonl(+_report.json)`、`t3_arms_comparison_same_device.json`、`reports/t3_uncond_2ep_report.{json,md}`、`scripts/compare_response_arms.py`、`tests/test_compare_response_arms.py`。
-- 权重不入 Git：`weights/t3_unconditional_2ep/adapter_model.safetensors`（sha256 `0fa04f2d…`，36,981,072 B）按仓库规矩经 GitHub Release 分发。
+- 权重不入 Git：`weights/t3_unconditional_2ep/adapter_model.safetensors`（sha256 `0fa04f2d…`，36,981,072 B）已发布 GitHub Release [`d-cycle2-t3-unconditional-2ep-20261027`](https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/d-cycle2-t3-unconditional-2ep-20261027)（Pre-release，zip sha256 `63e451ee…`，发布后经 API 资产端点下载核验通过）。
 - 本地 BLEU-4/ROUGE-L 为字符级诊断实现（`src/evaluation/metrics.py`），官方指标未公布，本报告所有分数不冒充官方分数。
 
 ## 六、结论与建议
