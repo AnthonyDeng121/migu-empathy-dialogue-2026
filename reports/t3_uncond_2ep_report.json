@@ -1,0 +1,174 @@
+{
+  "version": "response_sft_prep_v2",
+  "status": "candidate training",
+  "model": {
+    "name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct",
+    "loaded_from": "base_qwen15b"
+  },
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4090",
+  "dtype": "bfloat16",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 2,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "none",
+    "_comment": "CYCLE2 T3 单变量对照配置：与 D4 v2（configs/response_sft_2epoch.json，金标条件两轮候选）唯一差别是 condition_mode 由 \"gold\" 改为 \"none\"，即训练时不再注入金标情感/画像条件。基座 Qwen2.5-1.5B-Instruct（revision 989aa7980e4cf806f80c7fef2b1adb7bc71aa306）、数据（B1 冻结划分）、预算（epochs 2、batch_size 1、gradient_accumulation 8、learning_rate 0.0001、warmup_ratio 0.03、seed 20261013 等全部不变）均与 D4 v2 逐项一致。目的：检验「用金标条件训练」与「部署侧不注入条件（condition_response=false）」的失配代价，作为 T3 完全无条件两轮 SFT 对照的训练侧配置；对照结论须与 D4 v2 同评测协议比较。"
+  },
+  "runtime": {
+    "python": "3.11.15",
+    "torch": "2.12.0+cu132",
+    "transformers": "4.57.6",
+    "peft": "0.21.2",
+    "training_seconds": 11025.937
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'data/processed/b1_full_v1/response_train.jsonl' \\\n  --config 'configs/response_sft_unconditional_2ep.json' \\\n  --device cuda \\\n  --output-dir 'weights/t3_unconditional_2ep' \\\n  --report-json 'reports/t3_uncond_2ep_report.json' \\\n  --report-md 'reports/t3_uncond_2ep_report.md' \\\n  --train-format b1 \\\n  --model-dir 'base_qwen15b' \\\n  --checkpoint-every 250 \\\n  --local-files-only",
+    "code_commit": null,
+    "code_dirty": null,
+    "script_sha256": "4fd9b7c7e2371269f939ca9e5547c908947bdd63ba18d09bfc1cf90668b38e1c"
+  },
+  "data": {
+    "train_path": "data/processed/b1_full_v1/response_train.jsonl",
+    "train_format": "b1",
+    "train_total_samples": 18653,
+    "train_used_samples": 18653,
+    "skipped_long_samples": 0,
+    "train_sha256": "a70ca036f2ad28265bbbd3ce6882006f81e7dd7abb39a50dbf0f16cb713e2ff6",
+    "condition_train_sha256": null,
+    "response_turn_consistency": null,
+    "condition_mode": "none",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 90,
+      "mean": 876.9,
+      "max": 2048
+    }
+  },
+  "parameters": {
+    "trainable": 9232384,
+    "total": 1552946688,
+    "fraction": 0.005945
+  },
+  "training_speed": {
+    "optimizer_steps": 4664,
+    "micro_batches_done": 37306,
+    "micro_batches_trained": 37306,
+    "mean_train_loss": 2.0171,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 4661,
+    "measured_window_seconds": 11010.416,
+    "seconds_per_step": 2.362243,
+    "seconds_per_step_basis": "mean full gradient-accumulation window after warm-up",
+    "full_steps_per_epoch": 2332,
+    "estimated_full_train_seconds": 11017.503,
+    "estimated_full_train_seconds_with_30pct_margin": 14322.754,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
+  },
+  "vram_peak_bytes": 7219051008,
+  "checks": {
+    "optimizer_steps": 4664,
+    "first_loss": 2.99967,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 1.05975997,
+    "lora_tensors": 392,
+    "lora_weights_changed": true,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "weights/t3_unconditional_2ep",
+      "lora_tensors_in_file": 392,
+      "lora_tensors_compared": 392,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 3,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "pp:[\"train_conv_000001\",9,1]",
+          "generated_text": "嗯，那就先不分析。\n\n那种别扭感确实很具体：冷淡像是个锚，一落下去，周围那些原本能踩实的东西，好像也都晃了一下。人在圈子里面，本来就容易把自己和别人一起掂量一遍，冷淡一下，连这点安全感都会隐隐发虚。\n\n你就这么待着也好，不用现在就把下一步定死。"
+        },
+        {
+          "id": "pp:[\"train_conv_000001\",11,2]",
+          "generated_text": "那个“怕被整个圈子排除”的念头，比他态度稍微缓过来一点点更扎人。因为面子通常不会只针对一个人，它像是把大家的目光都集中到你身上，让你觉得自己的位置可能正在往下滑。\n\n群里的正常互动，往往只是暂时没有直接冲突，不代表关系还在走回头路。可人在孤立无援时，注意力会被拉回到“我是不是被边缘化”这个最坏的结果上，于是每次冷淡都会变成新的证据。\n\n现在他态度缓过来，说明他的节奏变了，未必是你这边的问题。可你还是会反复掂量，害怕自己也在同一轨道上慢慢落下去。这种悬着的感觉，确实比单纯的冷淡更消耗人。"
+        },
+        {
+          "id": "pp:[\"train_conv_000001\",15,3]",
+          "generated_text": "那就先按群里现在这样正常来往，不用再给自己加一层“必须谈清楚”的任务。\n\n空落落的那部分先放着，不靠紧也不靠远，等你想回头时再说。"
+        }
+      ],
+      "passed": true
+    },
+    "generation_probe": [
+      {
+        "id": "pp:[\"train_conv_000001\",9,1]",
+        "generated_text": "嗯，那就先不分析。\n\n那种别扭感确实很具体：冷淡像是个锚，一落下去，周围那些原本能踩实的东西，好像也都晃了一下。人在圈子里面，本来就容易把自己和别人一起掂量一遍，冷淡一下，连这点安全感都会隐隐发虚。\n\n你就这么待着也好，不用现在就把下一步定死。"
+      },
+      {
+        "id": "pp:[\"train_conv_000001\",11,2]",
+        "generated_text": "那个“怕被整个圈子排除”的念头，比他态度稍微缓过来一点点更扎人。因为面子通常不会只针对一个人，它像是把大家的目光都集中到你身上，让你觉得自己的位置可能正在往下滑。\n\n群里的正常互动，往往只是暂时没有直接冲突，不代表关系还在走回头路。可人在孤立无援时，注意力会被拉回到“我是不是被边缘化”这个最坏的结果上，于是每次冷淡都会变成新的证据。\n\n现在他态度缓过来，说明他的节奏变了，未必是你这边的问题。可你还是会反复掂量，害怕自己也在同一轨道上慢慢落下去。这种悬着的感觉，确实比单纯的冷淡更消耗人。"
+      },
+      {
+        "id": "pp:[\"train_conv_000001\",15,3]",
+        "generated_text": "那就先按群里现在这样正常来往，不用再给自己加一层“必须谈清楚”的任务。\n\n空落落的那部分先放着，不靠紧也不靠远，等你想回头时再说。"
+      }
+    ],
+    "non_empty_generations": 3
+  },
+  "resume": null,
+  "checkpointing": {
+    "every_steps": 250,
+    "saved": [
+      "weights/t3_unconditional_2ep/checkpoints/step_000250",
+      "weights/t3_unconditional_2ep/checkpoints/step_000500",
+      "weights/t3_unconditional_2ep/checkpoints/step_000750",
+      "weights/t3_unconditional_2ep/checkpoints/step_001000",
+      "weights/t3_unconditional_2ep/checkpoints/step_001250",
+      "weights/t3_unconditional_2ep/checkpoints/step_001500",
+      "weights/t3_unconditional_2ep/checkpoints/step_001750",
+      "weights/t3_unconditional_2ep/checkpoints/step_002000",
+      "weights/t3_unconditional_2ep/checkpoints/step_002250",
+      "weights/t3_unconditional_2ep/checkpoints/step_002500",
+      "weights/t3_unconditional_2ep/checkpoints/step_002750",
+      "weights/t3_unconditional_2ep/checkpoints/step_003000",
+      "weights/t3_unconditional_2ep/checkpoints/step_003250",
+      "weights/t3_unconditional_2ep/checkpoints/step_003500",
+      "weights/t3_unconditional_2ep/checkpoints/step_003750",
+      "weights/t3_unconditional_2ep/checkpoints/step_004000",
+      "weights/t3_unconditional_2ep/checkpoints/step_004250",
+      "weights/t3_unconditional_2ep/checkpoints/step_004500"
+    ]
+  },
+  "checkpoint_directory": "weights/t3_unconditional_2ep",
+  "adapter": {
+    "file": "weights/t3_unconditional_2ep/adapter_model.safetensors",
+    "bytes": 36981072,
+    "sha256": "0fa04f2d9eeaa70397c4843831669d6142041869aa31b5478e802c137a827ec5"
+  }
+}
