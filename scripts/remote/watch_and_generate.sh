@@ -24,6 +24,12 @@ echo "=== $(date) training wrapper finished ===" >> "$LOG"
 tail -5 "$ROOT/train_resilient.log" >> "$LOG" 2>/dev/null || true
 tail -3 "$ROOT/train_full.log" >> "$LOG" 2>/dev/null || true
 
+if ! grep -q "TRAINING_COMPLETE\|TRAINING_ALREADY_COMPLETE" "$ROOT/train_resilient.log"; then
+    echo "ERROR: training did not complete successfully, refusing to generate" >> "$LOG"
+    exit 1
+fi
+echo "=== $(date) training verified successful, proceeding to generation ===" >> "$LOG"
+
 while IFS= read -r command; do
     [ -n "$command" ] || continue
     echo "=== $(date) running: $command ===" >> "$LOG"

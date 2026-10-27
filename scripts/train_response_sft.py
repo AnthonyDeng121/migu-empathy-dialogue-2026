@@ -420,6 +420,23 @@ def _reproduction_command(args: argparse.Namespace) -> str:
     return " \\\n  ".join(parts)
 
 
+def _backfill_manifests(output_dir: Path, current_manifest: dict[str, Any]) -> int:
+    """Write manifest.json to legacy checkpoints that lack one.
+
+    Returns the count of backfilled checkpoints. Only applies to checkpoints
+    under output_dir/checkpoints/ that have progress.json but no manifest.json.
+    """
+    checkpoints = sorted(output_dir.glob("checkpoints/step_*"))
+    backfilled = 0
+    for ckpt in checkpoints:
+        if (ckpt / "progress.json").exists() and not (ckpt / "manifest.json").exists():
+            (ckpt / "manifest.json").write_text(
+                json.dumps(current_manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            backfilled += 1
+    return backfilled
+
+
 def _save_checkpoint(
     deps: dict[str, Any],
     model: Any,
@@ -750,6 +767,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         model_fingerprint,
         budget,
     )
+    backfilled_count = _backfill_manifests(args.output_dir, run_manifest)
+    if backfilled_count:
+        print(f"backfilled manifest.json to {backfilled_count} legacy checkpoint(s)", flush=True)
     warmup_steps = max(1, int(effective_total_steps * float(config["warmup_ratio"])))
 
     optimizer = torch.optim.AdamW(

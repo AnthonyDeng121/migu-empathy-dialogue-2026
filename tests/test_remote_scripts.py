@@ -117,5 +117,54 @@ class ResilientWrapperTests(unittest.TestCase):
             self.assertIn("RESILIENT_WRAPPER_DONE attempts=1", log)
 
 
+class WatchAndGenerateTests(unittest.TestCase):
+    """Post-training generation pipeline safety."""
+
+    def test_refuses_generation_when_training_failed(self) -> None:
+        """Pipeline exits 1 when wrapper log lacks success markers."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wrapper_log = root / "train_resilient.log"
+            wrapper_log.write_text("RESILIENT_WRAPPER_DONE attempts=1\n")
+            pipeline_log = root / "pipeline.log"
+            env = dict(os.environ)
+            env.update(ROOT=str(root), GEN_CMDS="echo arm1", LOG=str(pipeline_log))
+            result = subprocess.run(
+                [_bash(), str(REMOTE / "watch_and_generate.sh")],
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=60,
+            )
+            self.assertNotEqual(result.returncode, 0, "should exit 1 on training failure")
+            log_text = pipeline_log.read_text()
+            self.assertIn("training did not complete successfully", log_text)
+            self.assertNotIn("PIPELINE_DONE", log_text)
+
+    def test_proceeds_when_training_completed(self) -> None:
+        """Pipeline runs generations when wrapper log has success marker."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wrapper_log = root / "train_resilient.log"
+            wrapper_log.write_text("TRAINING_COMPLETE\nRESILIENT_WRAPPER_DONE attempts=3\n")
+            pipeline_log = root / "pipeline.log"
+            out1 = root / "arm1.txt"
+            env = dict(os.environ)
+            env.update(ROOT=str(root), GEN_CMDS=f"echo arm1 > {out1}", LOG=str(pipeline_log))
+            result = subprocess.run(
+                [_bash(), str(REMOTE / "watch_and_generate.sh")],
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=60,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            log_text = pipeline_log.read_text()
+            self.assertIn("training verified successful", log_text)
+            self.assertIn("PIPELINE_DONE", log_text)
+            self.assertTrue(out1.exists())
+            self.assertEqual(out1.read_text().strip(), "arm1")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.train_response_sft import (
     ETA_MARGIN,
     TIMING_WARMUP_STEPS,
+    _backfill_manifests,
     _checkpoint_path,
     _epoch_micro_batches,
     _flatten_epoch_plan,
@@ -649,6 +650,55 @@ class CheckpointResumeEndToEndTests(unittest.TestCase):
         empty.mkdir()
         with self.assertRaises(FileNotFoundError):
             run(self._args(resume_from=empty))
+
+
+class BackfillManifestTests(unittest.TestCase):
+    """Backfill manifest.json to legacy checkpoints without one."""
+
+    def test_backfills_legacy_checkpoints_without_manifest(self) -> None:
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            ckpt_dir = out / "checkpoints"
+            old_ckpt = ckpt_dir / "step_000100"
+            old_ckpt.mkdir(parents=True)
+            (old_ckpt / "progress.json").write_text("{}", encoding="utf-8")
+            new_ckpt = ckpt_dir / "step_000200"
+            new_ckpt.mkdir(parents=True)
+            (new_ckpt / "progress.json").write_text("{}", encoding="utf-8")
+            (new_ckpt / "manifest.json").write_text("{}", encoding="utf-8")
+            manifest = {"format_version": 1, "test": "data"}
+            count = _backfill_manifests(out, manifest)
+            self.assertEqual(count, 1)
+            backfilled = json.loads((old_ckpt / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(backfilled, manifest)
+            new_manifest = json.loads((new_ckpt / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(new_manifest, {})  # unchanged
+
+    def test_zero_count_when_all_checkpoints_have_manifest(self) -> None:
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            ckpt_dir = out / "checkpoints"
+            ckpt = ckpt_dir / "step_000100"
+            ckpt.mkdir(parents=True)
+            (ckpt / "progress.json").write_text("{}", encoding="utf-8")
+            (ckpt / "manifest.json").write_text('{"existing": true}', encoding="utf-8")
+            count = _backfill_manifests(out, {"format_version": 1})
+            self.assertEqual(count, 0)
+
+    def test_ignores_directories_without_progress_json(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            ckpt_dir = out / "checkpoints"
+            incomplete = ckpt_dir / "step_000999"
+            incomplete.mkdir(parents=True)
+            count = _backfill_manifests(out, {"format_version": 1})
+            self.assertEqual(count, 0)
+            self.assertFalse((incomplete / "manifest.json").exists())
 
 
 if __name__ == "__main__":
