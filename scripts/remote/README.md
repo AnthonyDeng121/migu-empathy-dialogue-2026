@@ -11,6 +11,11 @@
 
 ## 用法（以 CYCLE2 T3 为例）
 
+**环境必须落成 env 文件**：cron 以裸环境运行，直接 `export` 后装 crontab 会让
+supervisor 一启动就因未设置变量退出，"机器重启自愈"实际是断的。把 ROOT/OUT/PY/
+TRAIN_CMD/GEN_CMDS/GPU/ARMS/ARM_LINES 全部写进 `$ROOT/remote_env.sh`，cron 行与
+手动启动都先 source 它：
+
 ```bash
 export ROOT=/home/hanrongduo/liuhuanfeng
 export OUT=$ROOT/weights/t3_unconditional_2ep
@@ -21,6 +26,18 @@ export TRAIN_CMD="CUDA_VISIBLE_DEVICES=3 $PY scripts/train_response_sft.py \
   --model-dir base_qwen15b --device cuda --local-files-only \
   --output-dir $OUT --report-json reports/t3_uncond_2ep_report.json \
   --report-md reports/t3_uncond_2ep_report.md --checkpoint-every 250 {RESUME}"
+# 其余：GPU / GEN_CMDS / ARMS / ARM_LINES 同样写入（ARMS 只放行数一致的文件；
+# 160 条筛选集与 2354 条全量 val 混在一个 ARM_LINES 里会永远判不齐）
+{
+  echo "export ROOT=$ROOT"
+  echo "export OUT=$OUT"
+  echo "export PY=$PY"
+  printf 'export TRAIN_CMD=%q\n' "$TRAIN_CMD"
+  printf 'export GEN_CMDS=%q\n' "$GEN_CMDS"
+  echo "export GPU=3"
+  printf 'export ARMS=%q\n' "$ARMS"
+  echo "export ARM_LINES=$ARM_LINES"
+} > "$ROOT/remote_env.sh"
 
 setsid nohup bash scripts/remote/train_resilient.sh > /dev/null 2>&1 &
 
@@ -35,8 +52,8 @@ setsid nohup bash scripts/remote/watch_and_generate.sh > /dev/null 2>&1 &
 
 export ARMS="results/response_gen/t3_unconditional.jsonl results/response_gen/t3_d4v2_off_samedevice.jsonl"
 export ARM_LINES=160
-(crontab -l 2>/dev/null | grep -v supervisor.sh; \
- echo "*/10 * * * * $ROOT/scripts/remote/supervisor.sh >> $ROOT/supervisor.log 2>&1") | crontab -
+( crontab -l 2>/dev/null | grep -v supervisor.sh; \
+  echo "*/10 * * * * . $ROOT/remote_env.sh && bash $ROOT/scripts/remote/supervisor.sh >> $ROOT/supervisor.log 2>&1" ) | crontab -
 ```
 
 ## 纪律
