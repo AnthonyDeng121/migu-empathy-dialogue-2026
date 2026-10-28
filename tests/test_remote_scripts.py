@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -164,6 +165,88 @@ class WatchAndGenerateTests(unittest.TestCase):
             self.assertIn("PIPELINE_DONE", log_text)
             self.assertTrue(out1.exists())
             self.assertEqual(out1.read_text().strip(), "arm1")
+
+
+@unittest.skipUnless(shutil.which("python3"), "python3 is unavailable")
+class SupervisorDoneFilesTests(unittest.TestCase):
+    """DONE_FILES gates ALL_DONE.
+
+    A pipeline that dies between the last generation and its post-processing
+    (metrics) must be relaunched, not declared finished because the arm
+    files happen to be complete.
+    """
+
+    def _run_supervisor(self, root: Path, done_files_exist: bool):
+        arm = root / "arm_val.jsonl"
+        arm.write_text('{"id": "a"}\n' * 3, encoding="utf-8")
+        (root / "train_resilient.log").write_text("TRAINING_COMPLETE\n", encoding="utf-8")
+        metrics = root / "metrics.json"
+        if done_files_exist:
+            metrics.write_text("{}\n", encoding="utf-8")
+        shim = root / "bin"
+        shim.mkdir(exist_ok=True)
+        # Fake pgrep (nothing alive) and setsid (records the relaunch instead
+        # of spawning one) keep the test from touching real processes.
+        (shim / "pgrep").write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+        (shim / "setsid").write_text(
+            '#!/bin/sh\necho relaunch >> "$RELUNCH_LOG"\nexit 0\n', encoding="utf-8"
+        )
+        for path in shim.iterdir():
+            path.chmod(0o755)
+        env = dict(os.environ)
+        env.update(
+            ROOT=str(root),
+            ARMS="arm_val.jsonl",
+            ARM_LINES="3",
+            DONE_FILES="metrics.json",
+            PATH=f"{shim}:{env['PATH']}",
+            RELUNCH_LOG=str(root / "relaunch.log"),
+        )
+        return subprocess.run(
+            [_bash(), str(REMOTE / "supervisor.sh")],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=60,
+        )
+
+    def test_all_done_requires_done_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            missing = self._run_supervisor(root, done_files_exist=False)
+            self.assertNotIn("ALL_DONE", missing.stdout)
+            self.assertIn("pipeline dead -> relaunch", missing.stdout)
+            # The relaunch itself is backgrounded, so allow a moment for the
+            # shim to record it.
+            deadline = time.monotonic() + 3.0
+            while time.monotonic() < deadline and not (root / "relaunch.log").exists():
+                time.sleep(0.1)
+            self.assertTrue(
+                (root / "relaunch.log").exists(),
+                "a finished-but-unprocessed run must trigger a pipeline relaunch",
+            )
+            (root / "metrics.json").write_text("{}\n", encoding="utf-8")
+            complete = self._run_supervisor(root, done_files_exist=True)
+            self.assertIn("ALL_DONE", complete.stdout)
+            self.assertEqual(complete.returncode, 0, complete.stderr)
+
+    def test_done_files_unset_keeps_old_behaviour(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            arm = root / "arm_val.jsonl"
+            arm.write_text('{"id": "a"}\n', encoding="utf-8")
+            env = dict(os.environ)
+            env.update(ROOT=str(root), ARMS="arm_val.jsonl", ARM_LINES="1")
+            env.pop("DONE_FILES", None)
+            result = subprocess.run(
+                [_bash(), str(REMOTE / "supervisor.sh")],
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=60,
+            )
+            self.assertIn("ALL_DONE", result.stdout)
+            self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == "__main__":

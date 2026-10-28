@@ -13,6 +13,11 @@
 #   ROOT       project directory on the training host (required)
 #   ARMS       space-separated arm output files, relative to ROOT (required)
 #   ARM_LINES  expected line count per arm file (required)
+#   DONE_FILES optional space-separated post-processing outputs (metric
+#              reports, ...) that must exist before the run counts as
+#              finished; without it a pipeline that dies between the last
+#              generation and its metrics is declared done and never
+#              relaunched
 set -u
 
 : "${ROOT:?set ROOT to the project directory}"
@@ -31,6 +36,9 @@ arms_done() {
         [ -s "$f" ] || return 1
         [ "$(wc -l < "$f")" -ge "$ARM_LINES" ] || return 1
         tail -1 "$f" | python3 -c "import json,sys; json.loads(sys.stdin.read())" 2>/dev/null || return 1
+    done
+    for f in ${DONE_FILES:-}; do
+        [ -s "$f" ] || return 1
     done
 }
 
