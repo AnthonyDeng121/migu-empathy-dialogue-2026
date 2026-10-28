@@ -10,6 +10,12 @@ artifacts/*
 !artifacts/README.md
 results/*
 !results/README.md
+!results/cycle2_t4_20261028/
+results/cycle2_t4_20261028/*
+!results/cycle2_t4_20261028/t3_unconditional_c5_profile_v1.jsonl
+!results/cycle2_t4_20261028/t3_unconditional_c5_profile_v1.manifest.json
+!results/cycle2_t4_20261028/t3_d4v2_off_samedevice_c5_profile_v1.jsonl
+!results/cycle2_t4_20261028/t3_d4v2_off_samedevice_c5_profile_v1.manifest.json
 .cache/
 .pytest_cache/
 __pycache__/
