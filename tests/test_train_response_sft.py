@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -650,6 +652,239 @@ class CheckpointResumeEndToEndTests(unittest.TestCase):
         empty.mkdir()
         with self.assertRaises(FileNotFoundError):
             run(self._args(resume_from=empty))
+
+
+class _StubLogitsModel:
+    """Fixed-logits stand-in for a CausalLM (no transformers needed)."""
+
+    def __init__(self, logits: Any) -> None:
+        self.logits = logits
+
+    def __call__(self, input_ids: Any, attention_mask: Any) -> Any:
+        return SimpleNamespace(logits=self.logits[: input_ids.shape[0]])
+
+
+@unittest.skipUnless(_TRAINING_DEPS_AVAILABLE, "torch is unavailable")
+class WeightedTokenLossTests(unittest.TestCase):
+    """Per-sample loss weighting: the T4 variable's arithmetic contract."""
+
+    def _model_and_batch(self):
+        import torch
+
+        generator = torch.Generator().manual_seed(11)
+        logits = torch.randn(2, 6, 32, generator=generator, requires_grad=True)
+        labels = torch.tensor(
+            [
+                [-100, -100, 5, 7, 9, 11],
+                [-100, 4, 6, 8, 10, -100],
+            ]
+        )
+        batch = {
+            "input_ids": torch.zeros(2, 6, dtype=torch.long),
+            "attention_mask": torch.ones(2, 6, dtype=torch.long),
+            "labels": labels,
+        }
+        return _StubLogitsModel(logits), batch
+
+    def test_all_ones_equals_builtin_token_mean(self) -> None:
+        import torch
+
+        from scripts.train_response_sft import _weighted_token_loss
+
+        model, batch = self._model_and_batch()
+        loss = _weighted_token_loss(model, torch, batch, torch.tensor([1.0, 1.0]))
+        # transformers' built-in loss: mean cross-entropy over supervised
+        # tokens of the whole micro-batch.
+        expected = torch.nn.functional.cross_entropy(
+            model.logits[:, :-1].reshape(-1, 32).float(),
+            batch["labels"][:, 1:].reshape(-1),
+            ignore_index=-100,
+        )
+        self.assertTrue(torch.allclose(loss, expected))
+
+    def test_matches_manual_computation(self) -> None:
+        import math
+
+        import torch
+
+        from scripts.train_response_sft import _weighted_token_loss
+
+        model, batch = self._model_and_batch()
+        weights = [1.0, 2.0]
+        loss = _weighted_token_loss(model, torch, batch, torch.tensor(weights))
+        logits = model.logits.detach()
+        labels = batch["labels"]
+        weighted_sum = 0.0
+        token_count = 0
+        for row in range(labels.shape[0]):
+            for position in range(labels.shape[1] - 1):
+                target = int(labels[row, position + 1])
+                if target == -100:
+                    continue
+                scores = [float(value) for value in logits[row, position]]
+                peak = max(scores)
+                log_sum_exp = peak + math.log(sum(math.exp(s - peak) for s in scores))
+                weighted_sum += weights[row] * (log_sum_exp - scores[target])
+                token_count += 1
+        self.assertAlmostEqual(float(loss), weighted_sum / token_count, places=5)
+
+    def test_weight_survives_a_single_sample_batch(self) -> None:
+        # The configured batch_size is 1: a weighted-mean normalisation would
+        # cancel w against its own denominator and silently no-op.
+        import torch
+
+        from scripts.train_response_sft import _weighted_token_loss
+
+        model, batch = self._model_and_batch()
+        single = {
+            "input_ids": batch["input_ids"][:1],
+            "attention_mask": batch["attention_mask"][:1],
+            "labels": batch["labels"][:1],
+        }
+        unweighted = _weighted_token_loss(model, torch, single, torch.tensor([1.0]))
+        doubled = _weighted_token_loss(model, torch, single, torch.tensor([2.0]))
+        self.assertAlmostEqual(float(doubled), 2.0 * float(unweighted), places=6)
+
+    def test_loss_is_differentiable(self) -> None:
+        import torch
+
+        from scripts.train_response_sft import _weighted_token_loss
+
+        model, batch = self._model_and_batch()
+        loss = _weighted_token_loss(model, torch, batch, torch.tensor([1.0, 2.0]))
+        loss.backward()
+        self.assertIsNotNone(model.logits.grad)
+        self.assertTrue(torch.isfinite(model.logits.grad).all())
+
+
+@unittest.skipUnless(
+    _TRAINING_DEPS_AVAILABLE and _TINY_MODEL_SNAPSHOT.is_dir(),
+    "training dependencies or the local 0.5B snapshot are unavailable",
+)
+class SampleWeightEndToEndTests(unittest.TestCase):
+    """T4 variable wiring on the tiny model, end to end.
+
+    Guards the two failure modes that would silently void the experiment:
+    a weight that never reaches the trainer (all-1.0 must stay
+    byte-identical to a run with no weights at all) and a weight that never
+    changes the trajectory (a 2.0 row must move both the loss and the
+    adapter).
+    """
+
+    def setUp(self) -> None:
+        import json
+        import tempfile
+
+        self._json = json
+        self._tmp = tempfile.TemporaryDirectory()
+        root = Path(self._tmp.name)
+        self.root = root
+        self.train_path = root / "b1_train.jsonl"
+        self._write_rows(None)
+        self.config_path = root / "config.json"
+        self.config_path.write_text(
+            json.dumps(
+                {
+                    "model_name": "Qwen/Qwen2.5-0.5B-Instruct",
+                    "model_revision": "test-tiny",
+                    "max_length": 128,
+                    "max_new_tokens": 16,
+                    "epochs": 2,
+                    "batch_size": 1,
+                    "gradient_accumulation": 2,
+                    "learning_rate": 0.001,
+                    "weight_decay": 0.0,
+                    "warmup_ratio": 0.0,
+                    "seed": 20261026,
+                    "lora_r": 4,
+                    "lora_alpha": 8,
+                    "lora_dropout": 0.0,
+                    "lora_target_modules": ["q_proj", "v_proj"],
+                    "gradient_checkpointing": False,
+                    "max_history_turns": 2,
+                    "condition_mode": "none",
+                }
+            ),
+            encoding="utf-8",
+        )
+        self.model_dir = _tiny_model_dir(root / "tiny_model", _TINY_MODEL_SNAPSHOT)
+        self.output_dir = root / "out"
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
+
+    def _write_rows(self, weight: float | None) -> None:
+        rows = _b1_resume_rows(6)
+        if weight is not None:
+            for index, row in enumerate(rows):
+                row["sample_weight"] = weight if index == 0 else 1.0
+        with self.train_path.open("w", encoding="utf-8") as handle:
+            for row in rows:
+                handle.write(self._json.dumps(row, ensure_ascii=False) + "\n")
+
+    def _args(self, output_dir: Path):
+        import argparse
+
+        return argparse.Namespace(
+            train=self.train_path,
+            train_format="b1",
+            condition_jsonl=None,
+            config=self.config_path,
+            output_dir=output_dir,
+            report_json=self.root / "report.json",
+            report_md=self.root / "report.md",
+            device="cpu",
+            model_dir=self.model_dir,
+            max_train_samples=6,
+            max_steps=None,
+            checkpoint_every=0,
+            resume_from=None,
+            eval_prompts=2,
+            local_files_only=True,
+        )
+
+    def _run(self, name: str):
+        from scripts.train_response_sft import run
+
+        return run(self._args(self.root / name))
+
+    @staticmethod
+    def _sha256(path: Path) -> str:
+        import hashlib
+
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+
+    def test_all_ones_is_byte_identical_to_no_weights(self) -> None:
+        plain = self._run("out_plain")
+        self.assertFalse(plain["data"]["sample_weights"]["enabled"])
+        self.assertEqual(plain["data"]["sample_weights"]["weighted_samples"], 0)
+        self._write_rows(1.0)
+        weighted = self._run("out_ones")
+        self.assertFalse(weighted["data"]["sample_weights"]["enabled"])
+        self.assertEqual(
+            self._sha256(self.root / "out_ones" / "adapter_model.safetensors"),
+            self._sha256(self.root / "out_plain" / "adapter_model.safetensors"),
+        )
+
+    def test_a_real_weight_changes_the_trajectory(self) -> None:
+        plain = self._run("out_plain")
+        self._write_rows(2.0)
+        weighted = self._run("out_weighted")
+        self.assertTrue(weighted["data"]["sample_weights"]["enabled"])
+        self.assertEqual(weighted["data"]["sample_weights"]["weighted_samples"], 1)
+        self.assertEqual(weighted["data"]["sample_weights"]["total_samples"], 6)
+        self.assertNotEqual(
+            weighted["training_speed"]["mean_train_loss"],
+            plain["training_speed"]["mean_train_loss"],
+        )
+        self.assertNotEqual(
+            self._sha256(self.root / "out_weighted" / "adapter_model.safetensors"),
+            self._sha256(self.root / "out_plain" / "adapter_model.safetensors"),
+        )
 
 
 class BackfillManifestTests(unittest.TestCase):

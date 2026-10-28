@@ -1,0 +1,21 @@
+{
+  "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "max_length": 2048,
+  "max_new_tokens": 512,
+  "epochs": 2,
+  "batch_size": 1,
+  "gradient_accumulation": 8,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.01,
+  "warmup_ratio": 0.03,
+  "seed": 20261013,
+  "lora_r": 8,
+  "lora_alpha": 16,
+  "lora_dropout": 0.05,
+  "lora_target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+  "gradient_checkpointing": true,
+  "max_history_turns": 20,
+  "condition_mode": "gold",
+  "_comment": "CYCLE2 T4 单变量候选：与 D4 v2（configs/response_sft_2epoch.json）配置逐项相同，唯一变量是训练数据改为 data/processed/t4_long_response/response_train.jsonl（由 scripts/build_long_response_weights.py 从 B1 response_train.jsonl 生成：gold 回复字符数 >200 的样本 sample_weight=2.0，其余 1.0，共 5,853/18,653 条加权）。设计、判定标准与先定后跑依据见 reports/D_CYCLE2_T4_LONG_RESPONSE.md。"
+}
