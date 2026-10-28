@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "inputs": {
+    "input": "30908afe7050bd59ec27bc66851defbb5ad35440e2b80412e1a87b17c900ef62"
+  },
+  "config": {
+    "input": "data/processed/val_eval_input.jsonl",
+    "model": "weights/base_qwen15b",
+    "adapter": "weights/t4_longweight_2ep",
+    "max_samples": null,
+    "condition_jsonl": null,
+    "condition_fields": "both",
+    "max_new_tokens": 256,
+    "min_new_tokens": 0,
+    "full_set_size": 2354,
+    "device": "cuda"
+  },
+  "models": {
+    "model": "77f0e36abfa98943ef9619f6ea5a5615349514cd19e3ef829c045b40d000cd7f",
+    "adapter": "9fbf21a2453276e067e821318be7b506abcfefebc74d2a4bd692390ef974826a"
+  },
+  "code": "c877514c2d65c63b8da3dd92cbfcfc51ad93004c09cbe1a40a02dab2637e4454",
+  "environment": {
+    "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:50:00) [GCC 14.3.0]",
+    "platform": "Linux-5.15.0-105-generic-x86_64-with-glibc2.39",
+    "executable": "/opt/conda/bin/python",
+    "packages": {
+      "torch": "2.11.0+cu128",
+      "transformers": "4.57.6",
+      "peft": "0.21.2",
+      "safetensors": "0.8.0",
+      "tokenizers": "0.22.2",
+      "numpy": "2.5.2",
+      "accelerate": "1.15.0"
+    },
+    "runtime": {
+      "cuda": "12.8",
+      "cuda_available": true,
+      "gpu_names": [
+        "NVIDIA GeForce RTX 4090"
+      ],
+      "deterministic_algorithms": false,
+      "cudnn_version": 91900,
+      "cudnn_deterministic": false,
+      "cudnn_benchmark": false
+    },
+    "variables": {
+      "CUDA_VISIBLE_DEVICES": "0",
+      "CUBLAS_WORKSPACE_CONFIG": null,
+      "OMP_NUM_THREADS": null,
+      "HF_HUB_OFFLINE": null,
+      "TRANSFORMERS_OFFLINE": null,
+      "PYTORCH_CUDA_ALLOC_CONF": null
+    }
+  }
+}
