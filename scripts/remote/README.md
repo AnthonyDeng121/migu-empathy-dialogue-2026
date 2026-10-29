@@ -91,11 +91,12 @@ STAGES_FILE / BASE_WAIT_MINUTES / ADAPTER_SHA256S / MAX_ATTEMPTS   可选覆盖
 任一步失败都会写 `preflight.json`（含失败原因、python/torch/transformers/peft/accelerate 版本、GPU 名、基座 sha256 与等待秒数）
 并 `exit 1`，一个 stage 都不会碰：
 
-1. **python 栈**：`import torch, transformers` 必须本来就能导入——镜像预装 torch 2.5.1（与 `requirements-response.txt`
-   钉版一致），代码在 transformers 4.57.6 与 5.17.0 两个栈上都验证过，所以这两个**绝不安装、绝不改动**；
-2. **依赖修复**：`import peft` 或 `import accelerate` 失败时，执行
-   `$PY -m pip install --no-input peft==0.21.2 accelerate==1.15.0`（钉版同上）后复查，修了哪些模块、最终版本号、
-   pip 日志（`workload_deps_install.log`）都记进 `preflight.json`；pip 本身失败同样算预检失败；
+1. **python 栈**：`import torch` 必须本来就能导入——镜像预装 torch 2.5.1（与 `requirements-response.txt`
+   钉版一致），所以 torch **绝不安装、绝不改动**；
+2. **依赖修复**：`import transformers` / `import peft` / `import accelerate` 任一失败时，执行
+   `$PY -m pip install --no-input transformers==5.17.0 peft==0.21.2 accelerate==1.15.0`（钉版同上）后复查，
+   修了哪些模块、最终版本号、pip 日志（`workload_deps_install.log`）都记进 `preflight.json`；pip 本身失败同样算预检失败；
+   （SeeTaCloud 的 PyTorch 2.5.1 镜像实测：torch 有、transformers/peft/accelerate 全缺，正好走这条修复；）
 3. **CUDA**：`import torch, transformers, peft; assert torch.cuda.is_available()`；
 4. 等 `$ROOT/base_ready` 出现，且其中记录的 sha256 与 `model.safetensors` 实际值一致（默认再核一遍已知良好值
    `dd924a11…`，不一致直接失败；`BASE_SHA256_STRICT=0` 可降级为告警）；

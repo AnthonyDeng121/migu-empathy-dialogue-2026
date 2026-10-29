@@ -39,8 +39,9 @@
 #   ADAPTER_SHA256S     "relpath:sha256_prefix" pairs; an empty prefix means
 #                       presence+size check only (default: the two adapters)
 #   MAX_ATTEMPTS        supervisor relaunch budget (default 6; recorded only)
-#   PIP_PACKAGES        what a missing peft/accelerate is repaired with
-#                       (default: the requirements-response.txt pins)
+#   PIP_PACKAGES        what a missing transformers/peft/accelerate is
+#                       repaired with (default: the requirements-response.txt
+#                       pins; torch is never installed here)
 set -u
 
 : "${ROOT:?set ROOT to the project directory}"
@@ -76,9 +77,10 @@ BASE_MODEL_SIZE="${BASE_MODEL_SIZE:-3087467144}"
 BASE_SHA256_STRICT="${BASE_SHA256_STRICT:-1}"
 ADAPTER_SHA256S="${ADAPTER_SHA256S:-}"
 MAX_ATTEMPTS="${MAX_ATTEMPTS:-6}"
-# requirements-response.txt pins. Only peft/accelerate may be missing on a
-# fresh image, so they are the only ones this workload ever installs.
-PIP_PACKAGES="${PIP_PACKAGES:-peft==0.21.2 accelerate==1.15.0}"
+# requirements-response.txt pins. A fresh image ships torch but may lack
+# transformers/peft/accelerate; those three are the only ones ever installed
+# here (torch matches the pin already and is never touched).
+PIP_PACKAGES="${PIP_PACKAGES:-transformers==5.17.0 peft==0.21.2 accelerate==1.15.0}"
 
 # Numeric env values reach this script from a hand-editable file, so refuse to
 # trust a non-numeric one (an arithmetic error here would abort mid-preflight).
@@ -245,20 +247,20 @@ preflight_fail() { abort_workload "preflight_failed" "$1" "" "yes"; }
 
 say "workload start root=$ROOT gpu=$GPU stages=$STAGES_FILE"
 
-# (a) python stack: torch and transformers must already be importable (the
-# image ships torch 2.5.1, matching requirements-response.txt; the code runs on
-# transformers 4.57.6 and 5.17.0 alike, so neither is ever touched here).
-# peft/accelerate are the two the image may lack, so they get repaired.
-if ! "$PY" -c 'import torch, transformers' >> "$LOG" 2>&1; then
-    preflight_fail "python stack probe failed: $PY cannot import torch and transformers (the image ships torch 2.5.1; this workload never installs torch)"
+# (a) python stack: torch must already be importable (the image ships torch
+# 2.5.1, matching requirements-response.txt; the code runs on transformers
+# 4.57.6 and 5.17.0 alike, and torch is never installed here).
+# transformers/peft/accelerate are what a fresh image may lack, so those are
+# the three this workload repairs from the same pins.
+if ! "$PY" -c 'import torch' >> "$LOG" 2>&1; then
+    preflight_fail "python stack probe failed: $PY cannot import torch (the image ships torch 2.5.1; this workload never installs torch)"
 fi
-say "preflight: torch+transformers importable"
+say "preflight: torch importable"
 PF_TORCH="$("$PY" -c 'import torch; print(torch.__version__)' 2>> "$LOG" || echo unknown)"
-PF_TRANSFORMERS="$("$PY" -c 'import transformers; print(transformers.__version__)' 2>> "$LOG" || echo unknown)"
 
 module_imports() { "$PY" -c "import $1" >> "$LOG" 2>&1; }
 DEPS_MISSING=""
-for module in peft accelerate; do
+for module in transformers peft accelerate; do
     module_imports "$module" || DEPS_MISSING="$DEPS_MISSING $module"
 done
 if [ -n "$DEPS_MISSING" ]; then
@@ -272,8 +274,9 @@ if [ -n "$DEPS_MISSING" ]; then
         module_imports "$module" || preflight_fail "module $module is still not importable after the repair (see $DEPS_LOG)"
     done
     PF_DEPS_REPAIRED="$DEPS_MISSING"
-    say "preflight: dependency repair ok (peft/accelerate installed, see $DEPS_LOG)"
+    say "preflight: dependency repair ok (installed: $DEPS_MISSING, see $DEPS_LOG)"
 fi
+PF_TRANSFORMERS="$("$PY" -c 'import transformers; print(transformers.__version__)' 2>> "$LOG" || echo unknown)"
 PF_PEFT="$("$PY" -c 'import peft; print(peft.__version__)' 2>> "$LOG" || echo unknown)"
 PF_ACCELERATE="$("$PY" -c 'import accelerate; print(accelerate.__version__)' 2>> "$LOG" || echo unknown)"
 if ! "$PY" -c 'import torch, transformers, peft; assert torch.cuda.is_available()' >> "$LOG" 2>&1; then

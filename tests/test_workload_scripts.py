@@ -50,6 +50,11 @@ if [ "${1:-}" = "-c" ]; then
         *peft.__version__*) echo "0.21.2" ; exit 0 ;;
         *accelerate.__version__*) echo "1.15.0" ; exit 0 ;;
         "import torch, transformers") [ "${FAKE_TORCH_OK:-1}" = "1" ] || exit 1 ; exit 0 ;;
+        "import torch") [ "${FAKE_TORCH_OK:-1}" = "1" ] || exit 1 ; exit 0 ;;
+        "import transformers")
+            [ "${FAKE_TRANSFORMERS_MISSING:-0}" = "1" ] || exit 0
+            [ -f "${FAKE_PIP_LOG:-/dev/null}.installed" ] && exit 0
+            exit 1 ;;
         "import peft")
             [ "${FAKE_PEFT_MISSING:-0}" = "1" ] || exit 0
             [ -f "${FAKE_PIP_LOG:-/dev/null}.installed" ] && exit 0
@@ -204,9 +209,11 @@ class WorkloadScriptSyntaxTests(unittest.TestCase):
     def test_dependency_repair_uses_the_pinned_versions(self) -> None:
         text = RUNNER.read_text(encoding="utf-8")
         self.assertIn("pip install --no-input", text)
-        self.assertIn("peft==0.21.2 accelerate==1.15.0", text)
-        # torch/transformers ship with the image and are never installed here.
-        self.assertIn("for module in peft accelerate", text)
+        self.assertIn("transformers==5.17.0 peft==0.21.2 accelerate==1.15.0", text)
+        self.assertIn("for module in transformers peft accelerate", text)
+        # torch ships with the image (2.5.1, same pin) and is only probed.
+        self.assertIn("-c 'import torch'", text)
+        self.assertNotIn("pip install torch", text)
 
 
 class WorkloadStagesTests(unittest.TestCase):
@@ -610,7 +617,7 @@ class RunWorkloadTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(list((root / "stages").glob("*.done")), [])
             preflight = json.loads((root / "preflight.json").read_text(encoding="utf-8"))
-            self.assertIn("cannot import torch and transformers", preflight["reason"])
+            self.assertIn("cannot import torch", preflight["reason"])
 
     def test_missing_cuda_aborts_before_any_stage(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -645,15 +652,36 @@ class RunWorkloadTests(unittest.TestCase):
             self.assertEqual(preflight["peft"], "0.21.2")
             self.assertEqual(preflight["accelerate"], "1.15.0")
             self.assertEqual(
-                preflight["pip_packages"], "peft==0.21.2 accelerate==1.15.0"
+                preflight["pip_packages"], "transformers==5.17.0 peft==0.21.2 accelerate==1.15.0"
             )
             self.assertTrue((root / "workload_deps_install.log").is_file())
             pip_log = (root / "pip.log").read_text(encoding="utf-8")
-            self.assertIn("peft==0.21.2 accelerate==1.15.0", pip_log)
+            self.assertIn("transformers==5.17.0 peft==0.21.2 accelerate==1.15.0", pip_log)
             # The repair happens inside preflight: the stages still ran.
             self.assertEqual(
                 self._markers(root), ["01_alpha.done", "16_t5_conditional_val.done"]
             )
+
+    def test_missing_transformers_is_repaired_with_the_pinned_versions(self) -> None:
+        """The SeeTaCloud image ships torch 2.5.1 but no transformers/peft/accelerate."""
+        extra = {
+            "FAKE_TRANSFORMERS_MISSING": "1",
+            "FAKE_PIP_LOG": "pip.log",
+            "ARMS_SPEC": "out/alpha.jsonl:2",
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            root = self._build_root(
+                root,
+                stage_lines=[_stage_line(root, "01_alpha", "out/alpha.jsonl")],
+                env_extra=extra,
+            )
+            result = self._run(root, env_extra=extra)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            preflight = json.loads((root / "preflight.json").read_text(encoding="utf-8"))
+            self.assertEqual(preflight["deps_repaired"], ["transformers"])
+            self.assertEqual(preflight["transformers"], "4.57.6")
+            self.assertEqual(preflight["torch"], "9.9.9+fake")
 
     def test_missing_peft_and_accelerate_are_both_recorded(self) -> None:
         extra = {
