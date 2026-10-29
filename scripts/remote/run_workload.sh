@@ -473,12 +473,21 @@ done <<< "$stage_lines"
 # The decider's verdict is the only thing that may add a ninth arm, and its
 # output path is only known at runtime, so this stage lives outside
 # workload_stages.sh and still gets a marker of its own.
+#
+# The marker freezes the arm that actually ran: line 1 is the audit spec
+# ("output:expected_lines"), line 2 the analysis path. A relaunch re-derives
+# the audit checklist from that record -- never from the decision file, which
+# a later stage-15 rerun could have rewritten -- so the arm is audited
+# whether the stage ran or was skipped. The marker is written only after the
+# artifact audit passes, so a crash mid-arm re-runs the arm instead of
+# inheriting a record whose outputs were never verified.
 COND_ARM_SPEC=""
 COND_ANALYSIS_DONE=""
-if [ -f "$STAGES_DIR/$COND_STAGE_NAME.done" ]; then
-    log "conditional full-val arm skipped (marker present)"
-    record_stage "$COND_STAGE_NAME" "skipped"
-else
+COND_MARKER_PENDING=0
+load_conditional_decision() {
+    # Sets CHOSEN_ARM/CHOSEN_ADAPTER/CHOSEN_CONDITION_JSONL/
+    # CHOSEN_CONDITION_FIELDS/CHOSEN_OUTPUT/CHOSEN_RESUME_DIR from the frozen
+    # decision; aborts the workload when it is missing or unusable.
     decision="$OUT_DIR/t5_conditional_decision.json"
     if [ ! -s "$decision" ]; then
         abort_workload "stage_failed" "conditional decision file missing or empty: $decision" "15_t5_decide"
@@ -494,17 +503,56 @@ for key in ("arm", "adapter", "condition_jsonl", "condition_fields", "output", "
         abort_workload "stage_failed" "could not parse $decision (see workload.log)" "$COND_STAGE_NAME"
     fi
     eval "$chosen_fields"
-    if [ -z "$CHOSEN_OUTPUT" ]; then
-        log "conditional full-val arm skipped: decider chose no arm (trigger=false)"
-        record_stage "$COND_STAGE_NAME" "skipped"
-        touch "$STAGES_DIR/$COND_STAGE_NAME.done"
-    else
+    if [ -n "$CHOSEN_OUTPUT" ]; then
         for value in "$CHOSEN_ADAPTER" "$CHOSEN_CONDITION_JSONL" "$CHOSEN_OUTPUT" "$CHOSEN_RESUME_DIR" "$CHOSEN_CONDITION_FIELDS"; do
             case "$value" in
                 *[[:space:]]* | *\'* | *\"*)
                     abort_workload "stage_failed" "decider field with unsafe characters: '$value'" "$COND_STAGE_NAME" ;;
             esac
         done
+    fi
+}
+cond_val_lines() { wc -l < "$ROOT/$VAL_INPUT" | tr -d ' '; }
+require_conditional_artifacts() {
+    # $1 = where the spec came from. Once the decision triggered the arm it
+    # is part of the work, so missing outputs stop the workload; they must
+    # never silently drop out of the audit checklist.
+    local out="${COND_ARM_SPEC%%:*}"
+    if [ ! -s "$ROOT/$out" ]; then
+        abort_workload "arms_incomplete" "conditional arm output missing or empty ($1): $out" "$COND_STAGE_NAME"
+    fi
+    if [ ! -s "$ROOT/$COND_ANALYSIS_DONE" ]; then
+        abort_workload "arms_incomplete" "conditional arm analysis missing or empty ($1): $COND_ANALYSIS_DONE" "$COND_STAGE_NAME"
+    fi
+}
+if [ -f "$STAGES_DIR/$COND_STAGE_NAME.done" ]; then
+    log "conditional full-val arm skipped (marker present)"
+    record_stage "$COND_STAGE_NAME" "skipped"
+    cond_spec_line="$(sed -n '1p' "$STAGES_DIR/$COND_STAGE_NAME.done")"
+    cond_analysis_line="$(sed -n '2p' "$STAGES_DIR/$COND_STAGE_NAME.done")"
+    if [ -n "$cond_spec_line" ]; then
+        # New-format marker: the arm that actually ran, frozen at completion.
+        COND_ARM_SPEC="$cond_spec_line"
+        COND_ANALYSIS_DONE="${cond_analysis_line:-$COND_ANALYSIS}"
+        require_conditional_artifacts "marker spec"
+    else
+        # Empty marker: the decider chose no arm, or a marker written before
+        # the spec was recorded. Re-derive from the decision and let the
+        # audit verify the artifacts either way.
+        load_conditional_decision
+        if [ -n "$CHOSEN_OUTPUT" ]; then
+            COND_ARM_SPEC="$CHOSEN_OUTPUT:$(cond_val_lines)"
+            COND_ANALYSIS_DONE="$COND_ANALYSIS"
+            require_conditional_artifacts "legacy marker"
+        fi
+    fi
+else
+    load_conditional_decision
+    if [ -z "$CHOSEN_OUTPUT" ]; then
+        log "conditional full-val arm skipped: decider chose no arm (trigger=false)"
+        record_stage "$COND_STAGE_NAME" "skipped"
+        touch "$STAGES_DIR/$COND_STAGE_NAME.done"
+    else
         cond_report="${CHOSEN_OUTPUT%.jsonl}_report.json"
         cond_cmd="$PY scripts/run_response_inference.py --input $VAL_INPUT --model $MODEL_DIR --adapter $CHOSEN_ADAPTER --condition-jsonl $CHOSEN_CONDITION_JSONL --condition-fields $CHOSEN_CONDITION_FIELDS --output $CHOSEN_OUTPUT --performance-report $cond_report --resume-dir $CHOSEN_RESUME_DIR --max-new-tokens 256 --device cuda"
         log "stage $COND_STAGE_NAME started ($CHOSEN_ARM): $cond_cmd"
@@ -522,12 +570,11 @@ for key in ("arm", "adapter", "condition_jsonl", "condition_fields", "output", "
             record_stage "$COND_STAGE_NAME" "failed"
             abort_workload "stage_failed" "conditional error analysis exited with code $rc" "$COND_STAGE_NAME"
         fi
-        val_lines="$(wc -l < "$ROOT/$VAL_INPUT" | tr -d ' ')"
-        COND_ARM_SPEC="$CHOSEN_OUTPUT:$val_lines"
+        COND_ARM_SPEC="$CHOSEN_OUTPUT:$(cond_val_lines)"
         COND_ANALYSIS_DONE="$COND_ANALYSIS"
-        touch "$STAGES_DIR/$COND_STAGE_NAME.done"
         record_stage "$COND_STAGE_NAME" "done"
-        log "stage $COND_STAGE_NAME finished ($CHOSEN_ARM -> $CHOSEN_OUTPUT)"
+        COND_MARKER_PENDING=1
+        log "stage $COND_STAGE_NAME finished ($CHOSEN_ARM -> $CHOSEN_OUTPUT); marker waits for the artifact audit"
     fi
 fi
 
@@ -596,6 +643,13 @@ stop_gpu_sampler
 
 if [ "$arms_failed" -gt 0 ]; then
     abort_workload "arms_incomplete" "$arms_failed artifact(s) failed the line-count/JSON audit (see $STATUS_JSON)" ""
+fi
+
+# The conditional arm's marker is written only now that its artifacts passed
+# the audit: a crash before this point must re-run the arm, never inherit a
+# marker whose outputs were never verified.
+if [ "$COND_MARKER_PENDING" -eq 1 ]; then
+    printf '%s\n%s\n' "$COND_ARM_SPEC" "$COND_ANALYSIS_DONE" > "$STAGES_DIR/$COND_STAGE_NAME.done"
 fi
 
 write_status_json "ok" "all stages finished and every audited artifact is complete"

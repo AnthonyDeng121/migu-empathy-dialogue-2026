@@ -13,6 +13,8 @@
 #   ROOT         project directory on the GPU host (required)
 #   ARMS_SPEC    "relpath:expected_lines" pairs, space separated (required)
 #   DONE_FILES   post-processing outputs that must exist before ALL_DONE
+#   OUT_DIR      where the decider writes its verdict (default
+#                results/response_gen); needed for the conditional-arm gate
 #   PY           python for the last-line JSON check (default python3)
 #   MAX_ATTEMPTS relaunch budget before WORKLOAD_GAVE_UP (default 6)
 #
@@ -60,6 +62,61 @@ command -v "$JSON_PY" > /dev/null 2>&1 || JSON_PY=python3
 if ! command -v "$JSON_PY" > /dev/null 2>&1; then
     JSON_PY=""
 fi
+
+# The decider may obligate a ninth (conditional) arm whose paths are only
+# known at runtime. run_workload.sh freezes them into the stage marker when
+# the arm completes; until then static completion must not pass for done:
+# the runner can die between the triggered decision and that arm, and the
+# effective lists are only written at the very end of a successful pass.
+# Keep these two paths in sync with run_workload.sh (asserted by tests).
+COND_STAGE_NAME="16_t5_conditional_val"
+COND_ANALYSIS_REL="reports/t5_conditional_val_error_analysis_newcard.json"
+OUT_DIR_REL="${OUT_DIR:-results/response_gen}"
+COND_DECISION_REL="$OUT_DIR_REL/t5_conditional_decision.json"
+conditional_output() {
+    # Prints the chosen output path when the frozen decision obligates the
+    # conditional arm and nothing when it does not; returns non-zero when
+    # the decision exists but cannot be read (never "nothing owed").
+    local decision="$ROOT/$COND_DECISION_REL"
+    [ -s "$decision" ] || return 1
+    if [ -n "$JSON_PY" ]; then
+        "$JSON_PY" - "$decision" 2>/dev/null <<'COND_PY'
+import json, sys
+try:
+    data = json.load(open(sys.argv[1], encoding="utf-8"))
+except Exception:
+    sys.exit(3)
+chosen = data.get("chosen") or {}
+sys.stdout.write(str(chosen.get("output") or ""))
+COND_PY
+        return $?
+    fi
+    # No interpreter at all: the repo's own writer puts "output": "..." on a
+    # single line, so a conservative grep keeps the gate closed, never open.
+    grep -o '"output"[[:space:]]*:[[:space:]]*"[^"]\+"' "$decision" 2>/dev/null \
+        | head -1 | sed -e 's/^.*:[[:space:]]*"//' -e 's/"$//'
+    return 0
+}
+conditional_arm_met() {
+    local output marker spec_line
+    if ! output="$(conditional_output)"; then
+        # No decision file yet: the runner has not reached stage 15, so the
+        # static arms are all there is. An unreadable decision must not pass.
+        [ -s "$ROOT/$COND_DECISION_REL" ] && return 1
+        return 0
+    fi
+    [ -n "$output" ] || return 0
+    marker="$ROOT/stages/$COND_STAGE_NAME.done"
+    [ -f "$marker" ] || return 1
+    spec_line="$(sed -n '1p' "$marker" 2>/dev/null)"
+    if [ -n "$spec_line" ]; then
+        [ "${spec_line%%:*}" = "$output" ] || return 1
+    fi
+    [ -s "$ROOT/$output" ] || return 1
+    last_line_ok "$ROOT/$output" || return 1
+    [ -s "$ROOT/$COND_ANALYSIS_REL" ] || return 1
+    return 0
+}
 
 # run_workload.sh writes the effective lists when it reaches the audit: they
 # are ARMS_SPEC/DONE_FILES plus the conditional arm, whose path is only known
@@ -117,7 +174,7 @@ if [ -f "$DONE_MARKER" ]; then
     exit 0
 fi
 
-if arms_done; then
+if arms_done && conditional_arm_met; then
     rm -f "$ATTEMPTS_FILE" "$MARKERS_FILE"
     echo "$(ts) ALL_DONE"
     exit 0

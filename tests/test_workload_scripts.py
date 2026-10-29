@@ -155,6 +155,21 @@ def _stage_line(root: Path, name: str, output: str, lines: int = 2) -> str:
     return f"{name}|mkdir -p {root}/out && printf '%s\\n' {args} > {root}/{output}"
 
 
+def _t4_emotion_decision() -> dict:
+    """The decider product that triggers the conditional full-val arm."""
+    return {
+        "trigger": True,
+        "chosen": {
+            "arm": "t4_emotion",
+            "adapter": "weights/t4_longweight_2ep",
+            "condition_jsonl": "results/response_gen/c5_conditions_val_full.jsonl",
+            "condition_fields": "emotion",
+            "output": "out/t5_conditional_t4_emotion_val_newcard.jsonl",
+            "resume_dir": "out/t5_conditional_t4_emotion_val_newcard_progress",
+        },
+    }
+
+
 class WorkloadScriptSyntaxTests(unittest.TestCase):
     """The workload scripts ship in the same repo as the training ones."""
 
@@ -920,7 +935,20 @@ class RunWorkloadTests(unittest.TestCase):
                     _stage_line(root, "02_beta", "out/beta.jsonl"),
                 ],
             )
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                json.dumps(_t4_emotion_decision()), encoding="utf-8"
+            )
             self.assertEqual(self._run(root).returncode, 0)
+            # The marker freezes the arm that actually ran: a relaunch audits
+            # that record, never a decision rewritten after the fact.
+            marker = root / "stages" / "16_t5_conditional_val.done"
+            self.assertEqual(
+                marker.read_text(encoding="utf-8").splitlines(),
+                [
+                    "out/t5_conditional_t4_emotion_val_newcard.jsonl:2",
+                    "reports/t5_conditional_val_error_analysis_newcard.json",
+                ],
+            )
             # A new decision must not resurrect an arm that already ran.
             (root / "out" / "t5_conditional_decision.json").write_text(
                 json.dumps(
@@ -941,6 +969,112 @@ class RunWorkloadTests(unittest.TestCase):
             self.assertEqual(self._run(root).returncode, 0)
             log = (root / "workload.log").read_text(encoding="utf-8")
             self.assertNotIn("d4v2_emotion ->", log)
+            status = self._status(root)
+            self.assertEqual(status["stages"]["16_t5_conditional_val"], "skipped")
+            self.assertTrue(
+                status["arms"]["out/t5_conditional_t4_emotion_val_newcard.jsonl"]["ok"]
+            )
+            self.assertTrue(
+                status["done_files"][
+                    "reports/t5_conditional_val_error_analysis_newcard.json"
+                ]
+            )
+
+    def test_conditional_marker_with_missing_artifacts_refuses_completion(self) -> None:
+        """A marker claiming a finished conditional arm must never launder
+        missing or short outputs into WORKLOAD_DONE on a relaunch."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            root = self._build_root(
+                root,
+                stage_lines=[
+                    _stage_line(root, "01_alpha", "out/alpha.jsonl"),
+                    _stage_line(root, "02_beta", "out/beta.jsonl"),
+                ],
+            )
+            # Static stages and the frozen decision are all in place; only the
+            # conditional arm is under test.
+            (root / "stages").mkdir(parents=True, exist_ok=True)
+            for name in ("01_alpha", "02_beta"):
+                (root / "stages" / f"{name}.done").write_text("", encoding="utf-8")
+            for name in ("alpha", "beta"):
+                (root / "out" / f"{name}.jsonl").write_text(
+                    '{"id": "a"}\n{"id": "b"}\n', encoding="utf-8"
+                )
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                json.dumps(_t4_emotion_decision()), encoding="utf-8"
+            )
+            (root / "stages" / "16_t5_conditional_val.done").write_text(
+                "out/t5_conditional_t4_emotion_val_newcard.jsonl:2\n"
+                "reports/t5_conditional_val_error_analysis_newcard.json\n",
+                encoding="utf-8",
+            )
+            result = self._run(root)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse((root / "WORKLOAD_DONE").exists())
+            status = self._status(root)
+            self.assertEqual(status["outcome"], "arms_incomplete")
+            self.assertIn("conditional arm output missing", status["reason"])
+            # A short output is refused by the audit, not waved through.
+            (root / "out" / "t5_conditional_t4_emotion_val_newcard.jsonl").write_text(
+                '{"id": "s0"}\n', encoding="utf-8"
+            )
+            (root / "reports").mkdir(parents=True, exist_ok=True)
+            (root / "reports" / "t5_conditional_val_error_analysis_newcard.json").write_text(
+                "{}\n", encoding="utf-8"
+            )
+            result = self._run(root)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse((root / "WORKLOAD_DONE").exists())
+            status = self._status(root)
+            self.assertEqual(status["outcome"], "arms_incomplete")
+            self.assertFalse(
+                status["arms"]["out/t5_conditional_t4_emotion_val_newcard.jsonl"]["ok"]
+            )
+
+    def test_conditional_marker_is_written_only_after_the_audit(self) -> None:
+        """Generation returning 0 with too few rows must not leave a marker:
+        the relaunch has to re-run the arm, and only a verified one may
+        complete the workload."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            root = self._build_root(
+                root,
+                stage_lines=[
+                    _stage_line(root, "01_alpha", "out/alpha.jsonl"),
+                    _stage_line(root, "02_beta", "out/beta.jsonl"),
+                ],
+            )
+            # Static stages and the frozen decision are all in place; only the
+            # conditional arm is under test.
+            (root / "stages").mkdir(parents=True, exist_ok=True)
+            for name in ("01_alpha", "02_beta"):
+                (root / "stages" / f"{name}.done").write_text("", encoding="utf-8")
+            for name in ("alpha", "beta"):
+                (root / "out" / f"{name}.jsonl").write_text(
+                    '{"id": "a"}\n{"id": "b"}\n', encoding="utf-8"
+                )
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                json.dumps(_t4_emotion_decision()), encoding="utf-8"
+            )
+            short = self._run(root, env_extra={"FAKE_GEN_LINES": "1"})
+            self.assertNotEqual(short.returncode, 0)
+            self.assertFalse(
+                (root / "stages" / "16_t5_conditional_val.done").exists()
+            )
+            self.assertFalse((root / "WORKLOAD_DONE").exists())
+            self.assertEqual(self._status(root)["outcome"], "arms_incomplete")
+            # The relaunch re-runs the arm and only then completes.
+            again = self._run(root)
+            self.assertEqual(again.returncode, 0, again.stdout + again.stderr)
+            self.assertTrue((root / "WORKLOAD_DONE").is_file())
+            marker = root / "stages" / "16_t5_conditional_val.done"
+            self.assertEqual(
+                marker.read_text(encoding="utf-8").splitlines()[0],
+                "out/t5_conditional_t4_emotion_val_newcard.jsonl:2",
+            )
+            log = (root / "workload.log").read_text(encoding="utf-8")
+            self.assertEqual(log.count("16_t5_conditional_val started"), 2)
 
 
 class SupervisorWorkloadTests(unittest.TestCase):
@@ -1091,6 +1225,84 @@ class SupervisorWorkloadTests(unittest.TestCase):
             )
             result = self._run_supervisor(root)
             self.assertIn("ALL_DONE", result.stdout)
+
+    def test_triggered_decision_blocks_all_done_until_the_arm_finishes(self) -> None:
+        """Static completion must not pass for done while a triggered
+        decision still owes a ninth arm: the runner can die between the
+        decision and that arm, and the effective lists are only written at
+        the very end of a successful pass."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._complete_arms(root)
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                json.dumps(
+                    {"trigger": True, "chosen": {"output": "out/conditional.jsonl"}}
+                ),
+                encoding="utf-8",
+            )
+            result = self._run_supervisor(root, env_extra={"OUT_DIR": "out"})
+            self.assertNotIn("ALL_DONE", result.stdout)
+            self.assertIn("relaunch attempt", result.stdout)
+            self.assertFalse((root / "WORKLOAD_GAVE_UP").exists())
+            # The arm finishes: the marker freezes the spec, artifacts land.
+            (root / "stages").mkdir(parents=True, exist_ok=True)
+            (root / "stages" / "16_t5_conditional_val.done").write_text(
+                "out/conditional.jsonl:2\n"
+                "reports/t5_conditional_val_error_analysis_newcard.json\n",
+                encoding="utf-8",
+            )
+            (root / "out" / "conditional.jsonl").write_text(
+                '{"id": "c"}\n{"id": "d"}\n', encoding="utf-8"
+            )
+            (root / "reports").mkdir(parents=True, exist_ok=True)
+            (
+                root / "reports" / "t5_conditional_val_error_analysis_newcard.json"
+            ).write_text("{}\n", encoding="utf-8")
+            result = self._run_supervisor(root, env_extra={"OUT_DIR": "out"})
+            self.assertIn("ALL_DONE", result.stdout)
+            deadline = time.monotonic() + 3.0
+            while time.monotonic() < deadline and not (root / "relaunch.log").exists():
+                time.sleep(0.1)
+            self.assertTrue((root / "relaunch.log").is_file())
+            before = (root / "relaunch.log").read_text(encoding="utf-8").count("relaunch")
+            result = self._run_supervisor(root, env_extra={"OUT_DIR": "out"})
+            self.assertIn("ALL_DONE", result.stdout)
+            after = (root / "relaunch.log").read_text(encoding="utf-8").count("relaunch")
+            self.assertEqual(before, after, "a finished workload must not relaunch")
+
+    def test_unreadable_decision_blocks_all_done(self) -> None:
+        """A decision that exists but cannot be parsed is unknown, not
+        "nothing owed": refusing to finish is the only safe reading."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._complete_arms(root)
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                "{not json", encoding="utf-8"
+            )
+            result = self._run_supervisor(root, env_extra={"OUT_DIR": "out"})
+            self.assertNotIn("ALL_DONE", result.stdout)
+            self.assertIn("relaunch attempt", result.stdout)
+
+    def test_no_trigger_decision_allows_all_done(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._complete_arms(root)
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                json.dumps({"trigger": False, "chosen": None}), encoding="utf-8"
+            )
+            result = self._run_supervisor(root, env_extra={"OUT_DIR": "out"})
+            self.assertIn("ALL_DONE", result.stdout)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_conditional_paths_stay_in_sync_with_the_runner(self) -> None:
+        runner = RUNNER.read_text(encoding="utf-8")
+        supervisor = SUPERVISOR.read_text(encoding="utf-8")
+        for shared in (
+            'COND_STAGE_NAME="16_t5_conditional_val"',
+            "reports/t5_conditional_val_error_analysis_newcard.json",
+        ):
+            self.assertIn(shared, runner)
+            self.assertIn(shared, supervisor)
 
 
 if __name__ == "__main__":
