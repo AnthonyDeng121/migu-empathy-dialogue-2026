@@ -63,6 +63,8 @@ PY_ABS="$("$PY" -c 'import sys; print(sys.executable)' 2>/dev/null || true)"
 say "python: $PY_ABS (from $PY)"
 
 # 2. gpu: the card with the most free memory; a single-card instance gives 0.
+# nvidia-smi prints CSV ("0, 24081"), so normalise the separator before the
+# numeric parse or every row is rejected and the picker silently defaults.
 GPU=""
 if command -v nvidia-smi > /dev/null 2>&1; then
     best_free=-1
@@ -73,7 +75,7 @@ if command -v nvidia-smi > /dev/null 2>&1; then
             best_free="$free"
             GPU="$idx"
         fi
-    done < <(nvidia-smi --query-gpu=index,memory.free --format=csv,noheader,nounits 2>/dev/null || true)
+    done < <(nvidia-smi --query-gpu=index,memory.free --format=csv,noheader,nounits 2>/dev/null | tr -d ' ' | tr ',' ' ' || true)
 fi
 if [ -z "$GPU" ]; then
     GPU="0"
@@ -201,8 +203,11 @@ if [ "$cron_mode" = "cron" ]; then
 fi
 
 if [ "$cron_mode" = "loop" ]; then
-    setsid nohup bash -c 'while true; do bash "$1" >> "$2" 2>&1; sleep 600; done' \
-        _ "$SUPERVISOR" "$SUPERVISOR_LOG" >> "$LAUNCH_LOG" 2>&1 < /dev/null &
+    # Source the env file first, exactly like the crontab line does: the
+    # supervisor self-defaults ROOT too, but this keeps both transports
+    # identical (and skips the loop entirely if the env file is missing).
+    setsid nohup bash -c 'while true; do . "$1" && bash "$2" >> "$3" 2>&1; sleep 600; done' \
+        _ "$ENV_FILE" "$SUPERVISOR" "$SUPERVISOR_LOG" >> "$LAUNCH_LOG" 2>&1 < /dev/null &
     say "supervisor started as a detached 10-minute loop (no cron on this image)"
 fi
 

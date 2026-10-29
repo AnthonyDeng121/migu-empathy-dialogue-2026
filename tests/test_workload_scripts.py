@@ -16,6 +16,7 @@ RUNNER = REMOTE / "run_workload.sh"
 STAGES = REMOTE / "workload_stages.sh"
 LAUNCHER = REMOTE / "launch_workload.sh"
 SUPERVISOR = REMOTE / "workload_supervisor.sh"
+UPLOADER = REMOTE / "upload_workload.sh"
 WORKLOAD_SCRIPTS = (RUNNER, STAGES, LAUNCHER, SUPERVISOR)
 
 
@@ -214,6 +215,32 @@ class WorkloadScriptSyntaxTests(unittest.TestCase):
         # torch ships with the image (2.5.1, same pin) and is only probed.
         self.assertIn("-c 'import torch'", text)
         self.assertNotIn("pip install torch", text)
+
+    def test_runner_and_supervisor_self_default_their_root(self) -> None:
+        """Both must find ROOT from their own location before any guard.
+
+        The launcher starts `bash run_workload.sh` without exporting ROOT and
+        the cron-less user-space loop is the only supervisor transport, so a
+        guard placed before the self-default kills the whole run (this exact
+        ordering bug shipped once).
+        """
+        for script in (RUNNER, SUPERVISOR):
+            text = script.read_text(encoding="utf-8")
+            with self.subTest(script=script.name):
+                self.assertIn('ROOT="${ROOT:-', text)
+                self.assertIn("$SELF_DIR/../..", text)
+                # the self-default must precede the hard guard
+                self.assertLess(text.index('ROOT="${ROOT:-'), text.index(': "${ROOT:?'))
+
+    def test_user_space_loop_sources_the_env_file(self) -> None:
+        """Without cron the detached loop is the only supervisor transport."""
+        text = LAUNCHER.read_text(encoding="utf-8")
+        self.assertIn('. "$1" && bash "$2"', text)
+
+    def test_base_pull_disables_xet_for_the_mirror(self) -> None:
+        """hf-mirror does not serve the xet CAS protocol (401 on reconstruction)."""
+        text = UPLOADER.read_text(encoding="utf-8")
+        self.assertIn("export HF_HUB_DISABLE_XET=1", text)
 
 
 class WorkloadStagesTests(unittest.TestCase):
@@ -477,6 +504,41 @@ class RunWorkloadTests(unittest.TestCase):
 
     def _markers(self, root: Path) -> list[str]:
         return sorted(p.name for p in (root / "stages").glob("*.done"))
+
+    def test_runner_finds_its_root_without_the_environment(self) -> None:
+        """The launcher starts `bash run_workload.sh` without exporting ROOT.
+
+        Only the script's own location may decide ROOT here, and the cwd is
+        deliberately foreign so a stale environment cannot mask a regression.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._build_root(
+                root,
+                stage_lines=[_stage_line(root, "01_alpha", "out/alpha.jsonl")],
+                env_extra={"ARMS_SPEC": "out/alpha.jsonl:2"},
+            )
+            local_runner = root / "scripts" / "remote" / "run_workload.sh"
+            local_runner.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(RUNNER, local_runner)
+            env = dict(os.environ)
+            env["PATH"] = f"{root / 'bin'}{os.pathsep}{env['PATH']}"
+            env["REAL_PYTHON"] = sys.executable
+            env.pop("ROOT", None)
+            result = subprocess.run(
+                [_bash(), str(local_runner)],
+                capture_output=True,
+                text=True,
+                env=env,
+                cwd=str(root.parent),
+                timeout=300,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertNotIn("set ROOT", result.stdout + result.stderr)
+            self.assertEqual(
+                self._markers(root), ["01_alpha.done", "16_t5_conditional_val.done"]
+            )
+            self.assertEqual(self._status(root)["outcome"], "ok")
 
     def test_stages_are_idempotent_across_relaunches(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -925,6 +987,42 @@ class SupervisorWorkloadTests(unittest.TestCase):
             result = self._run_supervisor(root)
             self.assertIn("ALL_DONE", result.stdout)
             self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse((root / "relaunch.log").exists())
+
+    def test_supervisor_finds_its_root_without_the_environment(self) -> None:
+        """The cron-less loop sources the env file, but the supervisor must not
+        depend on that transport: a bare invocation from a foreign cwd
+        self-defaults ROOT and reads the audit lists from workload.env."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            local = root / "scripts" / "remote" / "workload_supervisor.sh"
+            local.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(SUPERVISOR, local)
+            (root / "workload.env").write_text(
+                f'export ROOT="{root}"\n'
+                'export ARMS_SPEC="out/alpha.jsonl:2"\n'
+                'export DONE_FILES="out/metrics.json"\n'
+                'export MAX_ATTEMPTS="2"\n',
+                encoding="utf-8",
+            )
+            self._complete_arms(root)
+            self._shims(root)
+            env = dict(os.environ)
+            env["PATH"] = f"{root / 'bin'}{os.pathsep}{env['PATH']}"
+            env["RELUNCH_LOG"] = str(root / "relaunch.log")
+            env.pop("ROOT", None)
+            env.pop("ARMS_SPEC", None)
+            result = subprocess.run(
+                [_bash(), str(local)],
+                capture_output=True,
+                text=True,
+                env=env,
+                cwd=str(root.parent),
+                timeout=120,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertNotIn("set ROOT", result.stdout + result.stderr)
+            self.assertIn("ALL_DONE", result.stdout)
             self.assertFalse((root / "relaunch.log").exists())
 
     def test_incomplete_arms_trigger_one_relaunch(self) -> None:

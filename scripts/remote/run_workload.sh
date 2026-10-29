@@ -44,16 +44,24 @@
 #                       pins; torch is never installed here)
 set -u
 
-: "${ROOT:?set ROOT to the project directory}"
-cd "$ROOT" || exit 1
+# The launcher, cron and the supervisor hand ROOT over through the
+# environment or workload.env; a bare `bash run_workload.sh` (exactly how the
+# launcher starts it, without exporting ROOT) must work too, so default to
+# this script's own repo location before anything else.
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="${ROOT:-$(cd "$SELF_DIR/../.." && pwd)}"
 
 # workload.env is the single source of truth for this run: launch_workload.sh
 # writes it, cron and the supervisor source it, and re-sourcing it here makes
-# a manual `bash run_workload.sh` behave exactly like a supervisor relaunch.
+# a manual `bash run_workload.sh` behave exactly like a supervisor relaunch
+# (its ROOT/PY/GPU exports win over the default above).
 if [ -f "$ROOT/workload.env" ]; then
     # shellcheck source=/dev/null
     . "$ROOT/workload.env"
 fi
+
+: "${ROOT:?set ROOT to the project directory}"
+cd "$ROOT" || exit 1
 
 : "${PY:?set PY to a python that imports torch/transformers/peft with CUDA}"
 : "${GPU:?set GPU to the CUDA_VISIBLE_DEVICES value for this run}"

@@ -325,6 +325,9 @@ else
 # The candidate order matters on AutoDL: conda sits in /root/miniconda3 and a
 # non-interactive ssh session never sources conda, so PATH alone would only
 # ever find python3/python.
+#
+# HF_HUB_DISABLE_XET=1: hf-mirror does not serve the xet CAS protocol (the
+# reconstruction endpoint answers 401), so force the plain HTTP download path.
 set -u
 
 REMOTE_ROOT="${REMOTE_ROOT:-/root/migu/repo}"
@@ -337,6 +340,7 @@ MODEL_DIR="${MODEL_DIR:-$REMOTE_ROOT/weights/hf/Qwen2.5-1.5B-Instruct}"
 READY_MARKER="${READY_MARKER:-$REMOTE_ROOT/base_ready}"
 CHECKER="$REMOTE_ROOT/scripts/remote/base_ready_remote.sh"
 export HF_ENDPOINT
+export HF_HUB_DISABLE_XET=1
 
 ts() { date '+%F %T'; }
 

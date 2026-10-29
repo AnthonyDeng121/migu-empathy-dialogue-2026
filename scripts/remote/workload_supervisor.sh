@@ -23,11 +23,20 @@
 # instead of looping forever.
 set -u
 
+# Same contract as run_workload.sh: default to this script's repo location,
+# then let workload.env (written by launch_workload.sh) fill in ROOT and the
+# audit lists, so the user-space loop works even without cron sourcing it.
+SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT="${ROOT:-$(cd "$SELF_DIR/../.." && pwd)}"
+if [ -f "$ROOT/workload.env" ]; then
+    # shellcheck source=/dev/null
+    . "$ROOT/workload.env"
+fi
+
 : "${ROOT:?set ROOT to the project directory}"
 : "${ARMS_SPEC:?set ARMS_SPEC (\"relpath:expected_lines\" pairs, space separated)}"
 # Resolve the sibling before cd: $0 may be relative, and the relaunch must
 # work when the supervisor was started by hand from inside $ROOT.
-SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
 SELF="$SELF_DIR/run_workload.sh"
 cd "$ROOT" || exit 1
 MAX_ATTEMPTS="${MAX_ATTEMPTS:-6}"
