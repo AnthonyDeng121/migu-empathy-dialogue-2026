@@ -1,6 +1,6 @@
 # D 岗位 CYCLE2 T4：长回复改进（进行中）
 
-日期：2026-10-28（Asia/Shanghai）。分支：`feature/d-day7-deadline-standby`。状态：**CPU 侧分析完成，GPU 侧待执行**。
+日期：2026-10-28（Asia/Shanghai）。分支：`feature/d-day7-deadline-standby`。状态：**训练已完成、产物安全落本机；新卡评测由无人值守管线执行（待新 GPU 实例）**。
 
 对应执行计划 T4（D 列）：「根据自己已完成的误例分析，选**一个**长回复改进变量（样本权重或训练步数）；短实验信号成立再完成候选，保留必要训练，不盲增生成长度」。
 
@@ -84,7 +84,10 @@ markdown 粗体 342、列表符 169、近空 40、标题 33、引用 29、重复
 
 按计划「先短跑测时再完成必要训练」：先跑 `--max-steps` 短探针（如 120 步）测步速与 loss 曲线形态，确认加权生效（长桶 loss 占比变化）后再启动全量 2 epoch。
 
-## 三、执行环境（2026-10-28 已就绪）
+## 三、执行环境（2026-10-28 历史记录，实例已销毁）
+
+> 本节为 bitahub 实例（`xj-member.bitahub.com:42168`）的历史档案：训练在该实例完成，实例已于 19:59 由用户销毁，
+> T4 adapter 已拉回本机 `weights/t4_longweight_2ep/`（sha256 `bc6ca023…`，36,981,072 B）。网络结论对新实例仍有效。
 
 新实例：`xj-member.bitahub.com:42168`（root），主机名 `bitahub-a21667084185235456238240`。
 
@@ -119,16 +122,31 @@ markdown 粗体 342、列表符 169、近空 40、标题 33、引用 29、重复
 
 预计 scp 总时长：数据约 230 MB，按 700 KB/s 多流约 6–10 分钟（基座已免传）。
 
-## 四、下一步（未完成）
+## 四、剩余工作与执行方式（2026-10-29 定稿）
 
-1. 远端基座 sha256 与本机核对；传条件文件/val/筛选集/adapter/代码。
-2. 实例上跑短探针（`--max-steps 120`）测步速，确认加权生效（report 的 `data.sample_weights.weighted_samples` = 5,853）。
-3. 全量 2 epoch 训练（预计 4090 约 3.1h，含 +30% 余量约 4h），`--checkpoint-every 250`，三件套守护（`scripts/remote/`）。
-4. 同卡顺序生成 160 条筛选集 + 全量 val 2,354 条（T4 臂与 D4 v2 对照臂）。
-5. 按 2.2 判定标准出结论；达标则发布 Release 并提 PR 交 A 审，未达标记 no-go。
+训练已完成（18:33 PASS，4,664 步 / mean loss 2.6998 / 1.6039 s/step / reload 校验过 / 显存峰值 7.21G），adapter 在本机
+`weights/t4_longweight_2ep/`。剩余全部是**新实例上的同卡生成与指标**，由无人值守管线一次跑完，不需要人盯：
+
+1. **上传**（实例开通后）：`bash scripts/remote/upload_workload.sh`——4 条并行流 rsync（仓库树 / 两个 adapter / val 输入 / 条件与筛选集，约 150 MB），
+   传完双侧 sha256 核验（`sha256sum -c MANIFEST.sha256`），同时远程后台经 hf-mirror 拉基座（约 46 分钟，断流自动重试），
+   哈希等于 `dd924a11…` 才写 `base_ready`。
+2. **启动**（一条命令）：`bash scripts/remote/launch_workload.sh`——自动探测 python/选卡、生成 `workload.env`、
+   装 cron 自愈（装不上则用户态循环，二选一）、`setsid` 起管线。
+3. **管线内容**（`run_workload.sh` + `workload_stages.sh`，同卡串行；stage marker + 推理 journal 双幂等，进程死亡/重启后续跑）：
+   - 生成 8 臂：T4/D4v2 各 160 条筛选集（无条件）+ T4/D4v2 各 2,354 条全量 val（无条件，**全新 resume 目录**——断点 journal 的
+     identity 钉死环境字段，不能跨机续，bitahub 已产的 160+747 条只作历史证据）+ T4/D4v2 各 160 条筛选集（仅情感、情感+画像，T5 用）。
+   - 指标：筛选集两臂对比（`compare_response_arms`）、val 错误分析（`analyze_response_errors`，>200 桶 ROUGE-L 与偏短率）、
+     T5 四组条件对比。
+   - 预注册条件臂全量触发线（`decide_conditional_fullval.py`，先定后跑）：某条件臂相对同 adapter 关闭臂 ROUGE-L 提升 ≥0.005
+     且逐条 wins−losses ≥20，才自动补跑该臂全量 val（上限 +2.7h）。
+4. **预计耗时**：约 8 小时（区间 6.5–11：基座拉取 ~0.8h + 6 个筛选集臂 ~1.3h + 2 个全量臂 ~4.8–5.6h + 指标 ~0.3h；
+   触发条件臂全量再 +2.7h）。显存按 bs=1 变长序列估计 7–8G，24G 卡无压力；磁盘约 5G。
+5. **回来后**：拉回全部产物 → 按 2.2 判定线出结论（达标发 Release + 提 PR 交 A 审，未达记 no-go）→ 用户销毁实例。
+   完整恢复方法见 `docs/UNATTENDED_GPU_WORKLOAD.md`。
 
 ## 五、验证证据索引
 
 - 本报告所有数字由主会话从 `reports/d_day4_response_error_analysis.json` 与 `data/processed/b1_full_v1/response_train.jsonl` 直接重算（脚本口径见文中），未采信子智能体结论。
 - 训练数据哈希以 `data/processed/b1_full_v1/SHA256SUMS` 为准。
 - 本地 BLEU-4/ROUGE-L 为字符级诊断实现（`src/evaluation/metrics.py`），官方指标未公布，本报告所有分数不冒充官方分数。
+- 新卡评测前的本地接线冒烟（2026-10-29，WSL CPU，命令形状与远端管线逐字一致）：无条件臂 2 样本 PASS（35.2s）、仅情感臂 2 样本 PASS（condition_mode=predicted、coverage 2/2）；`--resume-dir` 双跑实证复用（第一次 new=1、第二次 reused=1/new=0，指纹一致）；`compare_response_arms`（2 臂与 3 臂）与 `analyze_response_errors` 均用历史产物实跑通过。
