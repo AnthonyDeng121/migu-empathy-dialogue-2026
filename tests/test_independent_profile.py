@@ -129,9 +129,20 @@ class IndependentProfileTests(unittest.TestCase):
         model.generator.generate.return_value = [[0, 1, 2]]
         model.d_tokenizer.decode.return_value = "hello"
         row = {"id": "sample", "history": [{"role": "user", "content": "hi"}]}
-        with patch("src.response.sft_data.build_eval_sample", return_value={"messages": []}) as build:
-            result = model.predict(row)
-        build.assert_called_once_with(row, condition=None)
+        for enabled, fields, expected in (
+            (False, "both", None),
+            (True, "emotion", {"emotion_label": "joy"}),
+            (True, "both", {"emotion_label": "joy", "user_profile": profile}),
+        ):
+            model.config.update(condition_response=enabled, condition_fields=fields)
+            with patch("src.response.sft_data.build_eval_sample", return_value={"messages": []}) as build:
+                result = model.predict(row)
+            build.assert_called_once_with(row, condition=expected)
+            self.assertEqual(result["user_profile"], profile)
+            from src.response.sft_data import system_prompt
+            prompt = system_prompt(expected)
+            self.assertEqual("用户画像：" in prompt, enabled and fields == "both")
+            self.assertEqual("joy" in prompt, enabled)
         self.assertEqual(result["emotion_label"], "joy")
         self.assertEqual(result["user_profile"], profile)
         self.assertEqual(result["id"], "sample")

@@ -1,0 +1,13 @@
+{
+  "classifier_dir": "weights/emotion_longtail075_b1_20261016",
+  "classifier_format": "sequence",
+  "profile_mode": "independent",
+  "response_model_dir": "weights/hf/Qwen2.5-1.5B-Instruct",
+  "response_adapter_dir": "weights/response_sft_d4_2ep",
+  "device": "cuda",
+  "condition_response": true,
+  "max_new_tokens": 256,
+  "hardware_label": "RTX 4090",
+  "profile_model_dir": "weights/profile_encoder_v1_b1_20261026",
+  "condition_fields": "emotion"
+}
