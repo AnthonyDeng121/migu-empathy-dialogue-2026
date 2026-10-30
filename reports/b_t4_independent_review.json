@@ -1,0 +1,95 @@
+{
+  "version": "b_t4_independent_review_v1",
+  "scope": ["C T3 profile v2", "D T3 unconditional SFT", "A PR37 engineering review"],
+  "git": {
+    "evaluation_base_commit": "9b104b114309ce94e3b4d403afb1705646322933",
+    "origin_main": "9b104b114309ce94e3b4d403afb1705646322933",
+    "required_branch": "feature/b-eval-tooling",
+    "observed_branch": "feature/b-eval-tooling",
+    "branch_switch": "not_needed_current_branch_matches_required"
+  },
+  "conclusions": {
+    "c_t3_profile_v2": "BLOCKED",
+    "c_blocker": "C_T3_PROFILE_V2_BLOCKED_MISSING_EVIDENCE",
+    "d_t3_unconditional": "NO_CLEAR_SIGNAL",
+    "d_comparability": "COMPARABLE_WITH_CAVEATS",
+    "overall": "READY_SFT_ONLY",
+    "a_pr37_verdict": "APPROVE"
+  },
+  "c": {
+    "prediction_path_expected_by_report": "results/profile_encoder_v2_micro_thresholds_20261026_val.jsonl",
+    "prediction_present": false,
+    "validation_rows_reported": 2354,
+    "validation_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+    "reported_macro_exact": 0.5935995468705749,
+    "reported_empty_macro_exact": 0.6282922684791844,
+    "reported_paired": {"wins": 195, "ties": 413, "losses": 292, "mean_delta": -0.04271031746031746},
+    "evidence_rule": "Report-only aggregates are not independently re-computable."
+  },
+  "d": {
+    "candidate": {
+      "path": "results/response_gen/t3_unconditional.jsonl",
+      "sha256": "64f330b327457ac20d1162f68503f8161e4408a102fa6b710ceae1754f8c5d7e",
+      "rows": 160,
+      "unique_ids": 160,
+      "duplicates": 0
+    },
+    "baseline": {
+      "path": "results/response_gen/t3_d4v2_off_samedevice.jsonl",
+      "sha256": "1cf556d2f5a5fb873a49626f27dc9ee4d19bfbfca6a7a58fec5fef499b06ed67",
+      "rows": 160,
+      "unique_ids": 160,
+      "duplicates": 0
+    },
+    "input": {
+      "path": "results/response_gen/t2_selection_input.jsonl",
+      "sha256": "8d1d487e4e2fb7d66071d72c8d9078744831751bfed7c9fb3103c067d9163959",
+      "rows": 160,
+      "unique_ids": 160
+    },
+    "metrics": {
+      "candidate_bleu4": 0.10337575026220751,
+      "baseline_bleu4": 0.10518689714841993,
+      "bleu4_delta": -0.0018111468862124108,
+      "candidate_rouge_l": 0.25019038086752715,
+      "baseline_rouge_l": 0.2525907930184378,
+      "rouge_l_delta": -0.002400412150910645,
+      "candidate_mean_length": 129.05,
+      "baseline_mean_length": 125.56875,
+      "empty_candidate": 0,
+      "empty_baseline": 0,
+      "rouge_metric_win_tie_loss": {"win": 65, "tie": 30, "loss": 65},
+      "rouge_delta_median": 0.0,
+      "rouge_delta_p25": -0.014912177305569041,
+      "rouge_delta_p75": 0.01961890917049032,
+      "identical_text": 26,
+      "candidate_longer_same_shorter": [67, 36, 57]
+    },
+    "history_slices": {
+      "short_1_5": {"support": 65, "bleu_delta": -0.004406, "rouge_delta": 0.001364, "longer_same_shorter": [29, 10, 26]},
+      "medium_6_15": {"support": 69, "bleu_delta": -0.002093, "rouge_delta": 0.000476, "longer_same_shorter": [28, 19, 22]},
+      "long_16_plus": {"support": 26, "bleu_delta": -0.001116, "rouge_delta": -0.008451, "longer_same_shorter": [6, 8, 12]}
+    }
+  },
+  "a_pr37": {
+    "head": "419febc214a4d324220423925679a907c16b3e43",
+    "changed_files": 8,
+    "special_tests": {"passed": 8, "failed": 0},
+    "verdict": "APPROVE"
+  },
+  "validation": {
+    "json_parse": "PASS",
+    "python_compileall": "PASS",
+    "ci_smoke": "PASS",
+    "git_diff_check": "PASS",
+    "unittest": {
+      "total": 369,
+      "pass": 353,
+      "fail": 7,
+      "error": 1,
+      "skip": 8,
+      "known_failure_area": "tests/test_remote_scripts.py: Windows Bash, Unix path, remote shell, subprocess / GBK decoding"
+    }
+  },
+  "contains_response_text": false
+}
