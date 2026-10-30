@@ -68,6 +68,10 @@ fi
 # the arm completes; until then static completion must not pass for done:
 # the runner can die between the triggered decision and that arm, and the
 # effective lists are only written at the very end of a successful pass.
+# The gate audits the arm's row count, never mere existence: a new-format
+# marker carries its own "output:expected_lines" spec, and a legacy (empty)
+# marker re-derives the count from $VAL_INPUT -- an unknown expected count
+# fails closed, leaving the runner's own audit as the only authority.
 # Keep these two paths in sync with run_workload.sh (asserted by tests).
 COND_STAGE_NAME="16_t5_conditional_val"
 COND_ANALYSIS_REL="reports/t5_conditional_val_error_analysis_newcard.json"
@@ -97,8 +101,17 @@ COND_PY
         | head -1 | sed -e 's/^.*:[[:space:]]*"//' -e 's/"$//'
     return 0
 }
+cond_val_lines() {
+    # Expected rows for the conditional full-val arm: the val input's line
+    # count, the same number run_workload.sh freezes into the marker spec.
+    local file
+    [ -n "${VAL_INPUT:-}" ] || return 1
+    file="$ROOT/$VAL_INPUT"
+    [ -f "$file" ] || return 1
+    wc -l < "$file" | tr -d ' '
+}
 conditional_arm_met() {
-    local output marker spec_line
+    local output marker spec_line want lines
     if ! output="$(conditional_output)"; then
         # No decision file yet: the runner has not reached stage 15, so the
         # static arms are all there is. An unreadable decision must not pass.
@@ -110,9 +123,25 @@ conditional_arm_met() {
     [ -f "$marker" ] || return 1
     spec_line="$(sed -n '1p' "$marker" 2>/dev/null)"
     if [ -n "$spec_line" ]; then
+        # New-format marker: line 1 froze "output:expected_lines" for the
+        # arm that actually ran, so audit that exact row count -- the same
+        # way arms_done audits the static arms.
         [ "${spec_line%%:*}" = "$output" ] || return 1
+        want="${spec_line##*:}"
+    else
+        # Legacy marker (written before the spec was recorded): it proves
+        # the stage ran, not that the arm is complete, so re-derive the
+        # expected count from the val input -- the runner that wrote this
+        # marker died before the audit lists existed. An unknown count
+        # fails closed; the runner's own audit is then the only authority.
+        want="$(cond_val_lines)" || return 1
     fi
+    case "$want" in
+        '' | *[!0-9]*) return 1 ;;
+    esac
     [ -s "$ROOT/$output" ] || return 1
+    lines="$(wc -l < "$ROOT/$output" | tr -d ' ')"
+    [ "$lines" -ge "$want" ] || return 1
     last_line_ok "$ROOT/$output" || return 1
     [ -s "$ROOT/$COND_ANALYSIS_REL" ] || return 1
     return 0

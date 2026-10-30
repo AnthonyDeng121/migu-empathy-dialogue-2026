@@ -1076,6 +1076,60 @@ class RunWorkloadTests(unittest.TestCase):
             log = (root / "workload.log").read_text(encoding="utf-8")
             self.assertEqual(log.count("16_t5_conditional_val started"), 2)
 
+    def test_legacy_empty_marker_is_re_audited_from_the_decision(self) -> None:
+        """An empty marker is what the previous runner left behind: it proves
+        the stage ran, not that the arm is complete, so a relaunch re-derives
+        the spec from the frozen decision and audits the row count -- a short
+        output must never complete the workload."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            root = self._build_root(
+                root,
+                stage_lines=[
+                    _stage_line(root, "01_alpha", "out/alpha.jsonl"),
+                    _stage_line(root, "02_beta", "out/beta.jsonl"),
+                ],
+            )
+            # Static stages and the frozen decision are all in place; only the
+            # conditional arm is under test.
+            (root / "stages").mkdir(parents=True, exist_ok=True)
+            for name in ("01_alpha", "02_beta"):
+                (root / "stages" / f"{name}.done").write_text("", encoding="utf-8")
+            for name in ("alpha", "beta"):
+                (root / "out" / f"{name}.jsonl").write_text(
+                    '{"id": "a"}\n{"id": "b"}\n', encoding="utf-8"
+                )
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                json.dumps(_t4_emotion_decision()), encoding="utf-8"
+            )
+            # The old runner's marker: present but empty, no audit lists.
+            (root / "stages" / "16_t5_conditional_val.done").write_text(
+                "", encoding="utf-8"
+            )
+            (root / "reports").mkdir(parents=True, exist_ok=True)
+            (
+                root / "reports" / "t5_conditional_val_error_analysis_newcard.json"
+            ).write_text("{}\n", encoding="utf-8")
+            cond_out = root / "out" / "t5_conditional_t4_emotion_val_newcard.jsonl"
+            # 1 of the 2 val rows: non-empty, but the audit must refuse.
+            cond_out.write_text('{"id": "s0"}\n', encoding="utf-8")
+            result = self._run(root)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse((root / "WORKLOAD_DONE").exists())
+            status = self._status(root)
+            self.assertEqual(status["outcome"], "arms_incomplete")
+            self.assertFalse(
+                status["arms"]["out/t5_conditional_t4_emotion_val_newcard.jsonl"]["ok"]
+            )
+            # A complete arm passes the same audit and finishes; the arm
+            # itself is not re-generated (the marker still skips it).
+            cond_out.write_text('{"id": "s0"}\n{"id": "s1"}\n', encoding="utf-8")
+            again = self._run(root)
+            self.assertEqual(again.returncode, 0, again.stdout + again.stderr)
+            self.assertTrue((root / "WORKLOAD_DONE").is_file())
+            log = (root / "workload.log").read_text(encoding="utf-8")
+            self.assertNotIn("16_t5_conditional_val started", log)
+
 
 class SupervisorWorkloadTests(unittest.TestCase):
     """ALL_DONE gating, relaunch and the retry budget."""
@@ -1293,6 +1347,113 @@ class SupervisorWorkloadTests(unittest.TestCase):
             result = self._run_supervisor(root, env_extra={"OUT_DIR": "out"})
             self.assertIn("ALL_DONE", result.stdout)
             self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_new_format_marker_audits_the_frozen_row_count(self) -> None:
+        """The new-format marker freezes "output:expected_lines"; the gate
+        must audit that exact count, not merely that the file exists."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._complete_arms(root)
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                json.dumps(
+                    {"trigger": True, "chosen": {"output": "out/conditional.jsonl"}}
+                ),
+                encoding="utf-8",
+            )
+            (root / "stages").mkdir(parents=True, exist_ok=True)
+            (root / "stages" / "16_t5_conditional_val.done").write_text(
+                "out/conditional.jsonl:2\n"
+                "reports/t5_conditional_val_error_analysis_newcard.json\n",
+                encoding="utf-8",
+            )
+            (root / "reports").mkdir(parents=True, exist_ok=True)
+            (
+                root / "reports" / "t5_conditional_val_error_analysis_newcard.json"
+            ).write_text("{}\n", encoding="utf-8")
+            # 1 of the frozen 2 rows: non-empty, last line valid JSON --
+            # every existence check passes, the row count does not.
+            (root / "out" / "conditional.jsonl").write_text(
+                '{"id": "c"}\n', encoding="utf-8"
+            )
+            result = self._run_supervisor(root, env_extra={"OUT_DIR": "out"})
+            self.assertNotIn("ALL_DONE", result.stdout)
+            self.assertIn("relaunch attempt", result.stdout)
+            (root / "out" / "conditional.jsonl").write_text(
+                '{"id": "c"}\n{"id": "d"}\n', encoding="utf-8"
+            )
+            result = self._run_supervisor(root, env_extra={"OUT_DIR": "out"})
+            self.assertIn("ALL_DONE", result.stdout)
+
+    def test_legacy_empty_marker_audits_the_val_input_row_count(self) -> None:
+        """An empty marker plus a triggered decision and no audit lists is
+        exactly the state a crashed old runner leaves behind: the expected
+        count is re-derived from VAL_INPUT, and a short output must not
+        pass for done."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._complete_arms(root)
+            (root / "data").mkdir(parents=True, exist_ok=True)
+            (root / "data" / "val.jsonl").write_text(
+                '{"id": "v0"}\n{"id": "v1"}\n', encoding="utf-8"
+            )
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                json.dumps(
+                    {"trigger": True, "chosen": {"output": "out/conditional.jsonl"}}
+                ),
+                encoding="utf-8",
+            )
+            (root / "stages").mkdir(parents=True, exist_ok=True)
+            (root / "stages" / "16_t5_conditional_val.done").write_text(
+                "", encoding="utf-8"
+            )
+            (root / "reports").mkdir(parents=True, exist_ok=True)
+            (
+                root / "reports" / "t5_conditional_val_error_analysis_newcard.json"
+            ).write_text("{}\n", encoding="utf-8")
+            env_extra = {"OUT_DIR": "out", "VAL_INPUT": "data/val.jsonl"}
+            # 1 of the 2 val rows, and no audit list to fall back on.
+            (root / "out" / "conditional.jsonl").write_text(
+                '{"id": "c"}\n', encoding="utf-8"
+            )
+            result = self._run_supervisor(root, env_extra=env_extra)
+            self.assertNotIn("ALL_DONE", result.stdout)
+            self.assertIn("relaunch attempt", result.stdout)
+            self.assertFalse((root / "WORKLOAD_GAVE_UP").exists())
+            # The arm is completed: only now may the workload finish.
+            (root / "out" / "conditional.jsonl").write_text(
+                '{"id": "c"}\n{"id": "d"}\n', encoding="utf-8"
+            )
+            result = self._run_supervisor(root, env_extra=env_extra)
+            self.assertIn("ALL_DONE", result.stdout)
+
+    def test_legacy_marker_without_val_input_fails_closed(self) -> None:
+        """Without VAL_INPUT the expected count is unknown, and unknown must
+        never pass for done: the runner's own audit stays the only
+        authority that may complete the workload."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._complete_arms(root)
+            (root / "out" / "t5_conditional_decision.json").write_text(
+                json.dumps(
+                    {"trigger": True, "chosen": {"output": "out/conditional.jsonl"}}
+                ),
+                encoding="utf-8",
+            )
+            (root / "stages").mkdir(parents=True, exist_ok=True)
+            (root / "stages" / "16_t5_conditional_val.done").write_text(
+                "", encoding="utf-8"
+            )
+            (root / "reports").mkdir(parents=True, exist_ok=True)
+            (
+                root / "reports" / "t5_conditional_val_error_analysis_newcard.json"
+            ).write_text("{}\n", encoding="utf-8")
+            # A complete output still cannot prove its own row count here.
+            (root / "out" / "conditional.jsonl").write_text(
+                '{"id": "c"}\n{"id": "d"}\n', encoding="utf-8"
+            )
+            result = self._run_supervisor(root, env_extra={"OUT_DIR": "out"})
+            self.assertNotIn("ALL_DONE", result.stdout)
+            self.assertIn("relaunch attempt", result.stdout)
 
     def test_conditional_paths_stay_in_sync_with_the_runner(self) -> None:
         runner = RUNNER.read_text(encoding="utf-8")
