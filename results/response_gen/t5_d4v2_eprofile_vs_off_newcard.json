@@ -1,0 +1,63 @@
+{
+  "input": "results/response_gen/t2_selection_input.jsonl",
+  "input_count": 160,
+  "arms": {
+    "off": {
+      "bleu4_mean": 0.09955425931784423,
+      "rouge_l_mean": 0.2508232506902887,
+      "mean_nonws_len": 122.91875,
+      "length_buckets": {
+        "101-200": 41,
+        "21-50": 29,
+        "51-100": 54,
+        "7-20": 5,
+        "<=6": 3,
+        ">200": 28
+      },
+      "empty_responses": 0
+    },
+    "emotion": {
+      "bleu4_mean": 0.1017499498244514,
+      "rouge_l_mean": 0.25239994776982655,
+      "mean_nonws_len": 125.40625,
+      "length_buckets": {
+        "101-200": 38,
+        "21-50": 28,
+        "51-100": 55,
+        "7-20": 5,
+        "<=6": 3,
+        ">200": 31
+      },
+      "empty_responses": 0
+    },
+    "eprofile": {
+      "bleu4_mean": 0.10230879499231745,
+      "rouge_l_mean": 0.2512844411106431,
+      "mean_nonws_len": 126.59375,
+      "length_buckets": {
+        "101-200": 41,
+        "21-50": 26,
+        "51-100": 55,
+        "7-20": 5,
+        "<=6": 3,
+        ">200": 30
+      },
+      "empty_responses": 0
+    }
+  },
+  "head_to_head": {
+    "main": "eprofile",
+    "base": "off",
+    "rouge_l_delta_median": 0.0,
+    "rouge_l_delta_p25": -0.013274399695826444,
+    "rouge_l_delta_p75": 0.013167945310706697,
+    "bleu4_delta_mean": 0.0027545356744732236,
+    "wins": 65,
+    "losses": 55,
+    "ties": 40,
+    "identical_text": 38,
+    "length_longer": 51,
+    "length_shorter": 67,
+    "length_same": 42
+  }
+}

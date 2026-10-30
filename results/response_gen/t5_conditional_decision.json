@@ -1,0 +1,56 @@
+{
+  "decision_version": "t5_conditional_fullval_v1",
+  "bar": {
+    "delta_rouge_l": 0.005,
+    "min_win_margin": 20
+  },
+  "candidates": [
+    {
+      "arm": "t4_emotion",
+      "adapter": "weights/t4_longweight_2ep",
+      "condition_jsonl": "results/response_gen/c5_conditions_val_full.jsonl",
+      "condition_fields": "emotion",
+      "output": "results/response_gen/t5_conditional_t4_emotion_val_newcard.jsonl",
+      "resume_dir": "results/response_gen/t5_conditional_t4_emotion_val_newcard_progress",
+      "delta_rouge_l": -0.0024173369782765353,
+      "win_margin": -16,
+      "eligible": false
+    },
+    {
+      "arm": "t4_eprofile",
+      "adapter": "weights/t4_longweight_2ep",
+      "condition_jsonl": "results/response_gen/t5_conditions_val_both.jsonl",
+      "condition_fields": "both",
+      "output": "results/response_gen/t5_conditional_t4_eprofile_val_newcard.jsonl",
+      "resume_dir": "results/response_gen/t5_conditional_t4_eprofile_val_newcard_progress",
+      "delta_rouge_l": -0.000431688145353909,
+      "win_margin": 8,
+      "eligible": false
+    },
+    {
+      "arm": "d4v2_emotion",
+      "adapter": "weights/response_sft_d4_2ep",
+      "condition_jsonl": "results/response_gen/c5_conditions_val_full.jsonl",
+      "condition_fields": "emotion",
+      "output": "results/response_gen/t5_conditional_d4v2_emotion_val_newcard.jsonl",
+      "resume_dir": "results/response_gen/t5_conditional_d4v2_emotion_val_newcard_progress",
+      "delta_rouge_l": 0.0015766970795378366,
+      "win_margin": 12,
+      "eligible": false
+    },
+    {
+      "arm": "d4v2_eprofile",
+      "adapter": "weights/response_sft_d4_2ep",
+      "condition_jsonl": "results/response_gen/t5_conditions_val_both.jsonl",
+      "condition_fields": "both",
+      "output": "results/response_gen/t5_conditional_d4v2_eprofile_val_newcard.jsonl",
+      "resume_dir": "results/response_gen/t5_conditional_d4v2_eprofile_val_newcard_progress",
+      "delta_rouge_l": 0.00046119042035436264,
+      "win_margin": 10,
+      "eligible": false
+    }
+  ],
+  "chosen": null,
+  "trigger": false,
+  "reason": "no arm cleared the bar"
+}

@@ -1,0 +1,205 @@
+{
+  "version": "response_sft_prep_v2",
+  "status": "smoke",
+  "model": {
+    "name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "card_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct",
+    "loaded_from": "weights/base_qwen15b"
+  },
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4090",
+  "dtype": "bfloat16",
+  "seed": 20261013,
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "epochs": 2,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.03,
+    "seed": 20261013,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "lora_target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "gradient_checkpointing": true,
+    "max_history_turns": 20,
+    "condition_mode": "gold",
+    "_comment": "CYCLE2 T4 单变量候选：与 D4 v2（configs/response_sft_2epoch.json）配置逐项相同，唯一变量是训练数据改为 data/processed/t4_long_response/response_train.jsonl（由 scripts/build_long_response_weights.py 从 B1 response_train.jsonl 生成：gold 回复字符数 >200 的样本 sample_weight=2.0，其余 1.0，共 5,853/18,653 条加权）。设计、判定标准与先定后跑依据见 reports/D_CYCLE2_T4_LONG_RESPONSE.md。"
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "torch": "2.11.0+cu128",
+    "transformers": "4.57.6",
+    "peft": "0.21.2",
+    "training_seconds": 196.17
+  },
+  "reproduction": {
+    "command": "python scripts/train_response_sft.py \\\n  --train 'data/processed/t4_long_response/response_train.jsonl' \\\n  --config 'configs/response_sft_t4_longweight.json' \\\n  --device cuda \\\n  --output-dir 'weights/t4_probe' \\\n  --report-json 'reports/t4_probe_report.json' \\\n  --report-md 'reports/t4_probe_report.md' \\\n  --train-format b1 \\\n  --condition-jsonl 'data/processed/b1_full_v1/classification_train.jsonl' \\\n  --model-dir 'weights/base_qwen15b' \\\n  --max-steps 120 \\\n  --eval-prompts 2 \\\n  --local-files-only",
+    "code_commit": "f9f2fefa7249e86a78c4d20f7ddf77720d2cb528",
+    "code_dirty": true,
+    "script_sha256": "9f67ff4143b6f781fb3129b828982cc29e67fab35c6d0f13cbf3e06f43fab5a1"
+  },
+  "data": {
+    "train_path": "data/processed/t4_long_response/response_train.jsonl",
+    "train_format": "b1",
+    "train_total_samples": 18653,
+    "train_used_samples": 18653,
+    "skipped_long_samples": 0,
+    "train_sha256": "8ef2a5dcfe7cd6a81f6eca8ba29808fec50abd635666d199a4fa5759ff027049",
+    "condition_train_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+    "response_turn_consistency": null,
+    "condition_mode": "gold",
+    "max_history_turns": 20,
+    "prompt_plus_response_tokens": {
+      "min": 116,
+      "mean": 902.0,
+      "max": 2048
+    },
+    "sample_weights": {
+      "enabled": true,
+      "weighted_samples": 5853,
+      "total_samples": 18653
+    }
+  },
+  "parameters": {
+    "trainable": 9232384,
+    "total": 1552946688,
+    "fraction": 0.005945
+  },
+  "training_speed": {
+    "optimizer_steps": 120,
+    "micro_batches_done": 960,
+    "micro_batches_trained": 960,
+    "mean_train_loss": 3.4181,
+    "timing_warmup_steps": 3,
+    "timed_optimizer_steps": 117,
+    "measured_window_seconds": 190.168,
+    "seconds_per_step": 1.625367,
+    "seconds_per_step_basis": "mean full gradient-accumulation window after warm-up",
+    "full_steps_per_epoch": 2332,
+    "estimated_full_train_seconds": 7580.713,
+    "estimated_full_train_seconds_with_30pct_margin": 9854.927,
+    "eta_note": "small-sample extrapolation, budget reference only; workplan requires a +30% failure margin on top of the raw estimate"
+  },
+  "vram_peak_bytes": 7212751872,
+  "checks": {
+    "optimizer_steps": 120,
+    "first_loss": 2.969118,
+    "first_step_gradient_finite_nonzero": true,
+    "first_step_lora_gradient_norm": 1.07217383,
+    "lora_tensors": 392,
+    "lora_weights_changed": true,
+    "adapter_reload": {
+      "method": "offline PeftModel.from_pretrained on the saved adapter; all LoRA tensors compared and greedy generations reproduced",
+      "adapter_directory": "weights/t4_probe",
+      "lora_tensors_in_file": 392,
+      "lora_tensors_compared": 392,
+      "lora_weights_match": true,
+      "lora_weight_mismatches": [],
+      "lora_weight_missing_in_model": [],
+      "generation_prompts": 2,
+      "generation_match": true,
+      "generation_mismatched_ids": [],
+      "reloaded_outputs": [
+        {
+          "id": "pp:[\"train_conv_000001\",9,1]",
+          "generated_text": "好，那就先别听建议，也不用分析。\n\n这种感觉很真实：当关系开始走下坡，人就像站在一个摇晃的平台上，每一步都像是在试探着看能不能稳住脚跟。\n\n你不需要立刻决定要不要重新靠近，也不需要马上给这个平台贴个“站不稳”的标签。现在，就让它在那里晃着，不用去判断它是否稳固，也不用去评判自己是否能站稳。\n\n如果它突然变得更摇晃，或者你发现它越来越像一根悬空的绳索，而不是一块坚实的地基，那才可能是时候考虑重新评估一下了。但现在，它只是在晃，你只需要接受它的存在。"
+        },
+        {
+          "id": "pp:[\"train_conv_000001\",11,2]",
+          "generated_text": "这种害怕，比他态度是否变好，更接近于一种“被边缘化”的恐惧：不是怕他不再理你，而是怕他不再理你之后，你也跟着被边缘化。\n\n这种边缘感，往往不是因为某个人突然变了，而是因为你在某个节点后，发现自己成了那个“谁都不理”的人。这种落差感，比单纯的态度变化更难接受。\n\n现在，如果他俩重新搭话了，哪怕态度没变，你心里还是会卡着吗？"
+        }
+      ],
+      "passed": true
+    },
+    "generation_probe": [
+      {
+        "id": "pp:[\"train_conv_000001\",9,1]",
+        "generated_text": "好，那就先别听建议，也不用分析。\n\n这种感觉很真实：当关系开始走下坡，人就像站在一个摇晃的平台上，每一步都像是在试探着看能不能稳住脚跟。\n\n你不需要立刻决定要不要重新靠近，也不需要马上给这个平台贴个“站不稳”的标签。现在，就让它在那里晃着，不用去判断它是否稳固，也不用去评判自己是否能站稳。\n\n如果它突然变得更摇晃，或者你发现它越来越像一根悬空的绳索，而不是一块坚实的地基，那才可能是时候考虑重新评估一下了。但现在，它只是在晃，你只需要接受它的存在。"
+      },
+      {
+        "id": "pp:[\"train_conv_000001\",11,2]",
+        "generated_text": "这种害怕，比他态度是否变好，更接近于一种“被边缘化”的恐惧：不是怕他不再理你，而是怕他不再理你之后，你也跟着被边缘化。\n\n这种边缘感，往往不是因为某个人突然变了，而是因为你在某个节点后，发现自己成了那个“谁都不理”的人。这种落差感，比单纯的态度变化更难接受。\n\n现在，如果他俩重新搭话了，哪怕态度没变，你心里还是会卡着吗？"
+      }
+    ],
+    "non_empty_generations": 2
+  },
+  "resume": null,
+  "checkpointing": {
+    "every_steps": null,
+    "saved": [],
+    "manifest": {
+      "format_version": 1,
+      "train_format": "b1",
+      "train_sha256": "8ef2a5dcfe7cd6a81f6eca8ba29808fec50abd635666d199a4fa5759ff027049",
+      "condition_sha256": "4d4e949813acca37ea5e827f4455f60e941f96c078357b8dc560a70b23a07cd5",
+      "config": {
+        "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+        "max_length": 2048,
+        "max_new_tokens": 512,
+        "epochs": 2,
+        "batch_size": 1,
+        "gradient_accumulation": 8,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.01,
+        "warmup_ratio": 0.03,
+        "seed": 20261013,
+        "lora_r": 8,
+        "lora_alpha": 16,
+        "lora_dropout": 0.05,
+        "lora_target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "gradient_checkpointing": true,
+        "max_history_turns": 20,
+        "condition_mode": "gold",
+        "_comment": "CYCLE2 T4 单变量候选：与 D4 v2（configs/response_sft_2epoch.json）配置逐项相同，唯一变量是训练数据改为 data/processed/t4_long_response/response_train.jsonl（由 scripts/build_long_response_weights.py 从 B1 response_train.jsonl 生成：gold 回复字符数 >200 的样本 sample_weight=2.0，其余 1.0，共 5,853/18,653 条加权）。设计、判定标准与先定后跑依据见 reports/D_CYCLE2_T4_LONG_RESPONSE.md。"
+      },
+      "model_fingerprint": {
+        "config.json": "98d2ff8cc47488d08a2b0b3acf4eb99ef210779b42bd48605f6b8e36acdbf670",
+        "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+        "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+        "model.safetensors": "dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee",
+        "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+        "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+        "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      },
+      "budget": {
+        "epochs": 2,
+        "batch_size": 1,
+        "gradient_accumulation": 8,
+        "max_train_samples": null,
+        "max_steps": 120,
+        "optimizer_steps_per_epoch": 2332,
+        "effective_total_steps": 120
+      }
+    }
+  },
+  "checkpoint_directory": "weights/t4_probe",
+  "adapter": {
+    "file": "weights/t4_probe/adapter_model.safetensors",
+    "bytes": 36981072,
+    "sha256": "c60233f12f17c0d62c6b53dd5e3ecdc65aec5838588eab62b4e46dae82256670"
+  }
+}

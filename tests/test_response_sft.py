@@ -58,6 +58,7 @@ def make_b1_response_row(
     target_user_turn_id: int = 3,
     context_turns: list[dict] | None = None,
     response_text: str = "目标回复",
+    sample_weight: float | None = None,
 ) -> dict:
     """Build a B1 response JSONL row (frozen split conversion product)."""
     if context_turns is None:
@@ -66,7 +67,7 @@ def make_b1_response_row(
             {"turn_id": 2, "role": "assistant", "content": "第一轮助手回复"},
             {"turn_id": 3, "role": "user", "content": "第二轮用户发言"},
         ]
-    return {
+    row = {
         "sample_id": sample_id,
         "conversation_id": "train_conv_000001",
         "target_user_turn_id": target_user_turn_id,
@@ -75,6 +76,9 @@ def make_b1_response_row(
         "response_text": response_text,
         "memory_refs": [],
     }
+    if sample_weight is not None:
+        row["sample_weight"] = sample_weight
+    return row
 
 
 def make_b1_classification_row(
@@ -464,6 +468,25 @@ class BuildSftSamplesFromB1Tests(unittest.TestCase):
         first = build_sft_samples_from_b1(rows, condition_rows=conditions, condition_mode="gold")
         second = build_sft_samples_from_b1(rows, condition_rows=conditions, condition_mode="gold")
         self.assertEqual(first, second)
+
+    def test_sample_weight_propagates_when_present(self) -> None:
+        # T4 long-response variable: the weight rides on the B1 row and must
+        # reach the sample, or the trainer silently sees an unweighted run.
+        rows = [make_b1_response_row("s1", sample_weight=2.0)]
+        sample = build_sft_samples_from_b1(rows, condition_mode="none")[0]
+        self.assertEqual(sample["sample_weight"], 2.0)
+
+    def test_sample_weight_absent_stays_absent(self) -> None:
+        rows = [make_b1_response_row("s1")]
+        sample = build_sft_samples_from_b1(rows, condition_mode="none")[0]
+        self.assertNotIn("sample_weight", sample)
+
+    def test_sample_weight_rejects_non_positive_or_malformed(self) -> None:
+        for bad in (0, 0.0, -1.0, float("nan"), float("inf"), True, "2.0", None):
+            row = make_b1_response_row("s1")
+            row["sample_weight"] = bad
+            with self.assertRaises(ValueError, msg=repr(bad)):
+                build_sft_samples_from_b1([row], condition_mode="none")
 
 
 class BuildEvalSampleContextTurnsTests(unittest.TestCase):
