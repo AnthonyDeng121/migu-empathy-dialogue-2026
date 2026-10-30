@@ -1,0 +1,254 @@
+{
+  "version": 1,
+  "task": "A/T5",
+  "source_main": "b4c07f7",
+  "selected_models": {
+    "emotion": "weights/emotion_longtail075_b1_20261016",
+    "response": "weights/response_sft_d4_2ep",
+    "profile_research_candidate": "weights/profile_encoder_v1_b1_20261026"
+  },
+  "sources": {
+    "configs/integrated_artifacts.json": {
+      "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/configs/integrated_artifacts.json",
+      "sha256": "6c933b2371774c6ac68a03e0390194113ed0ce2c02230b947a971dc800226923",
+      "lf_sha256": "249099864cd74e40193fcaa4886241d6e64bc45a25aa4bd2fda4215512eae3f0",
+      "bytes": 1263
+    },
+    "reports/C_CYCLE2_T4_EMOTION_TARGETED.md": {
+      "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/reports/C_CYCLE2_T4_EMOTION_TARGETED.md",
+      "sha256": "f8122de3398a88eca1c5063f538dc9e289d56e05ff29378dcdd4391328f7d31b",
+      "lf_sha256": "1ebc668d63414494326cb999c2a884e9ad05edbff604d8da3a11a99cbc486795",
+      "bytes": 4339
+    },
+    "reports/D_CYCLE2_T4_LONG_RESPONSE.md": {
+      "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/reports/D_CYCLE2_T4_LONG_RESPONSE.md",
+      "sha256": "a3771b0610fa865bfc4031afc493bc503c1f9264a854d592efe5a2ab90367276",
+      "lf_sha256": "b607f1af967b9385d9b7b785b0f273909e53e93d631c09a455d48a486ca4c53f",
+      "bytes": 15479
+    },
+    "reports/B_T3_INDEPENDENT_REVIEW.md": {
+      "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/reports/B_T3_INDEPENDENT_REVIEW.md",
+      "sha256": "f7f5c41f7c9af35bcdafd1b40dd1cf8b235b0a298927f5a15d0f62dac504a05a",
+      "lf_sha256": "907dbbd70c5a757932b8d948639cf455eb69f3f397e138739e3c68ed3cfd1606",
+      "bytes": 18069
+    },
+    "reports/c_cycle2_profile_v1_20261026.json": {
+      "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/reports/c_cycle2_profile_v1_20261026.json",
+      "sha256": "0a7432c5638b1e8df2dbd7b2ac8effdabe5ff6358661bfc9d42c2343aefe7cca",
+      "lf_sha256": "47a631505c9f8510128e970493991e2f1441b9e6eaf89092899e89a99800c9e5",
+      "bytes": 9020
+    },
+    "results/response_gen/t5_conditional_decision.json": {
+      "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/response_gen/t5_conditional_decision.json",
+      "sha256": "aa409ebb3303b9cbdafee72dfcc39c52a736b369f49474f8cd325daabdd5339f",
+      "lf_sha256": "9e35394e60c3e4510a7773d988b8a87b37128ff02661bb468289bc28a4f9147c",
+      "bytes": 2175
+    }
+  },
+  "input": {
+    "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/data/processed/b1_full_v1/response_val.jsonl",
+    "sha256": "ddf76588ee2be4912b7c7bd5e9070ef1a9bc967e59378b911f13cf2cfc3078e2",
+    "lf_sha256": "ddf76588ee2be4912b7c7bd5e9070ef1a9bc967e59378b911f13cf2cfc3078e2",
+    "bytes": 18822219
+  },
+  "candidates": [
+    {
+      "id": "baseline",
+      "status": "self_checked_pending_independent_review",
+      "config": {
+        "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/baseline.config.json",
+        "sha256": "4614f766195c464fbf7145838b41f7cb4b5fcbab8cf9a9889323b042834789c8",
+        "lf_sha256": "c765d8b449f414cbe7ce04af6e83f3e72744511d48a42593e936be4f1afa115e",
+        "bytes": 364
+      },
+      "prediction": {
+        "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/baseline.jsonl",
+        "sha256": "56ba0ab840ec34698c83f79104951aee862674b6532483fd1265fb0c70d73692",
+        "lf_sha256": "56ba0ab840ec34698c83f79104951aee862674b6532483fd1265fb0c70d73692",
+        "bytes": 1310777
+      },
+      "manifest": {
+        "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/baseline.manifest.json",
+        "sha256": "ce0f48ef2999f37ce702b2f0ad2f2be993779ba96f3d90d75a4add6886471242",
+        "lf_sha256": "ce0f48ef2999f37ce702b2f0ad2f2be993779ba96f3d90d75a4add6886471242",
+        "bytes": 5452
+      },
+      "local_model_availability": {
+        "classifier_dir": {
+          "path": "weights/emotion_longtail075_b1_20261016",
+          "present": true
+        },
+        "response_model_dir": {
+          "path": "weights/hf/Qwen2.5-1.5B-Instruct",
+          "present": true
+        },
+        "response_adapter_dir": {
+          "path": "weights/response_sft_d4_2ep",
+          "present": true
+        }
+      },
+      "checkpoint_reload_performed": false,
+      "response_condition": "off",
+      "samples": 2354
+    },
+    {
+      "id": "profile_v1",
+      "status": "self_checked_pending_independent_review",
+      "config": {
+        "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/profile_v1.config.json",
+        "sha256": "2bd40e61e68b4278d63c0cae5d1512acbfe6a581f4e7f5067c2d9ef696c522e9",
+        "lf_sha256": "98b1a87d1f71d5168cc138c760a5d31378ebbaf6d3d89cf49ca7eb8867cbe5fa",
+        "bytes": 436
+      },
+      "prediction": {
+        "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/profile_v1.jsonl",
+        "sha256": "19a9d58bd7236d78a40cdd97dba94bbe4a35a67a50cdf665908f74ddfb881543",
+        "lf_sha256": "19a9d58bd7236d78a40cdd97dba94bbe4a35a67a50cdf665908f74ddfb881543",
+        "bytes": 1318558
+      },
+      "manifest": {
+        "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/profile_v1.manifest.json",
+        "sha256": "f88261c70d52c0ca55947bc0631273e10460ceb101007a866b5eab8431536d26",
+        "lf_sha256": "f88261c70d52c0ca55947bc0631273e10460ceb101007a866b5eab8431536d26",
+        "bytes": 5480
+      },
+      "local_model_availability": {
+        "classifier_dir": {
+          "path": "weights/emotion_longtail075_b1_20261016",
+          "present": true
+        },
+        "response_model_dir": {
+          "path": "weights/hf/Qwen2.5-1.5B-Instruct",
+          "present": true
+        },
+        "response_adapter_dir": {
+          "path": "weights/response_sft_d4_2ep",
+          "present": true
+        },
+        "profile_model_dir": {
+          "path": "weights/profile_encoder_v1_b1_20261026",
+          "present": true
+        }
+      },
+      "checkpoint_reload_performed": false,
+      "response_condition": "off",
+      "samples": 2354
+    }
+  ],
+  "deferred_configs": [
+    {
+      "id": "emotion065_only",
+      "status": "missing_delivery",
+      "config": {
+        "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/emotion065_only.config.json",
+        "sha256": "5c5663e1bebd26346b42df36618d12a1a0fbc4c670810708f24e434345efa94b",
+        "lf_sha256": "b8a0966bca5d20ac31d6ec939e44aed5405d175011c0b8a9f16c26047556fa01",
+        "bytes": 364
+      },
+      "predictions_assembled": false,
+      "eligible_for_deployment": false
+    },
+    {
+      "id": "emotion065_profile_v1",
+      "status": "missing_delivery",
+      "config": {
+        "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/emotion065_profile_v1.config.json",
+        "sha256": "260feafa93a6cd6d8f87ace553346e946c9827393f77f64dd5996e41c5670914",
+        "lf_sha256": "c62e5ab95391645505659397ff332e7a12d0c0851615d37d0c71d65e1a9b39a1",
+        "bytes": 436
+      },
+      "predictions_assembled": false,
+      "eligible_for_deployment": false
+    },
+    {
+      "id": "response_t4_only",
+      "status": "no_go",
+      "config": {
+        "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/response_t4_only.config.json",
+        "sha256": "53094b9b4f44449e44c35e70634b034603fd808f7b6ffcc8b46683db46692d0c",
+        "lf_sha256": "8de462b3aad67d17f7ed534b3167b901584f67a5c06fe28b2df159bda1672f52",
+        "bytes": 362
+      },
+      "predictions_assembled": false,
+      "eligible_for_deployment": false
+    }
+  ],
+  "profile_metadata": {
+    "file": {
+      "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/weights/profile_encoder_v1_b1_20261026/checkpoint_metadata.json",
+      "sha256": "d31094c6d634c1fb09d3a47d3f7bc230740cb1196404bd4fcb03c54ddd448d33",
+      "lf_sha256": "d31094c6d634c1fb09d3a47d3f7bc230740cb1196404bd4fcb03c54ddd448d33",
+      "bytes": 1744
+    },
+    "labels": {
+      "personality_traits": [
+        "agreeable",
+        "assertive",
+        "casual",
+        "conservative",
+        "emotionally_stable",
+        "extroverted",
+        "high_conscientiousness",
+        "introverted",
+        "open",
+        "sensitive"
+      ],
+      "interests": [
+        "art_design",
+        "career_development",
+        "film_animation",
+        "games",
+        "music",
+        "pets",
+        "programming_technology",
+        "reading_writing",
+        "social",
+        "sports_fitness",
+        "study_exam",
+        "travel_outdoor"
+      ],
+      "style": [
+        "brief",
+        "colloquial",
+        "detailed",
+        "direct",
+        "emoji_user",
+        "formal",
+        "high_emotional_expression",
+        "humorous",
+        "indirect",
+        "low_emotional_expression",
+        "rational"
+      ]
+    },
+    "thresholds": {
+      "personality_traits": 0.64,
+      "interests": 0.81,
+      "style": 0.56
+    },
+    "max_length": 256
+  },
+  "deferred": [
+    {
+      "id": "emotion065_only_and_combined",
+      "status": "missing_delivery",
+      "model": "weights/emotion_longtail065_b1_20261028",
+      "reason": "C T4 internal candidate only; checkpoint and per-ID predictions not delivered locally; retain Day5 default. Requires reload/label/tokenizer/preprocessing checks before assembly."
+    },
+    {
+      "id": "response_only_t4_and_combined",
+      "status": "no_go",
+      "reason": "D T4 longweight failed preregistered gate; retain D4 v2; existing comparison predictions remain in results/response_gen/."
+    },
+    {
+      "id": "emotion_or_profile_conditioned",
+      "status": "no_go",
+      "reason": "D T5 conditional decision NO_TRIGGER; do not reuse unconditioned replies as conditioned results."
+    }
+  ],
+  "limitations": [
+    "Offline field assembly only; no model reload or formal end-to-end timing.",
+    "Existing full validation set is not a blind test.",
+    "Profile v1 output fields do not condition D; candidate does not change deployment defaults."
+  ]
+}

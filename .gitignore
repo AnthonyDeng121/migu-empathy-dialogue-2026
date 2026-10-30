@@ -95,3 +95,6 @@ reports/b1_v1_summary.md
 
 # 上传脚本运行产物（scripts/remote/upload_workload.sh 生成，含全部上传文件哈希）
 MANIFEST.sha256
+
+# A T5 fixed offline candidates (model weights remain ignored)
+!results/cycle2_t5_fixed_20261030/
