@@ -1,0 +1,39 @@
+{
+  "version": "response_generation_inference_resume_v1",
+  "model_path": "weights/hf/Qwen2.5-1.5B-Instruct",
+  "adapter_path": "weights/t4_longweight_2ep",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "condition_mode": "none",
+  "condition_source": null,
+  "condition_fields": null,
+  "condition_coverage": null,
+  "input_path": "results/response_gen/t2_selection_input.jsonl",
+  "samples": 160,
+  "max_new_tokens": 256,
+  "min_new_tokens": 0,
+  "total_seconds": 670.366,
+  "mean_seconds_per_sample": 4.1898,
+  "p50_seconds_per_sample": 2.8099,
+  "generated_tokens": 12842,
+  "tokens_per_second": 19.16,
+  "full_set_estimate_seconds": null,
+  "full_set_size": 2354,
+  "empty_responses": 0,
+  "resume": {
+    "reused_samples": 0,
+    "new_samples": 160,
+    "cumulative_successful_sample_seconds": 670.3655850365758,
+    "current_attempt_wall_seconds": 679.000581279397,
+    "cold_start": false,
+    "fingerprint_sha256": "5d2f1b68308a7c9525742087ac7ccbdb6cabd7eda45580a8828bcd3a4b8c9721",
+    "timing_note": "Successful sample compute only; failed/in-flight work excluded. Attempt wall times in attempts.jsonl; interrupted attempts may lack an end event."
+  },
+  "timing_scope": "cumulative successful generate calls across attempts; excludes prompts/loading; not cold-start throughput",
+  "output_sha256": "6954c70dfbb5a16ce3d71c81bd5dab15dbd3b59a7dcbb9699a137292c9888830",
+  "publication": {
+    "version": 1,
+    "id": "82c3dc7035e348e3948960a0c2575939",
+    "state": "complete"
+  }
+}

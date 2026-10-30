@@ -176,6 +176,33 @@ def _collate(tokenizer: Any, torch: Any, features: list[dict[str, Any]]) -> dict
     }
 
 
+def _weighted_token_loss(model: Any, torch: Any, batch: dict[str, Any], weights: Any) -> Any:
+    """Causal LM loss with per-sample weights.
+
+    transformers' built-in loss averages every supervised token equally.
+    This variant sums each sample's token losses, scales that sum by the
+    sample's weight, and keeps the mean-over-supervised-tokens
+    normalisation, so an all-1.0 weight vector reproduces the built-in loss
+    exactly. Normalising by the unweighted token count (not the weighted
+    one) is what makes the weight bite at batch_size=1: a weighted mean
+    would cancel w against its own denominator and silently no-op.
+    """
+    logits = model(
+        input_ids=batch["input_ids"], attention_mask=batch["attention_mask"]
+    ).logits
+    labels = batch["labels"]
+    shift_logits = logits[:, :-1, :].float()
+    shift_labels = labels[:, 1:]
+    token_losses = torch.nn.functional.cross_entropy(
+        shift_logits.reshape(-1, shift_logits.shape[-1]),
+        shift_labels.reshape(-1),
+        ignore_index=-100,
+        reduction="none",
+    ).view(shift_labels.shape)
+    supervised_tokens = (shift_labels != -100).sum()
+    return (weights * token_losses.sum(dim=1)).sum() / supervised_tokens
+
+
 def _lora_state(model: Any) -> dict[str, Any]:
     """All LoRA tensors as {saved-adapter key: cpu tensor}."""
     state: dict[str, Any] = {}
@@ -728,6 +755,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         model_fingerprint = {"hub": load_name, "revision": model_revision}
 
     train_encoded: list[dict[str, Any]] = []
+    train_weights: list[float] = []
     context_trimmed = 0
     for sample in train_examples:
         try:
@@ -740,8 +768,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 continue
             raise
         train_encoded.append({"input_ids": input_ids, "labels": labels})
+        # Optional per-sample weight (T4 long-response variable). Absent means
+        # every sample is weighted 1.0, so legacy runs are byte-identical.
+        train_weights.append(float(sample.get("sample_weight", 1.0)))
     if not train_encoded:
         raise ValueError("all training samples exceeded max_length")
+    use_sample_weights = any(weight != 1.0 for weight in train_weights)
+    weighted_samples = sum(1 for weight in train_weights if weight != 1.0)
     token_totals = [len(feature["input_ids"]) for feature in train_encoded]
 
     batch_size = int(config["batch_size"])
@@ -867,7 +900,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             batch = collate([train_encoded[index] for index in indices])
             batch = {key: value.to(device) for key, value in batch.items()}
             with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=autocast_enabled):
-                loss = model(**batch).loss / accumulation
+                if use_sample_weights:
+                    weights = torch.tensor(
+                        [train_weights[index] for index in indices],
+                        dtype=torch.float32,
+                        device=device,
+                    )
+                    loss = _weighted_token_loss(model, torch, batch, weights) / accumulation
+                else:
+                    loss = model(**batch).loss / accumulation
             loss_value = float(loss.detach().cpu()) * accumulation
             if optimizer_steps == 0 and not math.isfinite(loss_value):
                 raise RuntimeError(f"first step produced a non-finite loss: {loss_value}")
@@ -1044,6 +1085,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "min": min(token_totals),
                 "mean": round(sum(token_totals) / len(token_totals), 1),
                 "max": max(token_totals),
+            },
+            "sample_weights": {
+                "enabled": use_sample_weights,
+                "weighted_samples": weighted_samples,
+                "total_samples": len(train_encoded),
             },
         },
         "parameters": {

@@ -1,0 +1,39 @@
+{
+  "version": "response_generation_inference_resume_v1",
+  "model_path": "weights/hf/Qwen2.5-1.5B-Instruct",
+  "adapter_path": "weights/response_sft_d4_2ep",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "condition_mode": "predicted",
+  "condition_source": "results/response_gen/t5_conditions_selection_both.jsonl",
+  "condition_fields": "both",
+  "condition_coverage": "160/160",
+  "input_path": "results/response_gen/t2_selection_input.jsonl",
+  "samples": 160,
+  "max_new_tokens": 256,
+  "min_new_tokens": 0,
+  "total_seconds": 662.662,
+  "mean_seconds_per_sample": 4.1416,
+  "p50_seconds_per_sample": 2.8247,
+  "generated_tokens": 12839,
+  "tokens_per_second": 19.37,
+  "full_set_estimate_seconds": null,
+  "full_set_size": 2354,
+  "empty_responses": 0,
+  "resume": {
+    "reused_samples": 0,
+    "new_samples": 160,
+    "cumulative_successful_sample_seconds": 662.6615976542234,
+    "current_attempt_wall_seconds": 671.195392113179,
+    "cold_start": false,
+    "fingerprint_sha256": "9f2161d563c8dc92cf8168a85f495310cd8b461beaa4e61b6d24bdca0158f889",
+    "timing_note": "Successful sample compute only; failed/in-flight work excluded. Attempt wall times in attempts.jsonl; interrupted attempts may lack an end event."
+  },
+  "timing_scope": "cumulative successful generate calls across attempts; excludes prompts/loading; not cold-start throughput",
+  "output_sha256": "685979a8fb2399ae54d9144dd71deb7138c5bcc40832ee72887afc970f93d748",
+  "publication": {
+    "version": 1,
+    "id": "9a80a6478b464b51a3b1defef8bb0534",
+    "state": "complete"
+  }
+}

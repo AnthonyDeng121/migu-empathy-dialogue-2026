@@ -15,6 +15,7 @@ materials provide no memory bank, so the final candidate always outputs [].
 """
 from __future__ import annotations
 
+import math
 from typing import Any
 
 BASE_SYSTEM_PROMPT = (
@@ -200,15 +201,30 @@ def build_sft_samples_from_b1(
             {"role": "system", "content": system_prompt(condition)},
             *history_messages(context_turns, target_user_turn_id, max_history_turns),
         ]
-        samples.append(
-            {
-                "id": sample_id,
-                "conversation_id": conversation_id,
-                "target_user_turn_id": target_user_turn_id,
-                "messages": messages,
-                "response_text": response_text,
-            }
-        )
+        sample: dict[str, Any] = {
+            "id": sample_id,
+            "conversation_id": conversation_id,
+            "target_user_turn_id": target_user_turn_id,
+            "messages": messages,
+            "response_text": response_text,
+        }
+        # Optional per-sample training weight (e.g. the T4 long-response
+        # variable). Absent means 1.0 downstream; a malformed weight is an
+        # error rather than a silently unweighted sample.
+        if "sample_weight" in row:
+            weight = row["sample_weight"]
+            if (
+                isinstance(weight, bool)
+                or not isinstance(weight, (int, float))
+                or not math.isfinite(weight)
+                or weight <= 0
+            ):
+                raise ValueError(
+                    f"{sample_id}: sample_weight must be a positive finite "
+                    f"number, got {weight!r}"
+                )
+            sample["sample_weight"] = float(weight)
+        samples.append(sample)
     return samples
 
 

@@ -1,0 +1,49 @@
+{
+  "input": "results/response_gen/t2_selection_input.jsonl",
+  "input_count": 160,
+  "arms": {
+    "t4_off": {
+      "bleu4_mean": 0.10280735742485728,
+      "rouge_l_mean": 0.24944948793993776,
+      "mean_nonws_len": 126.36875,
+      "length_buckets": {
+        "101-200": 29,
+        "21-50": 25,
+        "51-100": 61,
+        "7-20": 5,
+        "<=6": 3,
+        ">200": 37
+      },
+      "empty_responses": 0
+    },
+    "d4v2_off": {
+      "bleu4_mean": 0.09955425931784423,
+      "rouge_l_mean": 0.2508232506902887,
+      "mean_nonws_len": 122.91875,
+      "length_buckets": {
+        "101-200": 41,
+        "21-50": 29,
+        "51-100": 54,
+        "7-20": 5,
+        "<=6": 3,
+        ">200": 28
+      },
+      "empty_responses": 0
+    }
+  },
+  "head_to_head": {
+    "main": "t4_off",
+    "base": "d4v2_off",
+    "rouge_l_delta_median": 0.0,
+    "rouge_l_delta_p25": -0.02304413479341353,
+    "rouge_l_delta_p75": 0.023225529548790334,
+    "bleu4_delta_mean": 0.0032530981070130497,
+    "wins": 71,
+    "losses": 73,
+    "ties": 16,
+    "identical_text": 14,
+    "length_longer": 74,
+    "length_shorter": 66,
+    "length_same": 20
+  }
+}

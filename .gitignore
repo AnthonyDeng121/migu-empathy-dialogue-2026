@@ -92,3 +92,6 @@ reports/b1_v1_summary.md
 !results/response_gen/c5_conditions_val_full.jsonl
 !logs/D_CYCLE2_T1_UNCOND_SMOKE.txt
 !reports/D_CYCLE2_T1_PREP.md
+
+# 上传脚本运行产物（scripts/remote/upload_workload.sh 生成，含全部上传文件哈希）
+MANIFEST.sha256
