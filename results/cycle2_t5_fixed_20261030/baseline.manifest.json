@@ -1,6 +1,11 @@
 {
-  "version": "offline_candidate_assembly_v1",
+  "version": "offline_candidate_assembly_v2",
   "artifact_kind": "offline_field_assembly",
+  "path_convention": {
+    "repo": "repository root",
+    "artifact": "containing candidate bundle directory",
+    "models": "repo-relative model IDs; empty is a sentinel"
+  },
   "formal_end_to_end_timing": false,
   "model_inference_performed": false,
   "response_condition_mode": "none",
@@ -8,73 +13,84 @@
   "samples": 2354,
   "sources": {
     "input": {
+      "path_base": "repo",
       "path": "data/processed/b1_full_v1/response_val.jsonl",
       "sha256": "ddf76588ee2be4912b7c7bd5e9070ef1a9bc967e59378b911f13cf2cfc3078e2",
       "lf_sha256": "ddf76588ee2be4912b7c7bd5e9070ef1a9bc967e59378b911f13cf2cfc3078e2",
       "bytes": 18822219
     },
     "response": {
+      "path_base": "repo",
       "path": "results/response_gen/d4v2_val_newcard.jsonl",
       "sha256": "a55274d3d3792dc1df28a2fb797a6b10b18e8688ce6c01eb1cfb24a94acf2b34",
       "lf_sha256": "1cfd430149c31d89a827dacb7e75e3e0eb6cab05a2abb8863f74871bd7520ce2",
       "bytes": 1054052
     },
     "emotion": {
+      "path_base": "repo",
       "path": "results/response_gen/c5_conditions_val_full.jsonl",
       "sha256": "e55a59f68e4c669a68f21b665912684cc076a41aaa6c66843c2600f3a5b3a320",
       "lf_sha256": "478e861a344647d655f9c4fbfee78d81812942e7c8c2282789564e39137ce7ea",
       "bytes": 153991
     },
     "profile": {
-      "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/empty_profiles.jsonl",
-      "sha256": "2d6263984ee925079bcd9c4e47ced0ff60bd63707f611cf7dfc2052c1258deed",
+      "path_base": "artifact",
+      "path": "empty_profiles.jsonl",
+      "sha256": "ee2fd6da4c49d277fd0738b87f404563054b32d12c785bb616af752087aed3ba",
       "lf_sha256": "ee2fd6da4c49d277fd0738b87f404563054b32d12c785bb616af752087aed3ba",
-      "bytes": 269198
+      "bytes": 266844
     },
     "response_report": {
+      "path_base": "repo",
       "path": "results/response_gen/d4v2_val_newcard_report.json",
       "sha256": "df259719f9d9365e5ebed7909da268499d4879437928b3c848f716051695d30c",
       "lf_sha256": "047945bc1e5fdb250d2e6c68fbcfef4a6d2fd376264410ec0075ae5c8bc20c05",
       "bytes": 1537
     },
     "record_0": {
+      "path_base": "repo",
       "path": "configs/integrated_artifacts.json",
       "sha256": "6c933b2371774c6ac68a03e0390194113ed0ce2c02230b947a971dc800226923",
       "lf_sha256": "249099864cd74e40193fcaa4886241d6e64bc45a25aa4bd2fda4215512eae3f0",
       "bytes": 1263
     },
     "record_1": {
+      "path_base": "repo",
       "path": "reports/C_CYCLE2_T4_EMOTION_TARGETED.md",
       "sha256": "f8122de3398a88eca1c5063f538dc9e289d56e05ff29378dcdd4391328f7d31b",
       "lf_sha256": "1ebc668d63414494326cb999c2a884e9ad05edbff604d8da3a11a99cbc486795",
       "bytes": 4339
     },
     "record_2": {
+      "path_base": "repo",
       "path": "reports/D_CYCLE2_T4_LONG_RESPONSE.md",
       "sha256": "a3771b0610fa865bfc4031afc493bc503c1f9264a854d592efe5a2ab90367276",
       "lf_sha256": "b607f1af967b9385d9b7b785b0f273909e53e93d631c09a455d48a486ca4c53f",
       "bytes": 15479
     },
     "record_3": {
+      "path_base": "repo",
       "path": "reports/B_T3_INDEPENDENT_REVIEW.md",
       "sha256": "f7f5c41f7c9af35bcdafd1b40dd1cf8b235b0a298927f5a15d0f62dac504a05a",
       "lf_sha256": "907dbbd70c5a757932b8d948639cf455eb69f3f397e138739e3c68ed3cfd1606",
       "bytes": 18069
     },
     "record_4": {
+      "path_base": "repo",
       "path": "reports/c_cycle2_profile_v1_20261026.json",
       "sha256": "0a7432c5638b1e8df2dbd7b2ac8effdabe5ff6358661bfc9d42c2343aefe7cca",
       "lf_sha256": "47a631505c9f8510128e970493991e2f1441b9e6eaf89092899e89a99800c9e5",
       "bytes": 9020
     },
     "record_5": {
+      "path_base": "repo",
       "path": "results/response_gen/t5_conditional_decision.json",
       "sha256": "aa409ebb3303b9cbdafee72dfcc39c52a736b369f49474f8cd325daabdd5339f",
       "lf_sha256": "9e35394e60c3e4510a7773d988b8a87b37128ff02661bb468289bc28a4f9147c",
       "bytes": 2175
     }
   },
-  "assembler_sha256": "dfa197ed92379814f0824e3ce67741a1ea81c2e079a60eceb46f51ed3e6e4f3f",
+  "assembler_sha256": "4063b976f9d43c7b8a50c4c433cf71cefeaa3d10ba33cde56fcf4f38c125c37b",
   "models": {
     "response": {
       "base": "weights/hf/Qwen2.5-1.5B-Instruct",
@@ -92,7 +108,8 @@
     "memory_refs": "response if present, otherwise empty (no memory bank)"
   },
   "output": {
-    "path": "D:/0Desktop2/项目/migu-empathy-dialogue-2026/team_project/results/cycle2_t5_fixed_20261030/baseline.jsonl",
+    "path_base": "artifact",
+    "path": "baseline.jsonl",
     "sha256": "56ba0ab840ec34698c83f79104951aee862674b6532483fd1265fb0c70d73692"
   },
   "checks": {

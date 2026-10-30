@@ -20,6 +20,8 @@ python scripts/build_t5_candidates.py --output-dir results/cycle2_t5_fixed_20261
 
 输出目录必须尚不存在。新目录可重复执行验证。脚本固定读取已有配置和模型决定，不改变正式入口默认配置。
 
+provenance v2 的每个文件路径都带 `path_base`：`repo` 表示仓库根目录，`artifact` 表示本候选包根目录。`path` 使用相对 POSIX 路径，不包含开发机或输出目录的绝对位置；模型 ID 为仓库相对路径。将整个候选包移动到另一输出目录后，11 个交付文件（含 manifest、catalog 及关联哈希）应逐字节一致。来源文件超出声明根目录时拒绝生成。CLI 外部输入可通过 `--provenance-root` 声明来源根目录。
+
 `results/cycle2_t5_fixed_20261030/catalog.json` 是交付索引，记录配置、预测、manifest、源文件指纹、实际本地权重目录可用性、缺失项和画像标签/阈值。两组均为 2,354 条，使用 D 最新 `d4v2_val_newcard.jsonl`；D 输入不变且无分类条件，允许复用回复。
 
 | 候选 | 情感字段 | 画像字段 | 回复字段 | 状态 |
@@ -39,5 +41,7 @@ python scripts/build_t5_candidates.py --output-dir results/cycle2_t5_fixed_20261
 使用独立本地环境 `../.codex_tmp/t5-inference-env`（torch `2.5.1+cpu`、transformers `5.17.0`、peft `0.21.2`、accelerate `1.15.0`），通过正式入口的 `Models` 真实加载三模型，CPU 跑两个样例（含空/非空画像）：情感和画像均与交付预测一致，回复非空且 schema 合法。非空画像样例切回空画像后再次生成，回复逐字一致，情感不变，条件始终关闭。本地检查仅覆盖 device/hardware_label，不改交付配置。
 
 这是少量加载和接线检查，不是全量重生成或正式性能测试，未占用公共 GPU。catalog/manifest 中的 `model_inference_performed=false`、`checkpoint_reload_performed=false` 描述离线组装步骤本身；后续真实加载证据仅保存于本地 `.codex_tmp/acceptance/cycle2/a_t5_20261030/runtime/`。仍待 B 规定复核，不标团队 Done。
+
+B 对 `31d89d5` 的工程复核为 REQUEST_CHANGES；本次修复路径可移植性与 response 显式会话错配门禁，等待新 HEAD 复审。B 本地缺少权重，权重内容及真实三模型加载仍为 `NOT_INDEPENDENTLY_VERIFIABLE`；A 的本地自检不替代独立验证。新增无权重跨目录回归测试，覆盖完整 T5 包的 11 个文件及嵌套关联哈希；完整数据跨目录复现也已执行。此次不重跑模型生成或改变选型结论。
 
 B T6 可直接使用两组预测与 catalog；另外提供仅换情感、情感+画像、仅换 T4 回复三份待补/排除配置，`deferred_configs` 标明无组装预测、不可部署。0.65 情感候选需先补齐交付和实际加载检查。正式采用/发布须完成规定复核。全量验证集并非盲测，本文不作效果改善结论。具体自检日志仅保存在 `.codex_tmp/acceptance/cycle2/a_t5_20261030/`。

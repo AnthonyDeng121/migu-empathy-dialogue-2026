@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from scripts.assemble_candidate import assemble_rows, digest, load_inputs, main
+from scripts.assemble_candidate import assemble_rows, digest, fingerprint, load_inputs, main, portable_path
 
 
 class CandidateAssemblyTests(unittest.TestCase):
@@ -75,6 +75,54 @@ class CandidateAssemblyTests(unittest.TestCase):
         self.inputs = []
         with self.assertRaises(ValueError):
             self.run_assembly()
+
+    def test_explicit_response_conversation_mismatch_rejected(self):
+        for conversation in ("wrong", None, ""):
+            with self.subTest(conversation=conversation):
+                self.responses[0]["conversation_id"] = conversation
+                with self.assertRaisesRegex(ValueError, "response: conversation mismatch"):
+                    self.run_assembly()
+        self.responses[0]["conversation_id"] = self.inputs[0]["conversation_id"]
+        self.assertTrue(self.run_assembly()[1]["validation"]["passed"])
+        del self.responses[0]["conversation_id"]
+        self.assertTrue(self.run_assembly()[1]["validation"]["passed"])
+
+    def test_manifest_and_hash_identical_across_output_directories(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, rows in (("input", self.inputs), ("responses", self.responses),
+                               ("emotions", self.emotions), ("profiles", self.profiles)):
+                (root / name).write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+            (root / "report").write_text(json.dumps({"samples": 2, "condition_mode": "none",
+                "adapter_path": str(root / "weights/adapter"),
+                "output_sha256": digest((root / "responses").read_bytes())}), encoding="utf-8")
+            manifests, fingerprints = [], []
+            for bundle in (root / "first", root / "other/nested"):
+                argv = ["assemble_candidate", "--provenance-root", str(root),
+                        "--output", str(bundle / "candidate.jsonl"),
+                        "--manifest", str(bundle / "candidate.manifest.json"),
+                        "--emotion-model", "weights/emotion", "--profile-model", "empty",
+                        "--response-report", str(root / "report")]
+                for name in ("input", "responses", "emotions", "profiles"):
+                    argv += [f"--{name}", str(root / name)]
+                with patch("sys.argv", argv), contextlib.redirect_stdout(io.StringIO()):
+                    main()
+                manifest = bundle / "candidate.manifest.json"
+                manifests.append(manifest.read_bytes())
+                fingerprints.append(fingerprint(manifest, repo_root=root, artifact_root=bundle))
+                data = json.loads(manifests[-1])
+                self.assertEqual(data["output"]["path_base"], "artifact")
+                self.assertEqual(data["sources"]["input"]["path_base"], "repo")
+                self.assertEqual(data["models"]["response"]["adapter"], "weights/adapter")
+                self.assertNotIn(root.as_posix(), manifests[-1].decode())
+            self.assertEqual(manifests[0], manifests[1])
+            self.assertEqual(fingerprints[0], fingerprints[1])
+
+    def test_provenance_rejects_paths_outside_declared_roots(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with self.assertRaisesRegex(ValueError, "outside declared roots"):
+                portable_path(root / "elsewhere/file", repo_root=root / "repo", artifact_root=root / "bundle")
 
     def test_cli_provenance_hash_and_no_overwrite(self):
         with tempfile.TemporaryDirectory() as directory:

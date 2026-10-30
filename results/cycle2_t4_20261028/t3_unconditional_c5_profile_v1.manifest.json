@@ -1,6 +1,11 @@
 {
-  "version": "offline_candidate_assembly_v1",
+  "version": "offline_candidate_assembly_v2",
   "artifact_kind": "offline_field_assembly",
+  "path_convention": {
+    "repo": "repository root",
+    "artifact": "containing candidate bundle directory",
+    "models": "repo-relative model IDs; empty is a sentinel"
+  },
   "formal_end_to_end_timing": false,
   "model_inference_performed": false,
   "response_condition_mode": "none",
@@ -8,61 +13,70 @@
   "samples": 160,
   "sources": {
     "input": {
+      "path_base": "repo",
       "path": "results/response_gen/t2_selection_input.jsonl",
       "sha256": "8d1d487e4e2fb7d66071d72c8d9078744831751bfed7c9fb3103c067d9163959",
       "lf_sha256": "014e52ab7d176c84a91b1c2a830b456c829d062c05dfeba80f670a309bc86a53",
       "bytes": 1252357
     },
     "response": {
+      "path_base": "repo",
       "path": "results/response_gen/t3_unconditional.jsonl",
       "sha256": "64f330b327457ac20d1162f68503f8161e4408a102fa6b710ceae1754f8c5d7e",
       "lf_sha256": "5990f5bbfbb0d3d8c511dcb69f35ceb48d1a842c5af11f64fe3b025c72334c75",
       "bytes": 71412
     },
     "emotion": {
+      "path_base": "repo",
       "path": "results/response_gen/c5_conditions_val_full.jsonl",
       "sha256": "e55a59f68e4c669a68f21b665912684cc076a41aaa6c66843c2600f3a5b3a320",
       "lf_sha256": "478e861a344647d655f9c4fbfee78d81812942e7c8c2282789564e39137ce7ea",
       "bytes": 153991
     },
     "profile": {
+      "path_base": "repo",
       "path": "reports/c_cycle2_profile_v1_predictions.jsonl",
       "sha256": "25d06cff8e53705ca59ec29a2b4907ea46b4b79039fb432284e1d72771834ccc",
       "lf_sha256": "4327bcb3fcb796b8e414b5c40931fe0b6fd5eb274a5b8141a65df471583eecb8",
       "bytes": 3167786
     },
     "response_report": {
+      "path_base": "repo",
       "path": "results/response_gen/t3_unconditional_report.json",
       "sha256": "6c33cb597d5dd62aa44039bc559be2492183e76a8d0b034bb86027a6b154acd5",
       "lf_sha256": "334faa544c4f72c11e7aa8ab686865b2817da87fef0f7abeca6128c9d5a8e05f",
       "bytes": 899
     },
     "record_0": {
+      "path_base": "repo",
       "path": "reports/t3_uncond_2ep_report.json",
       "sha256": "e3c41272af6a7a46853c4ed9efd270695bf78d94f6fe4076fd78deb5d4121d20",
       "lf_sha256": "dc2f7f1112ee4d664e159cbc4ebc5ce92c830c4e2a3fdc29bf00c203dc63b955",
       "bytes": 9603
     },
     "record_1": {
+      "path_base": "repo",
       "path": "reports/c_cycle2_profile_v1_20261026.json",
       "sha256": "0a7432c5638b1e8df2dbd7b2ac8effdabe5ff6358661bfc9d42c2343aefe7cca",
       "lf_sha256": "47a631505c9f8510128e970493991e2f1441b9e6eaf89092899e89a99800c9e5",
       "bytes": 9020
     },
     "record_2": {
+      "path_base": "repo",
       "path": "reports/c_cycle2_profile_v2_micro_calibration_20261026.json",
       "sha256": "3d0e7ed48741b01f4525cd4d64a736a2dcba384543c1fc24527621005051e2c8",
       "lf_sha256": "240906a13479291921b26afef603c7f5baa712de08e961f141b93aa46e29c361",
       "bytes": 4411
     },
     "record_3": {
+      "path_base": "repo",
       "path": "results/response_gen/c5_conditions_val_full_report.json",
       "sha256": "88b0d3fbb133330c919ae105d0618cb72aabccd1d475baac47cbaec95ef67432",
       "lf_sha256": "4ca53bb832b5c69eb4de403f7955fbf1ad364882751ad03c4dd30101ea9714ab",
       "bytes": 7274
     }
   },
-  "assembler_sha256": "dfa197ed92379814f0824e3ce67741a1ea81c2e079a60eceb46f51ed3e6e4f3f",
+  "assembler_sha256": "4063b976f9d43c7b8a50c4c433cf71cefeaa3d10ba33cde56fcf4f38c125c37b",
   "models": {
     "response": {
       "base": "base_qwen15b",
@@ -80,7 +94,8 @@
     "memory_refs": "response if present, otherwise empty (no memory bank)"
   },
   "output": {
-    "path": "results/cycle2_t4_20261028/t3_unconditional_c5_profile_v1.jsonl",
+    "path_base": "artifact",
+    "path": "t3_unconditional_c5_profile_v1.jsonl",
     "sha256": "6e40e3ebba507dbec193e6a64a939511d2e41f9ad9789afc30af10be26cf069b"
   },
   "checks": {

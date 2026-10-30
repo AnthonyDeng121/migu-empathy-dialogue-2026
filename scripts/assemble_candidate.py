@@ -47,12 +47,12 @@ def assemble_rows(inputs, responses, emotions, profiles):
     for source in inputs:
         key = source["id"]
         emotion, profile = indexes["emotion"][key], indexes["profile"][key]
-        for name, row in (("emotion", emotion), ("profile", profile)):
+        response = indexes["response"][key]
+        for name, row in (("response", response), ("emotion", emotion), ("profile", profile)):
             if "conversation_id" in row and row["conversation_id"] != source["conversation_id"]:
                 raise ValueError(f"{name}: conversation mismatch for {key}")
         # Read only predicted fields; reference labels are never copied.
         validate_classification_labels(emotion.get("emotion_label"), profile.get("user_profile"))
-        response = indexes["response"][key]
         row = {"id": key, "response_text": response["response_text"],
                "emotion_label": emotion["emotion_label"], "user_profile": profile["user_profile"],
                "memory_refs": response.get("memory_refs", [])}
@@ -71,9 +71,22 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def fingerprint(path: Path) -> dict[str, Any]:
+def portable_path(path: Path, *, repo_root: Path = PROJECT, artifact_root: Path | None = None) -> dict[str, str]:
+    """Name files relative to the repo or relocatable output bundle, never the host.
+
+    Artifact paths take priority because an output bundle may itself be inside
+    the repository. Files outside both declared roots are rejected.
+    """
+    resolved = path.resolve()
+    for base, root in (("artifact", artifact_root), ("repo", repo_root)):
+        if root is not None and resolved.is_relative_to(root.resolve()):
+            return {"path_base": base, "path": resolved.relative_to(root.resolve()).as_posix()}
+    raise ValueError(f"provenance path is outside declared roots: {path}")
+
+
+def fingerprint(path: Path, *, repo_root: Path = PROJECT, artifact_root: Path | None = None) -> dict[str, Any]:
     data = path.read_bytes()
-    return {"path": path.as_posix(), "sha256": digest(data),
+    return {**portable_path(path, repo_root=repo_root, artifact_root=artifact_root), "sha256": digest(data),
             "lf_sha256": digest(data.replace(b"\r\n", b"\n")), "bytes": len(data)}
 
 
@@ -93,7 +106,20 @@ def main():
     parser.add_argument("--emotion-model", required=True)
     parser.add_argument("--profile-model", required=True)
     parser.add_argument("--source-record", type=Path, action="append", default=[])
+    parser.add_argument("--provenance-root", type=Path, default=PROJECT,
+                        help="root for repo-relative source and model paths")
+    parser.add_argument("--artifact-root", type=Path,
+                        help="relocatable output bundle root (default: output parent)")
     args = parser.parse_args()
+    artifact_root = args.artifact_root or args.output.resolve().parent
+    def file_fingerprint(path):
+        return fingerprint(path, repo_root=args.provenance_root, artifact_root=artifact_root)
+    def model_path(value):
+        if value is None:
+            return None
+        path = Path(value)
+        return portable_path(path if path.is_absolute() else args.provenance_root / path,
+                             repo_root=args.provenance_root)["path"]
     source_paths = [args.input, args.responses, args.emotions, args.profiles, args.response_report, *args.source_record]
     destinations = [args.output.resolve(), args.manifest.resolve()]
     if len(set(destinations)) != 2 or set(destinations) & {p.resolve() for p in source_paths}:
@@ -101,7 +127,7 @@ def main():
     for path in (args.output, args.manifest):
         if path.exists() or path.is_symlink():
             raise ValueError(f"refusing to overwrite existing output: {path}")
-    before = [fingerprint(p) for p in source_paths]
+    before = [file_fingerprint(p) for p in source_paths]
     inputs = load_inputs(args.input)
     responses = read_jsonl(args.responses)
     report = json.loads(args.response_report.read_text(encoding="utf-8"))
@@ -111,22 +137,25 @@ def main():
     if report.get("samples") != len(responses) or report.get("condition_mode") != "none":
         raise ValueError("offline field replacement requires matching count and unconditioned responses")
     rows, checks = assemble_rows(inputs, responses, read_jsonl(args.emotions), read_jsonl(args.profiles))
-    if before != [fingerprint(p) for p in source_paths]:
+    if before != [file_fingerprint(p) for p in source_paths]:
         raise ValueError("source files changed during assembly")
     payload = "".join(json.dumps(r, ensure_ascii=False, separators=(",", ":")) + "\n" for r in rows).encode("utf-8")
     manifest = {
-        "version": "offline_candidate_assembly_v1", "artifact_kind": "offline_field_assembly",
+        "version": "offline_candidate_assembly_v2", "artifact_kind": "offline_field_assembly",
+        "path_convention": {"repo": "repository root", "artifact": "containing candidate bundle directory",
+                            "models": "repo-relative model IDs; empty is a sentinel"},
         "formal_end_to_end_timing": False, "model_inference_performed": False,
         "response_condition_mode": "none", "classification_used_to_generate_response": False,
         "samples": len(rows), "sources": dict(zip(
             ["input", "response", "emotion", "profile", "response_report", *[f"record_{i}" for i in range(len(args.source_record))]], before)),
-        "assembler_sha256": digest(Path(__file__).read_bytes()),
-        "models": {"response": {"base": report.get("model_path"), "adapter": report.get("adapter_path")},
-                   "emotion": args.emotion_model, "profile": args.profile_model},
+        "assembler_sha256": digest(Path(__file__).read_bytes().replace(b"\r\n", b"\n")),
+        "models": {"response": {"base": model_path(report.get("model_path")), "adapter": model_path(report.get("adapter_path"))},
+                   "emotion": model_path(args.emotion_model), "profile": model_path(args.profile_model)},
         "model_identity_basis": "existing prediction reports and supplied model IDs; no checkpoint reload",
         "field_sources": {"id_and_order": "input", "response_text": "response", "emotion_label": "emotion",
                           "user_profile": "profile", "memory_refs": "response if present, otherwise empty (no memory bank)"},
-        "output": {"path": args.output.as_posix(), "sha256": digest(payload)},
+        "output": {**portable_path(args.output, repo_root=args.provenance_root, artifact_root=artifact_root),
+                   "sha256": digest(payload)},
         "checks": checks,
     }
     for path in (args.output, args.manifest):

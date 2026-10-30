@@ -51,7 +51,9 @@ python scripts/assemble_candidate.py \
 
 复用已有 `_index_by_id`、B 提交校验器和官方字段/标签校验。所有来源拒绝缺失、非法或重复 ID；回复来源必须与输入 ID 集合完全一致。分类来源允许覆盖更大的验证集，清单记录未使用行数。本次情感及画像各有 2354 行，选取 160 行、各剩余 2194 行。
 
-按输入 ID 顺序发布，源顺序不一致时按 ID 修正并报告错位数。画像来源如携带 conversation_id 则与输入核对。检查非空回复、官方标签、三维画像、memory_refs、输出数量和 ID 顺序。只替换分类字段，回复字符串逐字保留；没有 memory_refs 时显式使用空数组（没有 memory bank）。
+按输入 ID 顺序发布，源顺序不一致时按 ID 修正并报告错位数。回复、情感和画像来源如显式携带 conversation_id，均与输入核对；错配（含 null/空值）直接拒绝，不携带该字段的历史预测仍可通过 ID 对齐。检查非空回复、官方标签、三维画像、memory_refs、输出数量和 ID 顺序。只替换分类字段，回复字符串逐字保留；没有 memory_refs 时显式使用空数组（没有 memory bank）。
+
+provenance v2 使用带 `path_base` 的相对路径：`repo` 相对仓库根目录，`artifact` 相对候选包目录（默认输出父目录，可用 `--artifact-root` 指定）。优先将包内文件记录为 artifact-relative，移动输出目录不改变 manifest 字节。外部来源须通过 `--provenance-root` 声明根目录，不接受无法归属的主机绝对路径。模型 ID 相对 repo；代码指纹按 LF 规范化。T4/T5 清单已重新生成，预测内容未改变。
 
 manifest 保存所有来源文件、交付记录及输出的 SHA-256，另记 LF 规范化哈希，以区分 Windows CRLF 与 Git LF。回复必须匹配生成报告中的输出哈希与行数，且报告须声明无条件生成；带条件回复不允许套用该工具冒充分类替换。两次读取指纹确认来源在组装期间未变化。输入、输出和 manifest 不得同路径，且不覆盖已存在产物。
 
