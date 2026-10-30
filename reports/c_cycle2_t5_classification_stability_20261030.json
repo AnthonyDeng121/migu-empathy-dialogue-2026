@@ -1,0 +1,167 @@
+{
+  "version": "c_cycle2_t5_classification_stability_v1",
+  "date": "2026-10-30",
+  "status": "INTEGRATION_GATE",
+  "execution": {
+    "device": "cpu",
+    "public_gpu_card_hours": 0,
+    "training_performed": false,
+    "thresholds_changed": false,
+    "official_score_claimed": false
+  },
+  "data": {
+    "path": "data/processed/b1_full_v1/classification_val.jsonl",
+    "rows": 2354,
+    "unique_sample_ids": 2354,
+    "conversations": 900,
+    "sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+    "contains_raw_dialogue_in_deliverable": false,
+    "historically_reused_validation": true
+  },
+  "profile_v1": {
+    "checkpoint": "weights/profile_encoder_v1_b1_20261026",
+    "checkpoint_tree_sha256": "a8dfb90341c4a5d8ad72a6fd38f5741489114b24efd4898805d0f63ca0542bf7",
+    "max_length": 256,
+    "thresholds": {
+      "personality_traits": 0.64,
+      "interests": 0.81,
+      "style": 0.56
+    },
+    "threshold_source": "training-only calibration split",
+    "training_inference_text_matches": {
+      "matched": 2354,
+      "total": 2354
+    },
+    "packaged_loader_profile_matches_saved_prediction": {
+      "matched": 2354,
+      "total": 2354
+    },
+    "prediction_coverage": {
+      "rows": 2354,
+      "unique_ids": 2354,
+      "missing": 0,
+      "extra": 0,
+      "duplicates": 0
+    },
+    "macro_exact": 0.646842,
+    "empty_baseline_macro_exact": 0.628292,
+    "per_dimension_exact": {
+      "personality_traits": 0.607052,
+      "interests": 0.819456,
+      "style": 0.514019
+    },
+    "nonempty_presence": {
+      "predicted_nonempty": 585,
+      "gold_nonempty": 1479,
+      "true_positive": 529,
+      "false_positive": 56,
+      "false_negative": 950,
+      "true_negative": 819,
+      "precision": 0.904274,
+      "recall": 0.357674,
+      "f1": 0.512597
+    },
+    "history_slices": {
+      "short_1_5": {
+        "n": 903,
+        "macro_exact": 0.724622,
+        "empty_baseline_macro_exact": 0.70395
+      },
+      "medium_6_15": {
+        "n": 1098,
+        "macro_exact": 0.612022,
+        "empty_baseline_macro_exact": 0.591682
+      },
+      "long_16_plus": {
+        "n": 353,
+        "macro_exact": 0.556185,
+        "empty_baseline_macro_exact": 0.548631
+      }
+    },
+    "retrospective_probability_calibration": {
+      "source": "reports/c_cycle2_profile_v1_predictions.jsonl",
+      "source_sha256": "4327bcb3fcb796b8e414b5c40931fe0b6fd5eb274a5b8141a65df471583eecb8",
+      "validation_used_to_change_threshold": false,
+      "brier_and_ece_bin_count": 10,
+      "per_dimension": {
+        "personality_traits": {
+          "brier": 0.0507742129,
+          "ece": 0.079715442,
+          "label_decisions": 23540
+        },
+        "interests": {
+          "brier": 0.0208515924,
+          "ece": 0.0614965934,
+          "label_decisions": 28248
+        },
+        "style": {
+          "brier": 0.0519865209,
+          "ece": 0.0873128144,
+          "label_decisions": 25894
+        }
+      }
+    },
+    "decision": "retain_as_internal_candidate_only"
+  },
+  "emotion_t4_weight065": {
+    "checkpoint": "weights/emotion_longtail065_b1_20261028",
+    "model_safetensors_sha256": "bc0c7cab2259d2aea5ca77e812caff1363575da48ee94b92c03e84c39709e895",
+    "report_json_sha256": "b65ae850a3e0e657ae06b1a93dba871a129089ab2f4f76a30b83440654a7b389",
+    "training_inference_text_matches": {
+      "matched": 2354,
+      "total": 2354
+    },
+    "settings": {
+      "max_length": 256,
+      "truncation_side": "left",
+      "batch_size": 32
+    },
+    "reload_metrics": {
+      "rows": 2354,
+      "accuracy": 0.714953,
+      "macro_f1": 0.590474,
+      "matches_c_t4_report": true,
+      "mixed_f1": 0.212766,
+      "care_f1": 0.0
+    },
+    "history_slices": {
+      "short_1_5": {
+        "n": 903,
+        "accuracy": 0.703212,
+        "macro_f1": 0.585315,
+        "mixed_f1": 0.106383,
+        "care_f1": 0.0
+      },
+      "medium_6_15": {
+        "n": 1098,
+        "accuracy": 0.728597,
+        "macro_f1": 0.571227,
+        "mixed_f1": 0.275229,
+        "care_f1": 0.0
+      },
+      "long_16_plus": {
+        "n": 353,
+        "accuracy": 0.70255,
+        "macro_f1": 0.489934,
+        "mixed_f1": 0.3125,
+        "care_f1": 0.0
+      }
+    },
+    "retrospective_probability_calibration": {
+      "method": "softmax; multiclass NLL; multiclass Brier=sum over 16 labels then sample mean; top-label ECE with 15 equal-width bins",
+      "threshold_or_weight_tuned": false,
+      "rows": 2354,
+      "nll": 0.9397124862,
+      "multiclass_brier_sum": 0.4080157421,
+      "top_label_ece": 0.0878845311,
+      "mean_top_label_confidence": 0.6270687399,
+      "accuracy_from_logits": 0.714953271
+    },
+    "decision": "internal_candidate_not_adopted"
+  },
+  "limitations": [
+    "B1 validation was reused in prior experiments and is not blind.",
+    "The reported calibration metrics are retrospective diagnostics on validation, not an official threshold or score.",
+    "No claim is made about hidden-test performance or official acceptance."
+  ]
+}
