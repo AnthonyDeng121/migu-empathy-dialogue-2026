@@ -5,11 +5,21 @@ Does not replace /root/participant or save/publish a platform image.
 """
 import argparse
 import json
-import re
+import shlex
 import shutil
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
+
+
+def resolve_model_directory(value: object, key: str) -> Path:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Missing or empty model directory: {key}")
+    source = Path(value.strip())
+    source = source if source.is_absolute() else PROJECT / source
+    if not source.is_dir():
+        raise ValueError(f"Missing model directory for {key}: {source}")
+    return source
 
 
 def main():
@@ -20,16 +30,20 @@ def main():
     args = parser.parse_args()
     config = json.loads(args.config.read_text(encoding="utf-8"))
     executable = args.python.absolute()
-    if not executable.is_file() or not re.fullmatch(r"/[A-Za-z0-9_./-]+", str(executable)):
-        parser.error("Provide an existing absolute Linux Python path without shell metacharacters")
+    if not executable.is_file():
+        parser.error("Provide an existing Python executable path")
+    model_specs = [("classifier_dir", "weights/emotion_longtail075_b1_20261016"),
+                   ("response_model_dir", "weights/hf/Qwen2.5-1.5B-Instruct"),
+                   ("response_adapter_dir", "weights/response_sft_d4_2ep")]
+    if config.get("profile_mode") == "independent":
+        model_specs.append(("profile_model_dir", "weights/profile_encoder_v1_b1_20261026"))
+
     model_dirs = {}
-    for key, relative in (("classifier_dir", "weights/emotion_longtail075_b1_20261016"),
-                          ("response_model_dir", "weights/hf/Qwen2.5-1.5B-Instruct"),
-                          ("response_adapter_dir", "weights/response_sft_d4_2ep")):
-        source = Path(config[key])
-        source = source if source.is_absolute() else PROJECT / source
-        if not source.is_dir():
-            parser.error(f"Missing model directory: {source}")
+    for key, relative in model_specs:
+        try:
+            source = resolve_model_directory(config.get(key), key)
+        except ValueError as error:
+            parser.error(str(error))
         model_dirs[relative] = source
         config[key] = relative
     destination = args.destination.absolute()
@@ -49,7 +63,7 @@ def main():
     shutil.copyfile(PROJECT / "run_inference.py", destination / "run_inference.py")
     shutil.copyfile(PROJECT / "start.sh", destination / "start_backend.sh")
     wrapper = ('#!/bin/sh\nset -eu\n'
-               f'export PYTHON_BIN={executable}\n'
+               f'export PYTHON_BIN={shlex.quote(str(executable))}\n'
                'export INFERENCE_BACKEND=integrated HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1\n'
                'export TOKENIZERS_PARALLELISM=false\n'
                'SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)\n'

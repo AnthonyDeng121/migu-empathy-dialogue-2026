@@ -141,3 +141,7 @@
 固定分支 `feature/a-mlops` 已同步 `origin/main=b4c07f7`。按 C/D 最新结论保留 Day5 情感、D4 v2 回复和条件关闭；画像 v1 仅为独立研究候选。已交付两组各 2,354 条离线候选、配置与来源指纹，见 `docs/T5_FIXED_CANDIDATES.md` 和 `results/cycle2_t5_fixed_20261030/catalog.json`。重复组装字节一致，相关 14 项测试通过，公共 GPU 卡时 0。
 
 已补齐全部选定权重和独立推理环境，三模型真实 CPU 加载通过；2 条空/非空画像样例与 C 交付预测一致，切回空画像后的 D 回复逐字一致。状态：组装和加载自检完成，待 B 独立复核，不标团队 Done。C T4 0.65 仍为内部候选、缺完整本地交付；D T4/T5 NO-GO，不扩大采用候选。交 B T6，具体自检附件仅保存在本地忽略目录。
+
+### 2026-11-02 A T6 执行补充
+
+T6 打包支持已实现：暂存脚本按选中配置纳入独立画像 checkpoint，Docker BuildKit 模型上下文纳入固定 v1 画像目录，哈希预检验证完整 checkpoint tree SHA-256 `a8dfb90341c4a5d8ad72a6fd38f5741489114b24efd4898805d0f63ca0542bf7`。正式 `integrated.json` 仍使用空画像；本地小文件替身通过暂存后独立画像结构预检。Docker/model-path 与 cloud 专项测试 10/10 通过，buildx check、compileall 和 diff check 通过；完整测试套件 495 项中 481 通过、13 跳过，另有既有 D workload supervisor 临时日志错误。Python 可执行路径使用 shell quoting，避免安全字符被拒或被 shell 展开。证据见 `reports/A_CYCLE2_T6_PROFILE_PACKAGING.md`。本工作树不含官方权重，未构建官方基础镜像；最终镜像仍需使用官方 base、真实权重和断网 GPU 入口复验。GPU 卡时 0。

@@ -9,10 +9,12 @@ class DockerModelPathsTests(unittest.TestCase):
     def test_model_context_copies_match_runtime_config(self):
         root = Path(__file__).resolve().parents[1]
         config = json.loads((root / "configs/integrated.json").read_text(encoding="utf-8"))
+        profile_config = json.loads((root / "configs/integrated_profile_v1_off.json").read_text(encoding="utf-8"))
         copies = re.findall(r"^COPY --from=model_assets (\S+) (\S+)$",
                             (root / "Dockerfile.integrated").read_text(encoding="utf-8"), re.M)
         expected = {config[key].rstrip("/") for key in
                     ("classifier_dir", "response_model_dir", "response_adapter_dir")}
+        expected.add(profile_config["profile_model_dir"].rstrip("/"))
         self.assertEqual({target.rstrip("/") for _, target in copies}, expected)
         for source, target in copies:
             self.assertEqual(source.strip("/"), target.removeprefix("weights/").rstrip("/"))
