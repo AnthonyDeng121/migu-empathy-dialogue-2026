@@ -458,7 +458,8 @@
         "prediction_rows": 2354,
         "unique_ids": 2354,
         "prediction_sha256": "85b6400fa42384a9c043facdb3f1bcac528a7fd92e26485c602457862967c19c",
-        "contains_dialogue_text": false
+        "contains_dialogue_text": false,
+        "checkpoint_tree_sha256": "258c43a7120741d9281e42edf0ddd8c3c543228a690a7e6c13f2549b6f6d4e79"
       },
       "t4_weight065": {
         "checkpoint": "weights/emotion_longtail065_b1_20261028",
@@ -875,7 +876,8 @@
         "prediction_rows": 2354,
         "unique_ids": 2354,
         "prediction_sha256": "f812e273e2de9b7065d2a8f2a9e664ae4828bab57219c8fa910ee532dd33ffac",
-        "contains_dialogue_text": false
+        "contains_dialogue_text": false,
+        "checkpoint_tree_sha256": "6ca0038fa2f42036a3fda3868d3d8b5ac1b36154ddd4c6acb86962584bad7ad6"
       }
     },
     "t4_minus_day5": {
