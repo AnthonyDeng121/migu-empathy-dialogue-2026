@@ -9,17 +9,24 @@ import sys
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
+PROFILE_TREE_HASH_FORMAT = "relative-path-file-sha256-v1"
 sys.path.insert(0, str(PROJECT))
 from scripts.run_integrated import load_config, check_files
 
 
 def _tree_sha256(directory: Path) -> str:
     digest = hashlib.sha256()
+    digest.update(PROFILE_TREE_HASH_FORMAT.encode("ascii") + b"\0")
     for path in sorted(item for item in directory.rglob("*") if item.is_file()):
-        digest.update(path.relative_to(directory).as_posix().encode("utf-8"))
+        relative_path = path.relative_to(directory).as_posix().encode("utf-8")
+        file_digest = hashlib.sha256()
         with path.open("rb") as handle:
             for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-                digest.update(chunk)
+                file_digest.update(chunk)
+        digest.update(b"file\0")
+        digest.update(len(relative_path).to_bytes(8, "big"))
+        digest.update(relative_path)
+        digest.update(file_digest.digest())
     return digest.hexdigest()
 
 
@@ -38,6 +45,8 @@ def verify_model_hashes(config: dict, manifest: dict) -> None:
             raise ValueError(f"Model hash mismatch: {path}")
 
     if config.get("profile_mode") == "independent":
+        if manifest.get("profile_checkpoint_tree_hash_format") != PROFILE_TREE_HASH_FORMAT:
+            raise ValueError("Independent profile checkpoint tree hash format is missing or unsupported")
         expected_tree = manifest.get("profile_checkpoint_tree_sha256")
         if not isinstance(expected_tree, str) or not re.fullmatch(r"[a-f0-9]{64}", expected_tree):
             raise ValueError("Independent profile checkpoint tree SHA-256 is missing or invalid")

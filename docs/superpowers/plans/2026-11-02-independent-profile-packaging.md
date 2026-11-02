@@ -19,7 +19,7 @@
 ## Review Focus
 
 - Empty mode must not require or stage a profile checkpoint; independent mode must fail if it is missing.
-- A modified file anywhere in the profile checkpoint tree must fail hash preflight.
+- A modified file anywhere in the profile checkpoint tree must fail hash preflight; relative path and file digest framing must make the tree encoding unambiguous.
 - Paths containing shell-safe special characters must not be rejected or interpreted by the generated launcher.
 - Staged config paths must resolve inside the staged participant directory.
 - Docker preflight must actually load the independent-profile config while the runtime default stays empty.

@@ -78,7 +78,7 @@ python scripts/package_expert_materials.py --output artifacts/expert_materials_l
 docker build -f Dockerfile.integrated --build-arg OFFICIAL_BASE_IMAGE=<官方完整镜像引用> --build-arg TEAM_NAME=<正式队名> --build-context model_assets=./weights --build-context expert_materials=./artifacts/expert_materials_latest -t migu-integrated:candidate .
 ```
 
-`model_assets` 需要包含情感模型、回复基座、回复 adapter 和 `profile_encoder_v1_b1_20261026` 四个目录。Docker 构建会用独立画像配置预检全部模型及画像目录哈希；镜像运行入口仍使用 `configs/integrated.json` 的空画像默认值。暂存目录若要实际启用画像，传入 `configs/integrated_profile_v1_off.json`。
+`model_assets` 需要包含情感模型、回复基座、回复 adapter 和 `profile_encoder_v1_b1_20261026` 四个目录。Docker 构建会用独立画像配置预检全部模型及画像目录哈希；画像树哈希格式固定为 `relative-path-file-sha256-v1`。镜像运行入口仍使用 `configs/integrated.json` 的空画像默认值。暂存目录若要实际启用画像，传入 `configs/integrated_profile_v1_off.json`。
 
 构建需要可访问的软件包源；运行不需要联网。该配方需在实际官方基础镜像上构建并执行 GPU/断网回归才算验收，源码中有 Dockerfile 不代表镜像已构建成功。专家材料由明确清单打包，含技术方案、实验记录和训练日志及 SHA-256，不包含本地验收记录；需按最终候选复核材料完整性。
 

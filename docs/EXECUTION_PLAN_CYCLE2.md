@@ -144,4 +144,4 @@
 
 ### 2026-11-02 A T6 执行补充
 
-T6 打包支持已实现：暂存脚本按选中配置纳入独立画像 checkpoint，Docker BuildKit 模型上下文纳入固定 v1 画像目录，哈希预检验证完整 checkpoint tree SHA-256 `a8dfb90341c4a5d8ad72a6fd38f5741489114b24efd4898805d0f63ca0542bf7`。正式 `integrated.json` 仍使用空画像；本地小文件替身通过暂存后独立画像结构预检。Docker/model-path 与 cloud 专项测试 10/10 通过，buildx check、compileall 和 diff check 通过；完整测试套件 495 项中 481 通过、13 跳过，另有既有 D workload supervisor 临时日志错误。Python 可执行路径使用 shell quoting，避免安全字符被拒或被 shell 展开。证据见 `reports/A_CYCLE2_T6_PROFILE_PACKAGING.md`。本工作树不含官方权重，未构建官方基础镜像；最终镜像仍需使用官方 base、真实权重和断网 GPU 入口复验。GPU 卡时 0。
+T6 打包支持已实现：暂存脚本按选中配置纳入独立画像 checkpoint，Docker BuildKit 模型上下文纳入固定 v1 画像目录，哈希预检使用 `relative-path-file-sha256-v1` 规范编码，验证 tree SHA-256 `408825d4bd5be2915cb49481697a45368ee6ed9d458f47c4886cc9b644499e00`。正式 `integrated.json` 仍使用空画像；本地小文件替身通过暂存后独立画像结构预检。Docker/model-path 与 cloud 专项测试 12/12 通过，buildx check、compileall 和 diff check 通过；完整测试套件 497 项中 483 通过、13 跳过，另有既有 D workload supervisor 临时日志错误。Python 可执行路径使用 shell quoting，避免安全字符被拒或被 shell 展开。证据见 `reports/A_CYCLE2_T6_PROFILE_PACKAGING.md`。本工作树不含官方权重，未构建官方基础镜像；最终镜像仍需使用官方 base、真实权重和断网 GPU 入口复验。GPU 卡时 0。

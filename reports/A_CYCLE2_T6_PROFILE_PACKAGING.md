@@ -13,13 +13,14 @@ Branch: `feature/a-mlops`
 
 ## Verification
 
-- Docker/model path and cloud staging/preflight tests: **10/10 passed**.
+- Docker/model path and cloud staging/preflight tests: **12/12 passed**.
 - The stage test uses small substitute model files, stages the independent profile config, and runs `cloud_preflight --files-only` from the staged directory.
 - A shell path containing spaces and `$(touch INJECTED)` is preserved literally; the sentinel file is not created.
-- Profile tree hash acceptance and changed-tree rejection both pass. The actual local C v1 profile checkpoint hash matches the pinned value: `a8dfb90341c4a5d8ad72a6fd38f5741489114b24efd4898805d0f63ca0542bf7`.
+- Profile tree hash acceptance, changed-tree rejection, and ambiguous path/content framing rejection all pass. The actual local C v1 profile checkpoint hash matches the pinned `relative-path-file-sha256-v1` value: `408825d4bd5be2915cb49481697a45368ee6ed9d458f47c4886cc9b644499e00`.
+- A read-only review found a theoretical path/content framing ambiguity in the first tree-hash encoding. The implementation now length-frames relative paths and hashes each file before combining entries; the new collision-shaped regression case passes.
 - `docker buildx build --check` passed with small named-context directory substitutes and reported no warnings.
 - `python -m compileall -q scripts src tests` and `git diff --check` passed.
-- Full suite: **495 tests, 481 passed, 13 skipped, 1 existing error**: `test_budget_exhaustion_writes_gave_up` cannot read its temporary `relaunch.log`. It reproduced in the pre-change baseline.
+- Full suite: **497 tests, 483 passed, 13 skipped, 1 existing error**: `test_budget_exhaustion_writes_gave_up` cannot read its temporary `relaunch.log`. It reproduced in the pre-change baseline.
 - The local environment does not have `torch`, `transformers`, `peft`, `safetensors`, or `accelerate`; no local model-load or inference test was possible.
 
 ## Boundary

@@ -7,6 +7,18 @@ import scripts.cloud_preflight as cloud_preflight
 
 
 class CloudPreflightTests(unittest.TestCase):
+    def test_profile_tree_hash_frames_paths_and_contents(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            left = root / 'left'
+            right = root / 'right'
+            left.mkdir()
+            right.mkdir()
+            (left / 'a').write_bytes(b'b')
+            (right / 'ab').write_bytes(b'')
+
+            self.assertNotEqual(cloud_preflight._tree_sha256(left), cloud_preflight._tree_sha256(right))
+
     def fixture(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -35,7 +47,8 @@ class CloudPreflightTests(unittest.TestCase):
             }],
             'response_adapter_sha256': hashlib.sha256(b'adapter').hexdigest(),
             'response_base_weights_sha256': hashlib.sha256(b'base').hexdigest(),
-            'profile_checkpoint_tree_sha256': 'b8c7379bc998718711910d24cbb89b04fa3ccfdc4bc07ddaecb8fcc5fe42fc67',
+            'profile_checkpoint_tree_hash_format': cloud_preflight.PROFILE_TREE_HASH_FORMAT,
+            'profile_checkpoint_tree_sha256': cloud_preflight._tree_sha256(profile),
         }
         return config, manifest, profile
 
@@ -52,6 +65,12 @@ class CloudPreflightTests(unittest.TestCase):
         (profile / 'heads.safetensors').write_bytes(b'changed')
         with self.assertRaisesRegex(ValueError, 'profile checkpoint tree hash mismatch'):
             verify(config, manifest)
+
+    def test_independent_profile_tree_hash_requires_supported_format(self):
+        config, manifest, _ = self.fixture()
+        manifest.pop('profile_checkpoint_tree_hash_format')
+        with self.assertRaisesRegex(ValueError, 'hash format is missing or unsupported'):
+            cloud_preflight.verify_model_hashes(config, manifest)
 
     def test_empty_profile_mode_does_not_require_profile_tree_hash(self):
         verify = getattr(cloud_preflight, 'verify_model_hashes', None)

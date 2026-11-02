@@ -2,7 +2,8 @@
   "classifier_release": "c-day5-emotion-longtail075-20261016",
   "classifier_source_commit": "ac6d39f",
   "profile_checkpoint_release": "c-profile-v1-b1-20261026",
-  "profile_checkpoint_tree_sha256": "a8dfb90341c4a5d8ad72a6fd38f5741489114b24efd4898805d0f63ca0542bf7",
+  "profile_checkpoint_tree_hash_format": "relative-path-file-sha256-v1",
+  "profile_checkpoint_tree_sha256": "408825d4bd5be2915cb49481697a45368ee6ed9d458f47c4886cc9b644499e00",
   "classifier_files": [
     {
       "path": "config.json",
