@@ -151,7 +151,7 @@ class WatchAndGenerateTests(unittest.TestCase):
             pipeline_log = root / "pipeline.log"
             out1 = root / "arm1.txt"
             env = dict(os.environ)
-            env.update(ROOT=str(root), GEN_CMDS=f"echo arm1 > {out1}", LOG=str(pipeline_log))
+            env.update(ROOT=str(root), GEN_CMDS=f'echo arm1 > "{out1.as_posix()}"', LOG=str(pipeline_log))
             result = subprocess.run(
                 [_bash(), str(REMOTE / "watch_and_generate.sh")],
                 capture_output=True,
@@ -199,7 +199,7 @@ class SupervisorDoneFilesTests(unittest.TestCase):
             ARMS="arm_val.jsonl",
             ARM_LINES="3",
             DONE_FILES="metrics.json",
-            PATH=f"{shim}:{env['PATH']}",
+            PATH=f"{shim}{os.pathsep}{env['PATH']}",
             RELUNCH_LOG=str(root / "relaunch.log"),
         )
         return subprocess.run(

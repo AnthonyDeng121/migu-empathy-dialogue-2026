@@ -1,4 +1,5 @@
 import json
+import hashlib
 from pathlib import Path
 import subprocess
 import sys
@@ -9,6 +10,7 @@ import zipfile
 
 from src.data.schema import EMOTIONS, PROFILE_LABELS
 import scripts.stage_submission as stage_submission
+from scripts.cloud_preflight import _tree_sha256, PROFILE_TREE_HASH_FORMAT
 
 
 class CloudPackageContractTests(unittest.TestCase):
@@ -87,6 +89,7 @@ class CloudPackageContractTests(unittest.TestCase):
             profile = Path(config['profile_model_dir'])
             (profile / 'heads.safetensors').write_bytes(b'heads')
             (profile / 'tokenizer_config.json').write_text('{}')
+            (profile / 'tokenizer.json').write_text('{}')
             (profile / 'checkpoint_metadata.json').write_text(json.dumps({
                 'emotion_labels': sorted(EMOTIONS),
                 'profile_labels': {dim: sorted(labels) for dim, labels in PROFILE_LABELS.items()},
@@ -110,12 +113,35 @@ class CloudPackageContractTests(unittest.TestCase):
             self.assertEqual(staged['profile_model_dir'], 'weights/profile_encoder_v1_b1_20261026')
             self.assertEqual((destination / staged['profile_model_dir'] / 'heads.safetensors').read_bytes(), b'heads')
 
+            manifest = {
+                'classifier_files': [],
+                'response_adapter_sha256': hashlib.sha256(b'adapter').hexdigest(),
+                'response_base_weights_sha256': hashlib.sha256(b'model').hexdigest(),
+                'profile_checkpoint_tree_hash_format': PROFILE_TREE_HASH_FORMAT,
+                'profile_checkpoint_tree_sha256': _tree_sha256(profile),
+            }
+            (destination / 'configs/integrated_artifacts.json').write_text(json.dumps(manifest))
+            relocated = root / 'relocated'
+            destination.rename(relocated)
+            destination = relocated
+
             preflight = subprocess.run([
                 sys.executable, str(destination / 'scripts/cloud_preflight.py'),
-                '--config', str(destination / 'configs/integrated.json'), '--files-only',
+                '--config', str(destination / 'configs/integrated.json'), '--files-only', '--verify-hashes',
             ], cwd=destination, capture_output=True, text=True)
             self.assertEqual(preflight.returncode, 0, preflight.stdout + preflight.stderr)
             self.assertTrue(json.loads(preflight.stdout)['ready_for_smoke'])
+            self.assertTrue((destination / 'start.sh').stat().st_mode & 0o111)
+            for name in ('checkpoint_metadata.json', 'tokenizer.json', 'heads.safetensors', 'encoder/model.safetensors'):
+                target = destination / staged['profile_model_dir'] / name
+                original = target.read_bytes()
+                target.write_bytes(b'corrupt')
+                rejected = subprocess.run([
+                    sys.executable, str(destination / 'scripts/cloud_preflight.py'),
+                    '--files-only', '--verify-hashes',
+                ], cwd=destination, capture_output=True, text=True)
+                self.assertNotEqual(rejected.returncode, 0, name)
+                target.write_bytes(original)
 
     @unittest.skipIf(os.name == 'nt', 'Staging targets a Linux participant directory')
     def test_python_path_with_shell_special_characters_is_quoted(self):
