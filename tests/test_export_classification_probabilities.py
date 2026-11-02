@@ -59,6 +59,10 @@ class ExportClassificationProbabilityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "finite numbers"):
             emotion_prediction_records(self.rows, [invalid], labels)
 
+        invalid[0] = float("nan")
+        with self.assertRaisesRegex(ValueError, "finite numbers"):
+            emotion_prediction_records(self.rows, [invalid], labels)
+
     def test_profile_record_uses_frozen_thresholds_and_omits_dialogue(self) -> None:
         labels = {dimension: list(values) for dimension, values in PROFILE_LABELS.items()}
         thresholds = {dimension: 0.5 for dimension in PROFILE_LABELS}
