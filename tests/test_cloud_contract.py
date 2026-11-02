@@ -39,10 +39,15 @@ class CloudPackageContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             config = json.loads((project / 'configs/integrated.json').read_text(encoding='utf-8'))
-            for key in ('classifier_dir', 'response_model_dir', 'response_adapter_dir'):
+            for key, names in {
+                'classifier_dir': ('config.json', 'model.safetensors', 'tokenizer_config.json'),
+                'response_model_dir': ('config.json', 'model.safetensors', 'tokenizer_config.json'),
+                'response_adapter_dir': ('adapter_config.json', 'adapter_model.safetensors'),
+            }.items():
                 model = root / key
                 model.mkdir()
-                (model / 'placeholder.json').write_text('{}')
+                for name in names:
+                    (model / name).write_text('{}')
                 config[key] = str(model)
             path = root / 'runtime.json'
             path.write_text(json.dumps(config))
