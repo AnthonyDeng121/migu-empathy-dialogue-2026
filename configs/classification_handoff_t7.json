@@ -1,0 +1,380 @@
+{
+  "version": "c-classification-handoff-t7-v1",
+  "date": "2026-11-03",
+  "owner": "C",
+  "reviewer": "D",
+  "baseline_commit": "82f0768",
+  "source_report": {
+    "path": "reports/c_cycle2_t6_classification_freeze_20261102.json",
+    "sha256": "5c428156b507a6f4afb180c0cee17defab7bb9914c83bd3c014db8e0b182a93f"
+  },
+  "selection": {
+    "emotion": "day5_default",
+    "profile_mode": "empty",
+    "condition_response": false,
+    "profile_v1": "internal candidate only; not selected for the integrated default",
+    "old_profile": "no-go",
+    "t4_weight065": "candidate only; pending independent comparison"
+  },
+  "input_contract": {
+    "offline": "local checkpoint/tokenizer only",
+    "inference_entry": "scripts/run_integrated.py",
+    "context": "history up to and including target_user_turn_id; target must be a user turn",
+    "roles": {
+      "user": "用户",
+      "assistant": "助手"
+    },
+    "format": "one line per turn: Chinese role + fullwidth colon + content, joined with newline",
+    "truncation_side": "left",
+    "max_length": 256,
+    "forbidden_inputs": [
+      "future assistant response",
+      "validation gold labels",
+      "conversation text from retrieval over validation"
+    ],
+    "profile_empty": {
+      "personality_traits": [],
+      "interests": [],
+      "style": []
+    },
+    "tokenizer_note": "Explicit max_length=256 is required; do not use tokenizer model_max_length sentinel."
+  },
+  "tree_hash_format": "legacy scripts/train_emotion_profile.py: sorted POSIX relative path UTF-8 concatenated with file bytes, no framing; compare only with the same algorithm. Per-file hashes below are SHA-256 of actual bytes.",
+  "models": {
+    "day5_default": {
+      "path": "weights/emotion_longtail075_b1_20261016",
+      "selection": "selected",
+      "legacy_tree_sha256": "258c43a7120741d9281e42edf0ddd8c3c543228a690a7e6c13f2549b6f6d4e79",
+      "files": [
+        {
+          "path": "config.json",
+          "bytes": 1611,
+          "sha256": "c4dd8bd0084559e91cd3e6b03b1aaba4acc5b1173220f81a6d34d553869f853a"
+        },
+        {
+          "path": "model.safetensors",
+          "bytes": 409143304,
+          "sha256": "aedbacb14bced4417ac00d42c7cfccec722b64efaf84779fd9c8339f018e9e37"
+        },
+        {
+          "path": "tokenizer.json",
+          "bytes": 439376,
+          "sha256": "867be2cb3189c94aaf44e0cd095a871e0db5a57146441de913d489827f0e9c5a"
+        },
+        {
+          "path": "tokenizer_config.json",
+          "bytes": 567,
+          "sha256": "18307e407ae7e1f4433c3581e4c8083fadb4639aa543e2178330b7ac6940622c"
+        }
+      ],
+      "labels": [
+        "anger",
+        "anxiety",
+        "care",
+        "disgust",
+        "fear",
+        "gratitude",
+        "helplessness",
+        "joy",
+        "loneliness",
+        "mixed",
+        "neutral",
+        "pride",
+        "relaxed",
+        "sadness",
+        "shame",
+        "surprise"
+      ],
+      "max_length": 256,
+      "decode": "argmax over 16 logits; first label wins ties; no emotion threshold",
+      "metrics": {
+        "accuracy": 0.716653,
+        "macro_f1": 0.584843
+      }
+    },
+    "t4_weight065": {
+      "path": "weights/emotion_longtail065_b1_20261028",
+      "selection": "candidate",
+      "legacy_tree_sha256": "6ca0038fa2f42036a3fda3868d3d8b5ac1b36154ddd4c6acb86962584bad7ad6",
+      "files": [
+        {
+          "path": "config.json",
+          "bytes": 1611,
+          "sha256": "c4dd8bd0084559e91cd3e6b03b1aaba4acc5b1173220f81a6d34d553869f853a"
+        },
+        {
+          "path": "model.safetensors",
+          "bytes": 409143304,
+          "sha256": "bc0c7cab2259d2aea5ca77e812caff1363575da48ee94b92c03e84c39709e895"
+        },
+        {
+          "path": "tokenizer.json",
+          "bytes": 439376,
+          "sha256": "867be2cb3189c94aaf44e0cd095a871e0db5a57146441de913d489827f0e9c5a"
+        },
+        {
+          "path": "tokenizer_config.json",
+          "bytes": 567,
+          "sha256": "18307e407ae7e1f4433c3581e4c8083fadb4639aa543e2178330b7ac6940622c"
+        }
+      ],
+      "labels": [
+        "anger",
+        "anxiety",
+        "care",
+        "disgust",
+        "fear",
+        "gratitude",
+        "helplessness",
+        "joy",
+        "loneliness",
+        "mixed",
+        "neutral",
+        "pride",
+        "relaxed",
+        "sadness",
+        "shame",
+        "surprise"
+      ],
+      "max_length": 256,
+      "decode": "argmax over 16 logits; first label wins ties; no emotion threshold",
+      "metrics": {
+        "accuracy": 0.714953,
+        "macro_f1": 0.590474
+      }
+    },
+    "profile_v1": {
+      "path": "weights/profile_encoder_v1_b1_20261026",
+      "selection": "candidate",
+      "legacy_tree_sha256": "a8dfb90341c4a5d8ad72a6fd38f5741489114b24efd4898805d0f63ca0542bf7",
+      "files": [
+        {
+          "path": "checkpoint_metadata.json",
+          "bytes": 1744,
+          "sha256": "d31094c6d634c1fb09d3a47d3f7bc230740cb1196404bd4fcb03c54ddd448d33"
+        },
+        {
+          "path": "encoder/config.json",
+          "bytes": 896,
+          "sha256": "c29dccae1d4e05be21f76c12812542a28a5d94f2a5370acfd923bf1acc9ff211"
+        },
+        {
+          "path": "encoder/model.safetensors",
+          "bytes": 409092920,
+          "sha256": "45db88e7d9c78430b47f02b403e8d00e6f065e1f6712b274a7aac22df5a2f4e2"
+        },
+        {
+          "path": "heads.safetensors",
+          "bytes": 151452,
+          "sha256": "6faf23e98adb4693b4ef02c4f14b8e427212b749439c67e81747d837c9ff272b"
+        },
+        {
+          "path": "tokenizer.json",
+          "bytes": 439376,
+          "sha256": "867be2cb3189c94aaf44e0cd095a871e0db5a57146441de913d489827f0e9c5a"
+        },
+        {
+          "path": "tokenizer_config.json",
+          "bytes": 377,
+          "sha256": "86edfbd1d109094d4ea6a04c83822681bd05e495ced8de2cbcd6fea518da3440"
+        }
+      ],
+      "profile_labels": {
+        "personality_traits": [
+          "agreeable",
+          "assertive",
+          "casual",
+          "conservative",
+          "emotionally_stable",
+          "extroverted",
+          "high_conscientiousness",
+          "introverted",
+          "open",
+          "sensitive"
+        ],
+        "interests": [
+          "art_design",
+          "career_development",
+          "film_animation",
+          "games",
+          "music",
+          "pets",
+          "programming_technology",
+          "reading_writing",
+          "social",
+          "sports_fitness",
+          "study_exam",
+          "travel_outdoor"
+        ],
+        "style": [
+          "brief",
+          "colloquial",
+          "detailed",
+          "direct",
+          "emoji_user",
+          "formal",
+          "high_emotional_expression",
+          "humorous",
+          "indirect",
+          "low_emotional_expression",
+          "rational"
+        ]
+      },
+      "thresholds": {
+        "personality_traits": 0.64,
+        "interests": 0.81,
+        "style": 0.56
+      },
+      "max_length": 256,
+      "decode": "sigmoid probability >= per-dimension threshold; keep checkpoint label order"
+    },
+    "old_profile": {
+      "path": "weights/profile_unweighted_b1_20261015",
+      "selection": "no-go",
+      "legacy_tree_sha256": "1b1bee3d8cf5175ea7d7c771015f3aa7ecd5455b740c3f93e2bce1ce98bfd4b0",
+      "files": [
+        {
+          "path": "checkpoint_metadata.json",
+          "bytes": 1504,
+          "sha256": "39704ec40ea23135a9ed99ef2634f84e48e4cf29e696a8fdfb242f5fa7536890"
+        },
+        {
+          "path": "encoder/config.json",
+          "bytes": 1591,
+          "sha256": "cfa627f12e360886101147f58d8012fea2f1a10da88ed5bbd46a49b974ff89b7"
+        },
+        {
+          "path": "encoder/model.safetensors",
+          "bytes": 409092920,
+          "sha256": "20376e0571baf16eff1036721471fb3b2224ce4e899dbaa5b612463a4f452fe2"
+        },
+        {
+          "path": "heads.safetensors",
+          "bytes": 151452,
+          "sha256": "d8a148bb47b915f94ccea0fb8aa0abab0461d9eec073c466718683ec5ab3fca7"
+        },
+        {
+          "path": "tokenizer.json",
+          "bytes": 439376,
+          "sha256": "867be2cb3189c94aaf44e0cd095a871e0db5a57146441de913d489827f0e9c5a"
+        },
+        {
+          "path": "tokenizer_config.json",
+          "bytes": 567,
+          "sha256": "18307e407ae7e1f4433c3581e4c8083fadb4639aa543e2178330b7ac6940622c"
+        }
+      ],
+      "profile_labels": {
+        "personality_traits": [
+          "agreeable",
+          "assertive",
+          "casual",
+          "conservative",
+          "emotionally_stable",
+          "extroverted",
+          "high_conscientiousness",
+          "introverted",
+          "open",
+          "sensitive"
+        ],
+        "interests": [
+          "art_design",
+          "career_development",
+          "film_animation",
+          "games",
+          "music",
+          "pets",
+          "programming_technology",
+          "reading_writing",
+          "social",
+          "sports_fitness",
+          "study_exam",
+          "travel_outdoor"
+        ],
+        "style": [
+          "brief",
+          "colloquial",
+          "detailed",
+          "direct",
+          "emoji_user",
+          "formal",
+          "high_emotional_expression",
+          "humorous",
+          "indirect",
+          "low_emotional_expression",
+          "rational"
+        ]
+      },
+      "thresholds": {
+        "personality_traits": 0.18,
+        "interests": 0.16,
+        "style": 0.27
+      },
+      "max_length": 256,
+      "decode": "sigmoid probability >= per-dimension threshold; keep checkpoint label order"
+    }
+  },
+  "prediction_artifacts": {
+    "emotion_day5": {
+      "path": "reports/c_cycle2_t6_emotion_day5_predictions_20261102.jsonl",
+      "sha256": "85b6400fa42384a9c043facdb3f1bcac528a7fd92e26485c602457862967c19c",
+      "rows": 2354
+    },
+    "emotion_t4": {
+      "path": "reports/c_cycle2_t6_emotion_weight065_predictions_20261102.jsonl",
+      "sha256": "f812e273e2de9b7065d2a8f2a9e664ae4828bab57219c8fa910ee532dd33ffac",
+      "rows": 2354
+    },
+    "profile_old": {
+      "path": "reports/c_cycle2_t6_profile_unweighted_predictions_20261102.jsonl",
+      "sha256": "0ed2c6e1145041969996f8776b8db317c2d5687ade62ecf93c157ad6b1f2b2e2",
+      "rows": 2354
+    },
+    "profile_v1": {
+      "path": "reports/c_cycle2_profile_v1_predictions.jsonl",
+      "sha256": "4327bcb3fcb796b8e414b5c40931fe0b6fd5eb274a5b8141a65df471583eecb8",
+      "rows": 2354
+    }
+  },
+  "validation_reference": {
+    "path": "data/processed/b1_full_v1/classification_val.jsonl",
+    "rows": 2354,
+    "unique_sample_ids": 2354,
+    "conversations": 900,
+    "sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+    "historically_reused_validation": true,
+    "contains_raw_dialogue_in_deliverables": false
+  },
+  "release_refs": {
+    "day5_default": {
+      "url": "https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-day5-emotion-longtail075-20261016",
+      "tag": "c-day5-emotion-longtail075-20261016",
+      "zip_assets": [
+        {
+          "name": "C_DAY5_EMOTION_LONGTAIL075_20261016.zip",
+          "sha256": "67db558687a42c6b10f31075ff1fecf14ffc6ba881c4d14d0bcd387b0ea0c526",
+          "bytes": 409585966,
+          "url": "https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/download/c-day5-emotion-longtail075-20261016/C_DAY5_EMOTION_LONGTAIL075_20261016.zip"
+        }
+      ]
+    },
+    "profile_v1": {
+      "url": "https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/tag/c-cycle2-profile-v1-20261026",
+      "tag": "c-cycle2-profile-v1-20261026",
+      "zip_assets": [
+        {
+          "name": "C_CYCLE2_PROFILE_V1_20261026.zip",
+          "sha256": "761761f619643fd8209d309d0d4cbc684d1aa2374c9542c26283ba961e514060",
+          "bytes": 379744801,
+          "url": "https://github.com/AnthonyDeng121/migu-empathy-dialogue-2026/releases/download/c-cycle2-profile-v1-20261026/C_CYCLE2_PROFILE_V1_20261026.zip"
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Validation has been reused and is not blind; local metrics are not official scores.",
+    "T7 verifies existing files and frozen output decoding, not a new training or model inference run.",
+    "Profile v1 exceeds empty on macro exact, but personality_traits/style regress and nonempty recall is low.",
+    "A owns final deployment packaging; B owns independent evaluation; D reviews this C handoff."
+  ]
+}
