@@ -26,6 +26,8 @@ __pycache__/
 .env
 .venv/
 .codex_tmp/
+# 已停用的 Hermes 本地记忆目录（历史文件仅本地留存，不入 Git）
+.hermes-memory/
 .zcode/
 .zcodeignore
 explain.md
