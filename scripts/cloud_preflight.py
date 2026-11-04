@@ -12,6 +12,31 @@ sys.path.insert(0, str(PROJECT))
 from scripts.run_integrated import load_config, check_files
 
 
+def verify_hashes(config, manifest):
+    expected = [(config["classifier_dir"] / item["path"], item["sha256"]) for item in manifest["classifier_files"]]
+    expected.append((config["response_adapter_dir"] / "adapter_model.safetensors", manifest["response_adapter_sha256"]))
+    if manifest.get("response_base_weights_sha256"):
+        expected.append((config["response_model_dir"] / "model.safetensors", manifest["response_base_weights_sha256"]))
+    if config.get("profile_mode") == "independent":
+        items = manifest.get("profile_files")
+        if not items:
+            raise ValueError("Independent profile requires pinned profile_files")
+        root = config["profile_model_dir"].resolve()
+        actual_files = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file()}
+        if actual_files != {item["path"] for item in items}:
+            raise ValueError("Profile file inventory mismatch")
+        for item in items:
+            path = (root / item["path"]).resolve()
+            if not path.is_relative_to(root):
+                raise ValueError("Profile manifest path escapes model directory")
+            expected.append((path, item["sha256"]))
+    for path, digest in expected:
+        with path.open("rb") as handle:
+            actual = hashlib.file_digest(handle, "sha256").hexdigest()
+        if actual != digest:
+            raise ValueError(f"Model hash mismatch: {path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=PROJECT / "configs/integrated.json")
@@ -24,15 +49,7 @@ def main():
         check_files(config)
         if args.verify_hashes:
             manifest = json.loads((PROJECT / "configs/integrated_artifacts.json").read_text(encoding="utf-8"))
-            expected = [(config["classifier_dir"] / item["path"], item["sha256"]) for item in manifest["classifier_files"]]
-            expected.append((config["response_adapter_dir"] / "adapter_model.safetensors", manifest["response_adapter_sha256"]))
-            if manifest.get("response_base_weights_sha256"):
-                expected.append((config["response_model_dir"] / "model.safetensors", manifest["response_base_weights_sha256"]))
-            for path, digest in expected:
-                with path.open("rb") as handle:
-                    actual = hashlib.file_digest(handle, "sha256").hexdigest()
-                if actual != digest:
-                    raise ValueError(f"Model hash mismatch: {path}")
+            verify_hashes(config, manifest)
     except Exception as error:
         errors.append(str(error))
     if not args.files_only:
