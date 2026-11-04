@@ -78,8 +78,6 @@ python scripts/package_expert_materials.py --output artifacts/expert_materials_l
 docker build -f Dockerfile.integrated --build-arg OFFICIAL_BASE_IMAGE=<官方完整镜像引用> --build-arg TEAM_NAME=<正式队名> --build-context model_assets=./weights --build-context expert_materials=./artifacts/expert_materials_latest -t migu-integrated:candidate .
 ```
 
-`model_assets` 需要包含情感模型、回复基座、回复 adapter 和 `profile_encoder_v1_b1_20261026` 四个目录。Docker 构建会用独立画像配置预检全部模型及画像目录哈希；画像树哈希格式固定为 `relative-path-file-sha256-v1`。镜像运行入口仍使用 `configs/integrated.json` 的空画像默认值。暂存目录若要实际启用画像，传入 `configs/integrated_profile_v1_off.json`。
-
 构建需要可访问的软件包源；运行不需要联网。该配方需在实际官方基础镜像上构建并执行 GPU/断网回归才算验收，源码中有 Dockerfile 不代表镜像已构建成功。专家材料由明确清单打包，含技术方案、实验记录和训练日志及 SHA-256，不包含本地验收记录；需按最终候选复核材料完整性。
 
 若实例没有 Docker，在从大赛专属公有镜像创建的实例内完成部署和验证，再使用平台的「上传大赛镜像」入口。使用 `scripts/stage_submission.py --config configs/cloud_runtime.json --python /opt/conda/envs/conda_env/bin/python --destination /root/migu-submission-latest` 建立新目录；配置中的模型路径应指向上述最新权重。此脚本不覆盖现有目录。验证新目录后再切换官方路径，最终必须重跑 `bash /root/participant/start.sh TEST_FILE RESULT_DIR`。上传时保留指定 Python 环境，将专家材料放入 `/root/AI技术赛道-数字人综合情感对话模型-正式队名`。平台已明确：私有镜像创建的实例无法上传大赛镜像；「保存镜像」及私有镜像恢复不能代替参赛上传路径。上传、安全审核、B 复核和官方成功状态仍分别记录，不能以试跑代替。
