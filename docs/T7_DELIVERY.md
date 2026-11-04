@@ -13,6 +13,8 @@ python scripts/package_expert_materials.py --output artifacts/expert_materials_t
 
 目的目录必须不存在。打包先核对冻结配置和已有模型哈希，再复制真实权重、代码、配置、官方兼容入口及两参数启动脚本。脚本可在本地生成 Linux 包；`--python-bin` 是目标镜像中的路径，存在性与依赖必须在目标环境检查。
 
+Response 基座和 adapter 在复制前、复制后都必须匹配已有 `configs/response_artifact.json` 的固定目录摘要、文件数和字节数。复用 `verify_response_artifact.artifact_digest` 的既定算法：按相对 POSIX 路径排序，累计路径 UTF-8 和文件 SHA-256 十六进制文本；排除隐藏下载缓存。校验覆盖全部非隐藏文件，包括两处 tokenizer、基座 config/generation_config 和 adapter_config；缺失、修改或新增文件都会拒绝打包。最终 manifest 的 `frozen_response_assets` 记录已核对的摘要，不用新算的包内清单替代固定身份校验，也不因此宣称历史运行配置已复原。
+
 `candidate_manifest.json` 记录源提交、是否有未提交修改、相对路径、字节数及逐文件 SHA-256，不记录本机绝对目录。清单不包含自身。`configs/integrated.original.json` 保留原始配置；原成功镜像保持为回退版本。Python 环境须随平台镜像保留，不能只上传候选目录。
 
 ## 目标环境检查

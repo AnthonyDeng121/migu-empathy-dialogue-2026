@@ -13,6 +13,20 @@ sys.path.insert(0, str(PROJECT))
 from scripts.stage_submission import stage
 
 
+def verify_response_assets(config, pins):
+    """Bind complete current response directories to the existing frozen pins."""
+    from scripts.verify_response_artifact import artifact_digest
+    verified = {}
+    for name, key in (('base_model', 'response_model_dir'), ('adapter', 'response_adapter_dir')):
+        expected = pins[name]
+        actual = artifact_digest(config[key])
+        if any(actual[field] != expected['expected_' + field]
+               for field in ('digest', 'files', 'bytes')):
+            raise ValueError(f'Frozen response {name} identity mismatch: {config[key]}')
+        verified[name] = actual
+    return verified
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--destination', type=Path, required=True)
@@ -36,9 +50,17 @@ def main():
         parser.error('Default config differs from the frozen T7 selection')
     from scripts.cloud_preflight import verify_hashes
     from scripts.run_integrated import load_config
-    verify_hashes(load_config(source_config), json.loads((PROJECT / 'configs/integrated_artifacts.json').read_text(encoding='utf-8')))
+    resolved = load_config(source_config)
+    verify_hashes(resolved, json.loads((PROJECT / 'configs/integrated_artifacts.json').read_text(encoding='utf-8')))
+    response_pins = json.loads((PROJECT / 'configs/response_artifact.json').read_text(encoding='utf-8'))
+    verify_response_assets(resolved, response_pins)
     destination = args.destination.absolute()
     stage(source_config, destination)
+    # Verify the copied bytes too: source changes during copying must not be
+    # accepted merely because the resulting package has an internally valid hash.
+    staged_response = {key: destination / config[key]
+                       for key in ('response_model_dir', 'response_adapter_dir')}
+    verified_response = verify_response_assets(staged_response, response_pins)
     for name in ('run_inference.py', 'start.sh'):
         target = 'start_backend.sh' if name == 'start.sh' else name
         (destination / target).write_text((PROJECT / name).read_text(encoding='utf-8'), encoding='utf-8', newline='\n')
@@ -64,6 +86,7 @@ def main():
             files[path.relative_to(destination).as_posix()] = {'bytes': path.stat().st_size, 'sha256': digest}
     manifest = {'version': 'a-t7-candidate-v1',
                 'source_commit': source_commit, 'source_dirty': source_dirty,
+                'frozen_response_assets': verified_response,
                 'selection': expected, 'target_python': args.python_bin,
                 'target_python_verified': False, 'official_image_verified': False,
                 'historical_reproducibility': 'B T6 provenance caveat retained; not an exact historical regeneration claim',
