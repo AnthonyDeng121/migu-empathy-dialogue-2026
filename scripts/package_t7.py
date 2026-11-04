@@ -17,9 +17,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--destination', type=Path, required=True)
     parser.add_argument('--python-bin', required=True, help='Absolute Python path in the target Linux image; not a local interpreter')
+    parser.add_argument('--source-commit', help='Full source commit for an exported archive without Git metadata')
     args = parser.parse_args()
     if not re.fullmatch(r'/[A-Za-z0-9_./-]+', args.python_bin):
         parser.error('Provide an absolute Linux Python path without shell metacharacters')
+    if args.source_commit and not re.fullmatch(r'[a-f0-9]{40}', args.source_commit):
+        parser.error('source-commit must be a full 40-character commit SHA')
+    source_commit = args.source_commit or subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=PROJECT, text=True).strip()
+    source_dirty = None if args.source_commit else bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=PROJECT, text=True).strip())
     source_config = PROJECT / 'configs/integrated.json'
     config = json.loads(source_config.read_text(encoding='utf-8'))
     expected = {'classifier_dir': 'weights/emotion_longtail075_b1_20261016',
@@ -58,8 +63,7 @@ def main():
                 digest = hashlib.file_digest(handle, 'sha256').hexdigest()
             files[path.relative_to(destination).as_posix()] = {'bytes': path.stat().st_size, 'sha256': digest}
     manifest = {'version': 'a-t7-candidate-v1',
-                'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=PROJECT, text=True).strip(),
-                'source_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=PROJECT, text=True).strip()),
+                'source_commit': source_commit, 'source_dirty': source_dirty,
                 'selection': expected, 'target_python': args.python_bin,
                 'target_python_verified': False, 'official_image_verified': False,
                 'historical_reproducibility': 'B T6 provenance caveat retained; not an exact historical regeneration claim',
