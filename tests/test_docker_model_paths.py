@@ -13,6 +13,8 @@ class DockerModelPathsTests(unittest.TestCase):
                             (root / "Dockerfile.integrated").read_text(encoding="utf-8"), re.M)
         expected = {config[key].rstrip("/") for key in
                     ("classifier_dir", "response_model_dir", "response_adapter_dir")}
+        profile = json.loads((root / "configs/integrated_profile_v1_off.json").read_text(encoding="utf-8"))
+        expected.add(profile["profile_model_dir"])
         self.assertEqual({target.rstrip("/") for _, target in copies}, expected)
         for source, target in copies:
             self.assertEqual(source.strip("/"), target.removeprefix("weights/").rstrip("/"))

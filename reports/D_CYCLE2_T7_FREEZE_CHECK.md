@@ -291,3 +291,16 @@ weights/hf/Qwen2.5-1.5B-Instruct {'digest': '3dad5ec47fba5d325dd25df184c4fea7d92
 3. **PR 状态更正**：任务背景写"PR #39 待 A 审"，实际 `gh pr view 39` 显示 **PR #39 已 MERGED**（2026-10-30T03:10:20Z，merge commit `b4c07f73c56c390245831128e8971b378230b5f6`，标题"CYCLE2 T4：长样本加权 SFT 完成 + 无人值守评测管线"）。本地 `origin/main` 快照仍停留在 `9b104b1`（PR #38 合并），尚不含该 merge commit；**T7 前需 fetch 同步 main 并合入 D 分支**（fetch/merge 属 git 写操作，本次未执行）。
 4. **每日审查职责提醒（本任务范围外）**：`gh pr list --state open` 显示 C 的 **PR #41**（`docs(classification): record C T5 stability review`，head `feature/c-day5-classification-optimization-20261016`）处于 OPEN 且无 reviewer，按 D 的每日固定职责需安排审查；本次冻结核对未涉及该 PR 内容。
 5. **T6/D 收尾材料**可直接复用本报告 §三（哈希口径）与 §2.4/§2.10（Release 与 tokenizer/模板核对）作为 T7 交接附件；`docs/EXECUTION_PLAN_CYCLE2.md` 目前尚无 T7/D 行（表中 D 行止于 T6/D），按 `[[update-plan-d-rows]]` 规矩需在计划表补 T7/D 行（状态 Done + 本报告为证据）——该文件为团队共用计划，补写动作留待与 A 协同，本次未改。
+
+
+## 2026-11-05 A 验收补充
+
+原文保留 2026-10-30 核对现场；分类器路径 FAIL 已由 10/31 决策备忘的方案 B 处理。A 在最新 main `6d3fdfe` 基础上独立复核：
+
+- 基座目录摘要 `3dad5ec4…`、7 文件、3,098,955,668 字节；adapter 目录摘要 `b3e9017e…`、10 文件、52,866,512 字节，均与冻结配置一致。
+- adapter 权重 SHA-256 `6b75245a…`、分类器权重 SHA-256 `aedbacb1…` 匹配；契约目录存在，原配置 `check_files` PASS。
+- 词表一致；tokenizer merges 经序列化格式归一化后一致；adapter 显式记录 `ignore_merges=false`，基座未记录该字段。聊天模板逐字节一致，2,507 字节，SHA-256 `cd8e9439…`。不将 tokenizer JSON 原始内容称为完全一致。
+- Docker 路径、T7 打包和响应资产相关 23 项测试通过；PR #42 原 head `330b81d` 的线上 CI 为 SUCCESS。
+- 本次 Release API 查询超时，未重新下载 Release；发布链路沿用原始核验记录。本次未重训、未执行 GPU 推理。
+
+技术交付验收通过；计划表在 PR #42 合并前保持 Integration Gate，合并后再置 Done。已同步 main 并解决共享计划表冲突，保留 A/C 最新记录。

@@ -19,10 +19,14 @@ COPY scripts/ scripts/
 COPY configs/ configs/
 COPY start.sh start.sh
 COPY run_inference.py run_inference.py
-# Named context must contain precisely these three model directories.
+# Include the fixed optional profile candidate; default config remains unchanged.
 COPY --from=model_assets /emotion_longtail075_b1_20261016/ weights/emotion_longtail075_b1_20261016/
 COPY --from=model_assets /hf/Qwen2.5-1.5B-Instruct/ weights/hf/Qwen2.5-1.5B-Instruct/
 COPY --from=model_assets /response_sft_d4_2ep/ weights/response_sft_d4_2ep/
+COPY --from=model_assets /profile_encoder_v1_b1_20261026/ weights/profile_encoder_v1_b1_20261026/
+ARG INTEGRATED_CONFIG=configs/integrated.json
+RUN cp "${INTEGRATED_CONFIG}" /tmp/selected-integrated.json && cp /tmp/selected-integrated.json configs/integrated.json && rm /tmp/selected-integrated.json
 COPY --from=expert_materials / /root/AI技术赛道-数字人综合情感对话模型-${TEAM_NAME}/
-RUN chmod +x start.sh && ${PYTHON_BIN} scripts/cloud_preflight.py --files-only --verify-hashes
+RUN chmod +x start.sh && ${PYTHON_BIN} scripts/cloud_preflight.py --files-only --verify-hashes && \
+    ${PYTHON_BIN} scripts/cloud_preflight.py --config configs/integrated_profile_v1_off.json --files-only --verify-hashes
 ENTRYPOINT ["/root/participant/start.sh"]

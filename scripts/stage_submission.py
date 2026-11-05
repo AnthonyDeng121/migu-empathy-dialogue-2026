@@ -7,9 +7,37 @@ import argparse
 import json
 import re
 import shutil
+import sys
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT))
+from scripts.run_integrated import load_config, check_files
+
+
+def stage(config_path, destination):
+    """Copy selected assets and return a portable config; no model inference."""
+    config = load_config(config_path)
+    check_files(config)
+    keys = {"classifier_dir": "weights/emotion_longtail075_b1_20261016",
+            "response_model_dir": "weights/hf/Qwen2.5-1.5B-Instruct",
+            "response_adapter_dir": "weights/response_sft_d4_2ep"}
+    if config.get("profile_mode") == "independent":
+        keys["profile_model_dir"] = "weights/profile_encoder_v1_b1_20261026"
+    destination = Path(destination).absolute()
+    if destination.exists():
+        raise ValueError("Destination already exists; choose a fresh directory")
+    destination.mkdir(parents=True)
+    for name in ("src", "scripts", "configs"):
+        shutil.copytree(PROJECT / name, destination / name,
+                        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "cloud_runtime.json"))
+    for key, relative in keys.items():
+        shutil.copytree(config[key], destination / relative)
+        config[key] = relative
+    if config.get("profile_mode") != "independent":
+        config.pop("profile_model_dir", None)
+    (destination / "configs/integrated.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+    return config
 
 
 def main():
@@ -18,30 +46,11 @@ def main():
     parser.add_argument("--python", type=Path, required=True)
     parser.add_argument("--destination", type=Path, required=True)
     args = parser.parse_args()
-    config = json.loads(args.config.read_text(encoding="utf-8"))
     executable = args.python.absolute()
     if not executable.is_file() or not re.fullmatch(r"/[A-Za-z0-9_./-]+", str(executable)):
         parser.error("Provide an existing absolute Linux Python path without shell metacharacters")
-    model_dirs = {}
-    for key, relative in (("classifier_dir", "weights/emotion_longtail075_b1_20261016"),
-                          ("response_model_dir", "weights/hf/Qwen2.5-1.5B-Instruct"),
-                          ("response_adapter_dir", "weights/response_sft_d4_2ep")):
-        source = Path(config[key])
-        source = source if source.is_absolute() else PROJECT / source
-        if not source.is_dir():
-            parser.error(f"Missing model directory: {source}")
-        model_dirs[relative] = source
-        config[key] = relative
     destination = args.destination.absolute()
-    if destination.exists():
-        parser.error("Destination already exists; choose a fresh directory")
-    destination.mkdir(parents=True)
-    for name in ("src", "scripts", "configs"):
-        shutil.copytree(PROJECT / name, destination / name,
-                        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "cloud_runtime.json"))
-    for relative, source in model_dirs.items():
-        shutil.copytree(source, destination / relative)
-    (destination / "configs/integrated.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+    stage(args.config, destination)
     compatibility_path = destination / "configs/inference_config.json"
     compatibility = json.loads(compatibility_path.read_text(encoding="utf-8"))
     compatibility["python_bin"] = str(executable)
