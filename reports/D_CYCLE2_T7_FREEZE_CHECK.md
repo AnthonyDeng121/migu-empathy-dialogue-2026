@@ -304,3 +304,5 @@ weights/hf/Qwen2.5-1.5B-Instruct {'digest': '3dad5ec47fba5d325dd25df184c4fea7d92
 - 本次 Release API 查询超时，未重新下载 Release；发布链路沿用原始核验记录。本次未重训、未执行 GPU 推理。
 
 技术交付验收通过；计划表在 PR #42 合并前保持 Integration Gate，合并后再置 Done。已同步 main 并解决共享计划表冲突，保留 A/C 最新记录。
+
+合并闭环：PR #42 已于 2026-11-05 合并，merge commit `7f01eed33c3ae5357e3f1645b7e9e2a2d8b272ae`；修正 head `f5d4348` 的线上 CI 为 SUCCESS，任务表据此更新为 Done。
