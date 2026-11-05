@@ -1,0 +1,3122 @@
+{
+  "version": "b_t7_independent_review_v1",
+  "date": "2026-11-04",
+  "timezone": "Asia/Shanghai",
+  "status": "T7_EVALUATION_COMPLETE",
+  "selection_stability": "SELECTION_STABLE",
+  "scope": "B T7 uncertainty and regression review of the fixed archived prediction pair, CPU-only; not deployment approval.",
+  "git_baseline": {
+    "branch": "feature/b-eval-tooling",
+    "HEAD": "d9f8a75527191c7cc4ff090ec63fca3d11fa01fd",
+    "origin_main": "75a8135f6bf424cb63347a68c2f1b00d68c7b69a",
+    "status": "## feature/b-eval-tooling...origin/feature/b-eval-tooling",
+    "log5": "d9f8a75 test(eval): 完成 T6 集中评测并记录 provenance caveat\n45e60ac test(eval): 完成 T5 情感与长回复候选独立复核\n75a8135 APPROVE（B 工程交付审查）。  已按最新 HEAD `cc40eb9` 复核 A 的 T4/T5 离线候选组装与固定候选交付。  候选组装按 sample ID 对齐 response / emotion / profile，并对 duplicate、missing、extra、conversation mismatch、非法来源路径等情况进行显式拒绝；manifest 与 provenance 信息可追溯，并保持原 response 内容不被错误改写。  本地复核结果：  * `test_assemble_candidate.py`：11/11 PASS * Python compileall：PASS * CI smoke：PASS * `git diff --check origin/main...HEAD`：PASS  本次 Approve 覆盖 A 的候选组装、字段对齐、来源追踪及固定配置工程交付，不代表提前确认 C/D 模型效果；模型效果仍以 B 后续独立评测为准。\ncc40eb9 Merge remote-tracking branch 'origin/main' into feature/a-mlops\n8dd26fc fix(inference): make candidate provenance portable and reject response conversation mismatch"
+  },
+  "fixed_lock": {
+    "classification": "KEEP_DAY5",
+    "response": "KEEP_D4V2",
+    "condition": "OFF",
+    "profile": "empty",
+    "max_new_tokens": 256
+  },
+  "t6_overall_reused": {
+    "support": 2354,
+    "paired": {
+      "bleu4": {
+        "metric_win": 1026,
+        "metric_tie": 280,
+        "metric_loss": 1048,
+        "mean_delta": 0.0008205710592041694,
+        "median_delta": 0.0
+      },
+      "rouge_l": {
+        "metric_win": 1038,
+        "metric_tie": 300,
+        "metric_loss": 1016,
+        "mean_delta": 0.00021638525331446243,
+        "median_delta": 0.0
+      }
+    },
+    "selected_d4v2": {
+      "bleu4_char": 0.1122403822666906,
+      "rouge_l_char_f1": 0.26031516925384734,
+      "empty_response": 0,
+      "issue_counts": {
+        "markdown:bold": 335,
+        "markdown:list_marker": 152,
+        "markdown:blockquote": 33,
+        "markdown:heading": 27,
+        "near_empty": 40,
+        "repeated_ngram": 29,
+        "repeated_sentence": 6,
+        "low_cjk": 1,
+        "markdown:table_row": 2
+      },
+      "long_response_gt200": 516,
+      "markdown_artifact": 372,
+      "repetition": 32,
+      "stripped_character_length_mean": 134.37425658453697,
+      "stripped_character_length_median": 92.0,
+      "stripped_character_length_min": 2,
+      "stripped_character_length_max": 479,
+      "non_whitespace_character_length_mean": 129.75233644859813,
+      "raw_character_length_mean": 134.37425658453697,
+      "near_empty_count": 40,
+      "low_cjk_count": 1,
+      "too_short_pred_gold_ratio_lt_0p7_count": 616
+    },
+    "historical_t4_longweight": {
+      "bleu4_char": 0.11306095332589476,
+      "rouge_l_char_f1": 0.2605315545071618,
+      "empty_response": 0,
+      "issue_counts": {
+        "markdown:bold": 337,
+        "markdown:blockquote": 30,
+        "markdown:list_marker": 174,
+        "markdown:heading": 27,
+        "repeated_sentence": 8,
+        "near_empty": 36,
+        "repeated_ngram": 27,
+        "markdown:table_row": 7,
+        "low_cjk": 3,
+        "markdown:link": 1
+      },
+      "long_response_gt200": 548,
+      "markdown_artifact": 381,
+      "repetition": 34,
+      "stripped_character_length_mean": 137.27824978759557,
+      "stripped_character_length_median": 93.0,
+      "stripped_character_length_min": 3,
+      "stripped_character_length_max": 480,
+      "non_whitespace_character_length_mean": 132.49447748513168,
+      "raw_character_length_mean": 137.27824978759557,
+      "near_empty_count": 36,
+      "low_cjk_count": 3,
+      "too_short_pred_gold_ratio_lt_0p7_count": 609
+    },
+    "delta_t4_minus_d4v2": {
+      "bleu4_char": 0.0008205710592041615,
+      "rouge_l_char_f1": 0.00021638525331446612,
+      "stripped_character_length_mean": 2.9039932030586044
+    }
+  },
+  "methodology": {
+    "seed": 20261104,
+    "replicates": 10000,
+    "rng": "Python random.Random (MT19937), randrange with replacement",
+    "clusters": 900,
+    "samples": 2354,
+    "cluster_key": "validation.conversation_id",
+    "cluster_order": "sorted conversation_id",
+    "resampling": "Draw 900 conversations with replacement each replicate, carrying every prediction point together; both arms and all three estimates share the draw.",
+    "estimand": "Sample-weighted mean of per-sample metric scores, preserving T6; unequal conversation sizes retained in numerator AND denominator. Not equal-weight conversation means.",
+    "metric_implementation": "src.evaluation.metrics.bleu4/rouge_l unchanged; scores cached once for immutable gold/hypothesis pairs; each replicate recomputes both arm means from resampled cluster sums.",
+    "exact_equivalence": "Metrics are arithmetic means of independently scored samples. Multiplicity-weighted cluster score sums/counts exactly implement scoring expanded resampled rows, up to floating roundoff.",
+    "normalization": "Unchanged whitespace-removing character metrics; no new tokenizer or corpus metric.",
+    "long_slice": "Apply frozen gold len(response_text.strip())>200 inside each full-conversation draw, retaining only eligible points for the long estimand; no resampling individual points.",
+    "long_conversations": 329,
+    "long_samples": 528,
+    "empty_long_replicates": 0,
+    "confidence_interval": "Two-sided percentile 95%, linear interpolation at (R-1)*p; no BCa or multiple-testing adjustment.",
+    "improvement_probability_definition": "Fraction of bootstrap deltas strictly >0; empirical stability summary, not posterior probability or p-value.",
+    "inference_limits": "Historical reused validation, conditional on fixed outputs; no training-seed/model uncertainty and no human quality inference."
+  },
+  "uncertainty": {
+    "overall_bleu4_delta": {
+      "point_estimate": 0.0008205710592041615,
+      "bootstrap_mean": 0.0008246007455563694,
+      "ci95_percentile": [
+        -0.0010325838272910734,
+        0.0027033456573080862
+      ],
+      "ci_contains_zero": true,
+      "ci_strictly_crosses_zero": true,
+      "candidate_improvement_fraction": 0.8067,
+      "tie_fraction": 0.0,
+      "valid_replicates": 10000,
+      "interpretation": "Empirical bootstrap fraction, not posterior probability or a formal p-value."
+    },
+    "overall_rouge_l_delta": {
+      "point_estimate": 0.00021638525331446612,
+      "bootstrap_mean": 0.00022507161604958678,
+      "ci95_percentile": [
+        -0.0018331938785516046,
+        0.0022952004016820174
+      ],
+      "ci_contains_zero": true,
+      "ci_strictly_crosses_zero": true,
+      "candidate_improvement_fraction": 0.5837,
+      "tie_fraction": 0.0,
+      "valid_replicates": 10000,
+      "interpretation": "Empirical bootstrap fraction, not posterior probability or a formal p-value."
+    },
+    "long_gt200_rouge_l_delta": {
+      "point_estimate": 0.0005281632496678956,
+      "bootstrap_mean": 0.0005188452533466441,
+      "ci95_percentile": [
+        -0.002082020372957982,
+        0.003084839774935891
+      ],
+      "ci_contains_zero": true,
+      "ci_strictly_crosses_zero": true,
+      "candidate_improvement_fraction": 0.6511,
+      "tie_fraction": 0.0,
+      "valid_replicates": 10000,
+      "interpretation": "Empirical bootstrap fraction, not posterior probability or a formal p-value.",
+      "fraction_reaching_primary_gate": 0.0
+    }
+  },
+  "frozen_adoption_gate": {
+    "candidate": "historical T4 longweight",
+    "primary_long_rouge_delta_min": 0.01,
+    "actual_long_rouge_delta": 0.0005281632496678956,
+    "primary_gate": "FAIL",
+    "overall_safety_rouge_delta_min": -0.005,
+    "actual_overall_rouge_delta": 0.00021638525331446612,
+    "overall_safety_gate": "PASS",
+    "adoption_status": "NO_GO",
+    "thresholds_changed": false
+  },
+  "regression_review": {
+    "ranking_rule": "Strict ROUGE delta <0 ascending for regressions; >0 descending for improvements; sample_id ascending breaks ties. Top20 overall, no manual replacement.",
+    "paired_outcome": {
+      "bleu4_char": {
+        "candidate_better": 1026,
+        "tie": 280,
+        "candidate_worse": 1048
+      },
+      "rouge_l_char_f1": {
+        "candidate_better": 1038,
+        "tie": 300,
+        "candidate_worse": 1016
+      }
+    },
+    "top20_regressions": [
+      {
+        "sample_id": "pp:[\"val_conv_000047\",5,1]",
+        "conversation_id": "val_conv_000047",
+        "gold_response": "好，我听着。",
+        "baseline_response": "好，那我听着。",
+        "candidate_response": "好，那我们就先让脑子歇会儿。你慢慢说，我听着。",
+        "baseline_metrics": {
+          "bleu4_char": 0.5946035575013605,
+          "rouge_l_char_f1": 0.923076923076923
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.2108445456905127,
+          "rouge_l_char_f1": 0.41379310344827586
+        },
+        "delta": {
+          "bleu4_char": -0.3837590118108478,
+          "rouge_l_char_f1": -0.5092838196286471
+        },
+        "gold_response_length_bucket": "<=6",
+        "gold_response_stripped_length": 6,
+        "baseline_response_stripped_length": 7,
+        "candidate_response_stripped_length": 23,
+        "emotion": "relaxed",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000622\",27,2]",
+        "conversation_id": "val_conv_000622",
+        "gold_response": "好，我先不提方案。你继续把这份担心说完，我不打断。",
+        "baseline_response": "好，我先不提方案。你继续说，我听着。",
+        "candidate_response": "我明白，你并不是在要求一个立刻解决的办法，而是在表达这种反复出现的担忧和睡眠受影响。你继续说，我先不分析。",
+        "baseline_metrics": {
+          "bleu4_char": 0.48462430218414126,
+          "rouge_l_char_f1": 0.7441860465116279
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.12197379410305399,
+          "rouge_l_char_f1": 0.28205128205128205
+        },
+        "delta": {
+          "bleu4_char": -0.3626505080810873,
+          "rouge_l_char_f1": -0.46213476446034585
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 25,
+        "baseline_response_stripped_length": 18,
+        "candidate_response_stripped_length": 53,
+        "emotion": "fear",
+        "history_slice": "long_16_plus",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000768\",5,2]",
+        "conversation_id": "val_conv_000768",
+        "gold_response": "好，今晚就到这儿。你自己慢慢想就行。",
+        "baseline_response": "好，先听到这儿就够了。今晚你自己慢慢想就好。",
+        "candidate_response": "好，先到这里。你已经把“白天那些人”和“晚上那一下”分开了，今晚就停在这儿就够了。",
+        "baseline_metrics": {
+          "bleu4_char": 0.42494561961344396,
+          "rouge_l_char_f1": 0.7000000000000001
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.12345443921533868,
+          "rouge_l_char_f1": 0.3050847457627119
+        },
+        "delta": {
+          "bleu4_char": -0.3014911803981053,
+          "rouge_l_char_f1": -0.3949152542372882
+        },
+        "gold_response_length_bucket": "7-20",
+        "gold_response_stripped_length": 18,
+        "baseline_response_stripped_length": 22,
+        "candidate_response_stripped_length": 41,
+        "emotion": "neutral",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000483\",7,1]",
+        "conversation_id": "val_conv_000483",
+        "gold_response": "好，我先听你说，不分析。你已经多花了钱，却一直自己扛着，现在预算又变，让这份难受更重了。",
+        "baseline_response": "嗯，我先听着，不分析。你已经为此多花了这笔钱，而且它一直被独自压着；现在预算变化带来的不适，也会比单纯改变行程更重一些。",
+        "candidate_response": "嗯，我听着。你继续说。",
+        "baseline_metrics": {
+          "bleu4_char": 0.2646503843836665,
+          "rouge_l_char_f1": 0.576923076923077
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.010870596737213772,
+          "rouge_l_char_f1": 0.21818181818181817
+        },
+        "delta": {
+          "bleu4_char": -0.2537797876464527,
+          "rouge_l_char_f1": -0.35874125874125884
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 44,
+        "baseline_response_stripped_length": 60,
+        "candidate_response_stripped_length": 11,
+        "emotion": "sadness",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000895\",9,1]",
+        "conversation_id": "val_conv_000895",
+        "gold_response": "好，我听着。你把这层说清楚就行，我不打断，也不分析、不给主意。",
+        "baseline_response": "好，我听着。你把这层说清楚就好。",
+        "candidate_response": "嗯，这层你提到了，我就听着。你不用现在就把整套方案讲完，也不用马上决定要不要把它说出来。",
+        "baseline_metrics": {
+          "bleu4_char": 0.3463339193553875,
+          "rouge_l_char_f1": 0.6382978723404255
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.13579621327966795,
+          "rouge_l_char_f1": 0.32
+        },
+        "delta": {
+          "bleu4_char": -0.21053770607571953,
+          "rouge_l_char_f1": -0.31829787234042545
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 31,
+        "baseline_response_stripped_length": 16,
+        "candidate_response_stripped_length": 44,
+        "emotion": "mixed",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000740\",19,3]",
+        "conversation_id": "val_conv_000740",
+        "gold_response": "好，这周就按这个来。回头有新情况再说。",
+        "baseline_response": "好，这周先按你定的来就行。回头有新情况再来就行。",
+        "candidate_response": "好，这周先按例会听完再说。今天就到这儿。",
+        "baseline_metrics": {
+          "bleu4_char": 0.44383351844821595,
+          "rouge_l_char_f1": 0.6976744186046512
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.2516441111691874,
+          "rouge_l_char_f1": 0.41025641025641024
+        },
+        "delta": {
+          "bleu4_char": -0.19218940727902856,
+          "rouge_l_char_f1": -0.28741800834824094
+        },
+        "gold_response_length_bucket": "7-20",
+        "gold_response_stripped_length": 19,
+        "baseline_response_stripped_length": 24,
+        "candidate_response_stripped_length": 20,
+        "emotion": "relaxed",
+        "history_slice": "long_16_plus",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000400\",3,2]",
+        "conversation_id": "val_conv_000400",
+        "gold_response": "好，我先不分析。你能把这点别扭说出来，已经很不容易了；那些准备并不会因为延期就变成笑话。",
+        "baseline_response": "嗯，我听着。你不用继续展开，也不用现在就证明自己做得对错；能把这种别扭说出来，就已经很不容易了。",
+        "candidate_response": "嗯，我听着。你不用继续展开，也不用马上想下一步。",
+        "baseline_metrics": {
+          "bleu4_char": 0.2912867627249274,
+          "rouge_l_char_f1": 0.45652173913043476
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.04220398217911733,
+          "rouge_l_char_f1": 0.20588235294117646
+        },
+        "delta": {
+          "bleu4_char": -0.24908278054581004,
+          "rouge_l_char_f1": -0.2506393861892583
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 44,
+        "baseline_response_stripped_length": 48,
+        "candidate_response_stripped_length": 24,
+        "emotion": "shame",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000462\",3,1]",
+        "conversation_id": "val_conv_000462",
+        "gold_response": "好，我先不提怎么做。你怕的不是那一次没跑，而是它像一个证据，让你开始怀疑身体是不是已经悄悄变了，再也回不到以前。这个念头反复出现，确实会让一次小插曲变得很沉。你继续说。",
+        "baseline_response": "好，我不说办法了。你害怕的可能不只是这次漏跑，而是担心身体和状态真的会回到以前那种稳定的状态里。这种反复出现的恐惧确实很消耗人。",
+        "candidate_response": "好，我不说办法了。你先把这件事说完，我听着。",
+        "baseline_metrics": {
+          "bleu4_char": 0.12084732081716214,
+          "rouge_l_char_f1": 0.41891891891891897
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.008881525567980332,
+          "rouge_l_char_f1": 0.16981132075471697
+        },
+        "delta": {
+          "bleu4_char": -0.11196579524918181,
+          "rouge_l_char_f1": -0.249107598164202
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 84,
+        "baseline_response_stripped_length": 64,
+        "candidate_response_stripped_length": 22,
+        "emotion": "anxiety",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000574\",3,1]",
+        "conversation_id": "val_conv_000574",
+        "gold_response": "好，你先把情况说完，我不急着帮你排计划。听起来这已经从“答辩重做很烦”牵扯到了要不要放弃考试，以及后面那个具体安排；但你白天还能照常复习、也还不甘心放弃，说明你心里其实有几股力量在拉扯。你继续说，我先听着。",
+        "baseline_response": "好，你先把情况说完，我不急着给建议。听起来你现在被两件事牵住了：答辩重做让你烦躁，而那个“要不要放弃”的念头也已经影响到了后续安排。白天还能复习说明你并不想就这样放弃，只是这件事压得你很难受。你可以继续说。",
+        "candidate_response": "你不是不想处理这件事，而是它已经让你同时面对两次选择：答辩重做和考试是否继续。白天还能复习说明你并不想放弃，只是被这种两难牵住了。\n\n可以把这两件事分开看：答辩重做是当前必须完成的任务，考试则需要根据你现在的状态重新判断。如果暂时无法决定，也可以先保留两个选项，不必立刻逼自己做出最终决定。",
+        "baseline_metrics": {
+          "bleu4_char": 0.31790150581600596,
+          "rouge_l_char_f1": 0.46601941747572817
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.07781914432752292,
+          "rouge_l_char_f1": 0.21951219512195122
+        },
+        "delta": {
+          "bleu4_char": -0.24008236148848305,
+          "rouge_l_char_f1": -0.24650722235377695
+        },
+        "gold_response_length_bucket": "101-200",
+        "gold_response_stripped_length": 103,
+        "baseline_response_stripped_length": 103,
+        "candidate_response_stripped_length": 145,
+        "emotion": "mixed",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000686\",5,1]",
+        "conversation_id": "val_conv_000686",
+        "gold_response": "好，你先说，我不急着分析。你刚想起前天它就有点不吃东西，今天又明显没精神，所以现在特别害怕，担心是不是已经耽误得很严重了。你继续说。",
+        "baseline_response": "好，我先不分析，也不急着给结论。你刚才提到前天就开始不吃东西，今天也明显没精神，这些信息我都听见了。你现在最害怕的是它已经到了很严重的程度吗？",
+        "candidate_response": "好，你继续说，我不分析，也不急着给结论。",
+        "baseline_metrics": {
+          "bleu4_char": 0.2724671074122388,
+          "rouge_l_char_f1": 0.5255474452554744
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.04166450322928626,
+          "rouge_l_char_f1": 0.27906976744186046
+        },
+        "delta": {
+          "bleu4_char": -0.2308026041829525,
+          "rouge_l_char_f1": -0.2464776778136139
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 66,
+        "baseline_response_stripped_length": 71,
+        "candidate_response_stripped_length": 20,
+        "emotion": "fear",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000294\",33,3]",
+        "conversation_id": "val_conv_000294",
+        "gold_response": "不客气，能聊顺就行。\n\n这阵子辛苦了，记得下班吃顿好的。上游那边有动静了随时来聊，祝后面顺利。",
+        "baseline_response": "不客气，能帮你想开一点就好。\n\n等上游那边有动静了，随时来聊。",
+        "candidate_response": "不客气。能帮你看开一点就好。\n\n等你准备好时候，随时回来聊。",
+        "baseline_metrics": {
+          "bleu4_char": 0.2855596775410012,
+          "rouge_l_char_f1": 0.5675675675675675
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.06940180038453017,
+          "rouge_l_char_f1": 0.3287671232876712
+        },
+        "delta": {
+          "bleu4_char": -0.21615787715647103,
+          "rouge_l_char_f1": -0.23880044427989633
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 47,
+        "baseline_response_stripped_length": 31,
+        "candidate_response_stripped_length": 30,
+        "emotion": "gratitude",
+        "history_slice": "long_16_plus",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000744\",3,1]",
+        "conversation_id": "val_conv_000744",
+        "gold_response": "好，先到这儿。你想清楚后再来就行。",
+        "baseline_response": "好，先到这儿。你已经说到这了，想清楚后再来找我就行。",
+        "candidate_response": "好，先到这儿。你已经说到这了。",
+        "baseline_metrics": {
+          "bleu4_char": 0.5129497107827519,
+          "rouge_l_char_f1": 0.7906976744186047
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.460901616174935,
+          "rouge_l_char_f1": 0.5625
+        },
+        "delta": {
+          "bleu4_char": -0.05204809460781684,
+          "rouge_l_char_f1": -0.22819767441860472
+        },
+        "gold_response_length_bucket": "7-20",
+        "gold_response_stripped_length": 17,
+        "baseline_response_stripped_length": 26,
+        "candidate_response_stripped_length": 15,
+        "emotion": "anxiety",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000735\",5,1]",
+        "conversation_id": "val_conv_000735",
+        "gold_response": "怕一停就捡不回来，这念头转几回确实烦。下周外拍本来就排着，去了随便按两下也算没断档，兴致低就低着拍，不必当成重启仪式。",
+        "baseline_response": "行，那就不当心理分析。卡住的是那种停下来的念头：一放慢节奏，感觉好像连拍都再捡不回来了，这念头转了好几回，确实烦。\n\n下周外拍你本来就有安排，那就按原计划去。拍的时候随便一点也没关系，别扭感也不用现在就把它变成必须解决的事。",
+        "candidate_response": "行，那就不当心理分析。卡住的是那种“停一下就会彻底断”的感觉——不是那几句点评有多重，而是怕一放就收不住。\n\n下次外拍还是照常去吧，不用特意跟那个念头较劲。拍完如果还想再碰，就碰；不想碰也行，都算数。",
+        "baseline_metrics": {
+          "bleu4_char": 0.16242262114649722,
+          "rouge_l_char_f1": 0.4023668639053254
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.037253000022213115,
+          "rouge_l_char_f1": 0.178343949044586
+        },
+        "delta": {
+          "bleu4_char": -0.1251696211242841,
+          "rouge_l_char_f1": -0.22402291486073939
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 59,
+        "baseline_response_stripped_length": 112,
+        "candidate_response_stripped_length": 100,
+        "emotion": "anxiety",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000236\",7,2]",
+        "conversation_id": "val_conv_000236",
+        "gold_response": "好，我不急着给建议。你慢慢说，我听着。",
+        "baseline_response": "好，我不打断你。你慢慢说，我听着。",
+        "candidate_response": "好，我不打断你。你慢慢说，想到什么就接着往下讲。",
+        "baseline_metrics": {
+          "bleu4_char": 0.6365621559943808,
+          "rouge_l_char_f1": 0.7777777777777778
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.34079093551290196,
+          "rouge_l_char_f1": 0.5581395348837209
+        },
+        "delta": {
+          "bleu4_char": -0.29577122048147886,
+          "rouge_l_char_f1": -0.21963824289405687
+        },
+        "gold_response_length_bucket": "7-20",
+        "gold_response_stripped_length": 19,
+        "baseline_response_stripped_length": 17,
+        "candidate_response_stripped_length": 24,
+        "emotion": "mixed",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000777\",5,1]",
+        "conversation_id": "val_conv_000777",
+        "gold_response": "说出来会更像自己先认了，也更怕别人一眼看出你扛不住——这点别扭我听见了。\n\n你不用把它说成认栽，也不用现在给它定性。你把这点说完就行。",
+        "baseline_response": "嗯，别扭就先放这儿。你说得挺清楚：说出来会显得自己先认栽，别人一眼就能看出你扛不住。我不给建议。",
+        "candidate_response": "嗯，别扭就先放这儿。你说完再说。",
+        "baseline_metrics": {
+          "bleu4_char": 0.22554960468182209,
+          "rouge_l_char_f1": 0.40707964601769914
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.008124131330850775,
+          "rouge_l_char_f1": 0.19753086419753088
+        },
+        "delta": {
+          "bleu4_char": -0.21742547335097132,
+          "rouge_l_char_f1": -0.20954878182016826
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 67,
+        "baseline_response_stripped_length": 48,
+        "candidate_response_stripped_length": 16,
+        "emotion": "shame",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000283\",5,2]",
+        "conversation_id": "val_conv_000283",
+        "gold_response": "好，那就先这样。能把这口气顺过来，比急着去讨个说法更重要。\n\n下次要是再遇到这种心里堵得慌的时候，随时来念叨就行。去忙吧。",
+        "baseline_response": "嗯，那就先这样。能把心里的结稍微松动一点就好，不用急着马上解决所有事。\n\n随时欢迎回来，下次需要聊的时候，我会在这里等。",
+        "candidate_response": "嗯，能感觉到你现在的状态比刚才轻松了不少。既然心里已经松动了一些，那就按自己的节奏来，不必强求立刻解决所有问题。\n\n随时欢迎回来，无论以后是想吐槽、梳理心情，还是单纯想找个人待一会儿，都可以。祝你接下来的生活顺畅些。",
+        "baseline_metrics": {
+          "bleu4_char": 0.24648890688480524,
+          "rouge_l_char_f1": 0.358974358974359
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.03904991128874011,
+          "rouge_l_char_f1": 0.15757575757575756
+        },
+        "delta": {
+          "bleu4_char": -0.20743899559606513,
+          "rouge_l_char_f1": -0.2013986013986014
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 61,
+        "baseline_response_stripped_length": 60,
+        "candidate_response_stripped_length": 108,
+        "emotion": "relaxed",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000727\",3,2]",
+        "conversation_id": "val_conv_000727",
+        "gold_response": "那就今晚按能早点睡来过，这件事先放着。中间那条路你已经能接受，也不用今晚拍板。先睡。",
+        "baseline_response": "那就先按今晚能早点睡来过，不纠结。中途那条路你自己已经看过一遍，不必再加码。",
+        "candidate_response": "那就先按今晚能早点睡来过，不纠结。中途反复转过很多遍也没关系，它说明这件事在你心里占的位置不小；今晚的目标是休息，不是解决所有矛盾。",
+        "baseline_metrics": {
+          "bleu4_char": 0.2733845735412131,
+          "rouge_l_char_f1": 0.5500000000000002
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.15924586673657842,
+          "rouge_l_char_f1": 0.3518518518518519
+        },
+        "delta": {
+          "bleu4_char": -0.11413870680463467,
+          "rouge_l_char_f1": -0.19814814814814824
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 42,
+        "baseline_response_stripped_length": 38,
+        "candidate_response_stripped_length": 66,
+        "emotion": "relaxed",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000395\",9,2]",
+        "conversation_id": "val_conv_000395",
+        "gold_response": "好，我先不提方案。你慢慢把想说的说完。",
+        "baseline_response": "好，我先不给方案。你能把这些话说完就好，我会等你说完再听。",
+        "candidate_response": "好，我先不给方案。你已经把这份空落感和担心都讲出来了，先停在这里也可以。",
+        "baseline_metrics": {
+          "bleu4_char": 0.26492685902784496,
+          "rouge_l_char_f1": 0.5833333333333334
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.1952575439057254,
+          "rouge_l_char_f1": 0.4000000000000001
+        },
+        "delta": {
+          "bleu4_char": -0.06966931512211957,
+          "rouge_l_char_f1": -0.1833333333333333
+        },
+        "gold_response_length_bucket": "7-20",
+        "gold_response_stripped_length": 19,
+        "baseline_response_stripped_length": 29,
+        "candidate_response_stripped_length": 36,
+        "emotion": "loneliness",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000243\",3,1]",
+        "conversation_id": "val_conv_000243",
+        "gold_response": "好，我不说别的，你慢慢讲，我听着。",
+        "baseline_response": "好，我听着。你继续说，不用管逻辑，想到什么就说什么。",
+        "candidate_response": "好，我不给建议，也不急着分析。\n\n你说得对，这种“怎么做都不对”的感觉确实很煎熬。明明在努力维持关系，却因为表达方式不同而被贴上“不孝顺”的标签，这本身就是一种巨大的心理负担。你一直在默默承受这些指责和压力，却找不到一个合适的出口来释放它，这种孤立无援的感觉一定很沉重。\n\n你想继续说下去吗？或者，如果不想继续展开，我就安静听着。",
+        "baseline_metrics": {
+          "bleu4_char": 0.2250265947708922,
+          "rouge_l_char_f1": 0.3255813953488372
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.032969663627545165,
+          "rouge_l_char_f1": 0.14606741573033707
+        },
+        "delta": {
+          "bleu4_char": -0.19205693114334704,
+          "rouge_l_char_f1": -0.1795139796185001
+        },
+        "gold_response_length_bucket": "7-20",
+        "gold_response_stripped_length": 17,
+        "baseline_response_stripped_length": 26,
+        "candidate_response_stripped_length": 165,
+        "emotion": "mixed",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000005\",15,2]",
+        "conversation_id": "val_conv_000005",
+        "gold_response": "能感觉到你现在的状态比刚才稳当多了。一个人待着也能找到节奏，这本身就是一种适应。\n\n既然你想先聊到这，那我们就在这儿停步。祝你今晚煮的那碗面好吃，好好休息。",
+        "baseline_response": "不客气。能感觉到你现在的状态好多了，这就很好。\n\n祝你今晚睡个安稳觉。",
+        "candidate_response": "不客气，能陪你把这阵子的情绪理顺一点，我也挺开心的。\n\n祝你今晚睡个安稳觉。",
+        "baseline_metrics": {
+          "bleu4_char": 0.12622379854839366,
+          "rouge_l_char_f1": 0.3853211009174312
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.05460508539485393,
+          "rouge_l_char_f1": 0.21428571428571427
+        },
+        "delta": {
+          "bleu4_char": -0.07161871315353974,
+          "rouge_l_char_f1": -0.17103538663171694
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 78,
+        "baseline_response_stripped_length": 35,
+        "candidate_response_stripped_length": 38,
+        "emotion": "relaxed",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      }
+    ],
+    "top20_improvements": [
+      {
+        "sample_id": "pp:[\"val_conv_000555\",5,1]",
+        "conversation_id": "val_conv_000555",
+        "gold_response": "好，我先不拆解，也不急着给建议。你继续说，我听着。",
+        "baseline_response": "好，我不拆解，也不急着给建议。你说得对，它不只是几周没做完，也让你开始怀疑自己是否还真的喜欢烘焙。那个不敢承认的可能性，你继续说就行。",
+        "candidate_response": "好，我不拆解，也不急着给结论。你继续说，我听着。",
+        "baseline_metrics": {
+          "bleu4_char": 0.2457432914529378,
+          "rouge_l_char_f1": 0.43478260869565216
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.7432974655348964,
+          "rouge_l_char_f1": 0.8979591836734694
+        },
+        "delta": {
+          "bleu4_char": 0.49755417408195857,
+          "rouge_l_char_f1": 0.4631765749778172
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 25,
+        "baseline_response_stripped_length": 67,
+        "candidate_response_stripped_length": 24,
+        "emotion": "sadness",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000381\",19,4]",
+        "conversation_id": "val_conv_000381",
+        "gold_response": "好，今晚先不用做决定。能把这些压着的话说出来，已经很不容易了。先到这里，晚安。",
+        "baseline_response": "好，今晚先到这里。谢谢你把这些告诉我，希望你能休息一下。",
+        "candidate_response": "好，今晚先到这里。能把这些说出来，已经很不容易了。",
+        "baseline_metrics": {
+          "bleu4_char": 0.20101595468081215,
+          "rouge_l_char_f1": 0.32835820895522383
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.4742075809129353,
+          "rouge_l_char_f1": 0.6875
+        },
+        "delta": {
+          "bleu4_char": 0.2731916262321231,
+          "rouge_l_char_f1": 0.35914179104477617
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 39,
+        "baseline_response_stripped_length": 28,
+        "candidate_response_stripped_length": 25,
+        "emotion": "relaxed",
+        "history_slice": "long_16_plus",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000884\",25,4]",
+        "conversation_id": "val_conv_000884",
+        "gold_response": "好，先说到这里。你已经分清了卡住你的环节，今晚先不盯时间，按自己的节奏休息就好。",
+        "baseline_response": "好，今晚先不盯时间，把注意力放回当下。谢谢你愿意把这些告诉我，先到这里也可以。",
+        "candidate_response": "好，今晚先不盯时间，按你自己的节奏来就行。",
+        "baseline_metrics": {
+          "bleu4_char": 0.28287602457192007,
+          "rouge_l_char_f1": 0.27848101265822783
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.2722927822258205,
+          "rouge_l_char_f1": 0.5901639344262294
+        },
+        "delta": {
+          "bleu4_char": -0.010583242346099586,
+          "rouge_l_char_f1": 0.31168292176800155
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 40,
+        "baseline_response_stripped_length": 39,
+        "candidate_response_stripped_length": 21,
+        "emotion": "relaxed",
+        "history_slice": "long_16_plus",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000855\",5,2]",
+        "conversation_id": "val_conv_000855",
+        "gold_response": "好，我先听着，不给建议。你开始怀疑自己是不是根本不适合这个方向了；你继续说，我不会急着替你下结论。",
+        "baseline_response": "好，我先听着，不给建议。你说，我在这里。",
+        "candidate_response": "好，我先听着，不给建议。你说：“我已经开始怀疑，自己是不是根本不适合这个方向了。”",
+        "baseline_metrics": {
+          "bleu4_char": 0.171198271885385,
+          "rouge_l_char_f1": 0.49275362318840576
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.5918268619105762,
+          "rouge_l_char_f1": 0.7333333333333334
+        },
+        "delta": {
+          "bleu4_char": 0.4206285900251912,
+          "rouge_l_char_f1": 0.24057971014492763
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 49,
+        "baseline_response_stripped_length": 20,
+        "candidate_response_stripped_length": 41,
+        "emotion": "anxiety",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000175\",3,1]",
+        "conversation_id": "val_conv_000175",
+        "gold_response": "好，我听着，你继续说。",
+        "baseline_response": "好，你先说。我不打断，也不急着给建议。",
+        "candidate_response": "好，你先说。我听着。",
+        "baseline_metrics": {
+          "bleu4_char": 0.13264759167412227,
+          "rouge_l_char_f1": 0.3333333333333333
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.30920406534126715,
+          "rouge_l_char_f1": 0.5714285714285713
+        },
+        "delta": {
+          "bleu4_char": 0.1765564736671449,
+          "rouge_l_char_f1": 0.23809523809523797
+        },
+        "gold_response_length_bucket": "7-20",
+        "gold_response_stripped_length": 11,
+        "baseline_response_stripped_length": 19,
+        "candidate_response_stripped_length": 10,
+        "emotion": "anger",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000573\",15,4]",
+        "conversation_id": "val_conv_000573",
+        "gold_response": "去洗澡吧，先让自己放松下来。能把这件事说出来、也迈出联系朋友那一步，已经很不容易了。今晚先照顾好自己。",
+        "baseline_response": "不客气。先去做点让自己舒服的事吧，不必现在就把答案想完。",
+        "candidate_response": "好，先去做点让自己舒服的事。能把这份堵感说出来，已经很重要了。",
+        "baseline_metrics": {
+          "bleu4_char": 0.05111438662792578,
+          "rouge_l_char_f1": 0.20253164556962022
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.1515125517059781,
+          "rouge_l_char_f1": 0.4390243902439025
+        },
+        "delta": {
+          "bleu4_char": 0.10039816507805233,
+          "rouge_l_char_f1": 0.23649274467428227
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 51,
+        "baseline_response_stripped_length": 28,
+        "candidate_response_stripped_length": 31,
+        "emotion": "gratitude",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000490\",13,2]",
+        "conversation_id": "val_conv_000490",
+        "gold_response": "明白，你害怕的不是一个明确的拒绝，而是自己连一次被认真对待、被坦诚回应的机会都没有。那种被含糊带过、像不值得说明白的感觉，可能比拒绝本身更刺痛。你继续说，我先不提供沟通方式。",
+        "baseline_response": "好，我先不设计沟通方式。你继续说，我听着。",
+        "candidate_response": "我明白了，你害怕的不是一次拒绝，而是连基本的重视都没有——你期待的是一句明确的回应，而不是被当作可有可无的存在。你继续说，我先不分析，也不急着给建议。",
+        "baseline_metrics": {
+          "bleu4_char": 0.024524750294291606,
+          "rouge_l_char_f1": 0.1851851851851852
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.2727532930299763,
+          "rouge_l_char_f1": 0.4197530864197531
+        },
+        "delta": {
+          "bleu4_char": 0.2482285427356847,
+          "rouge_l_char_f1": 0.23456790123456792
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 87,
+        "baseline_response_stripped_length": 21,
+        "candidate_response_stripped_length": 75,
+        "emotion": "fear",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000747\",11,2]",
+        "conversation_id": "val_conv_000747",
+        "gold_response": "好，先说到这儿就行。你把这层拧着的感觉说出来了。",
+        "baseline_response": "好，先说到这儿。",
+        "candidate_response": "好，先说到这儿。你已经把这层拧着的东西摊开了。",
+        "baseline_metrics": {
+          "bleu4_char": 0.12033197381572708,
+          "rouge_l_char_f1": 0.5
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.5076857807232625,
+          "rouge_l_char_f1": 0.723404255319149
+        },
+        "delta": {
+          "bleu4_char": 0.38735380690753546,
+          "rouge_l_char_f1": 0.22340425531914898
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 24,
+        "baseline_response_stripped_length": 8,
+        "candidate_response_stripped_length": 23,
+        "emotion": "anxiety",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000424\",9,2]",
+        "conversation_id": "val_conv_000424",
+        "gold_response": "我听到了。你害怕的不是一次尴尬，而是失去这段朋友关系；主动发消息也像是在把自己置于“可能被拒绝”的位置，所以会更不敢动。你继续说，我先不分析。",
+        "baseline_response": "我明白了，真正让你害怕的，是你担心这次开口会变成“确认是否被排斥”的机会。你不想先发出消息，是因为害怕一旦表达，对方就会立刻否定你，甚至把你留在外面。",
+        "candidate_response": "我明白了，你害怕的不是那一句玩笑，而是它让你开始怀疑自己是否会被真正排斥，甚至不敢迈出主动联系的一步。你继续说，我先不分析。",
+        "baseline_metrics": {
+          "bleu4_char": 0.08063904710753929,
+          "rouge_l_char_f1": 0.2465753424657534
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.2853158224372504,
+          "rouge_l_char_f1": 0.46616541353383456
+        },
+        "delta": {
+          "bleu4_char": 0.20467677532971112,
+          "rouge_l_char_f1": 0.21959007106808115
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 71,
+        "baseline_response_stripped_length": 75,
+        "candidate_response_stripped_length": 62,
+        "emotion": "fear",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000255\",3,1]",
+        "conversation_id": "val_conv_000255",
+        "gold_response": "门一关，那个安静确实容易把人一下子拽进那种空落落的感觉里。\n\n刚把压了三个月的大事啃下来，紧绷的弦突然松了，那种“没了着落”的空虚感其实挺常见的。你刚才说的那份底气，和此刻这种面对空房间的恐惧，其实是两件事。前者是你对自己能力的确认，后者更像是长期一个人扛事、独自消化情绪后，身体和心里积攒的疲惫突然找上门来了。\n\n这种“一个人扛完所有事然后面对空荡荡的房间”的状态，确实会让人觉得孤单，甚至让人害怕它变成常态。但你现在能感觉到它，并且把它说出来，这本身就是在给那个空荡荡的房间添点人气。\n\n不用急着去消化下周的面试，也不用逼自己马上振作起来。就让自己在这个安静里待一会儿，感受一下那种空落落的，不用急着给它贴标签，也不用急着找解法。",
+        "baseline_response": "我在听。",
+        "candidate_response": "那种“交出报告后就彻底没了着落”的感觉，确实比单纯的忙碌更让人窒息。明明手里攥着东西，心里却像掉进了黑洞，这种悬空感最耗神。\n\n你提到的“害怕变成常态”这个念头，听起来像是在预演一种长期孤独的生活模式。这种恐惧往往比事情本身更消耗人，因为它让你意识到：如果现在不解决它，未来可能就会这样一直下去。\n\n既然你现在不想被问，那就先不用急着给下周面试找理由。你愿意多说说当时那种“空落落”的具体感受吗？是觉得时间不够用，还是某种情绪上的疏离感？",
+        "baseline_metrics": {
+          "bleu4_char": 1.850902389492222e-34,
+          "rouge_l_char_f1": 0.012698412698412697
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.08690646431486762,
+          "rouge_l_char_f1": 0.23193916349809887
+        },
+        "delta": {
+          "bleu4_char": 0.08690646431486762,
+          "rouge_l_char_f1": 0.21924075079968616
+        },
+        "gold_response_length_bucket": ">200",
+        "gold_response_stripped_length": 317,
+        "baseline_response_stripped_length": 4,
+        "candidate_response_stripped_length": 219,
+        "emotion": "loneliness",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [
+          "near_empty"
+        ],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": [
+          "near_empty"
+        ]
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000757\",11,3]",
+        "conversation_id": "val_conv_000757",
+        "gold_response": "就先按这个定：等人那截挂着，清单和能改序的两件接着推，整盘取消先放一边。入住时间和已订的东西回头只估接口，不一次拍死。",
+        "baseline_response": "这样就挺好：清单和能改序的先推，整盘取消先放一边，接口回头估。这几天按这个节奏来就行。",
+        "candidate_response": "这样定挺稳的：清单和能改序的先推，等人的那截单独挂着，整盘取消先放一边。入住和已订的事回头估接口就行，不急着一次拍死。",
+        "baseline_metrics": {
+          "bleu4_char": 0.2989004736365794,
+          "rouge_l_char_f1": 0.4509803921568628
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.4881798975112768,
+          "rouge_l_char_f1": 0.6610169491525424
+        },
+        "delta": {
+          "bleu4_char": 0.18927942387469737,
+          "rouge_l_char_f1": 0.21003655699567958
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 59,
+        "baseline_response_stripped_length": 43,
+        "candidate_response_stripped_length": 59,
+        "emotion": "relaxed",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000801\",11,2]",
+        "conversation_id": "val_conv_000801",
+        "gold_response": "好，先这样。你先下。",
+        "baseline_response": "好，先这样。轻松打完就关，你去吧。",
+        "candidate_response": "好，先这样。你去吧。",
+        "baseline_metrics": {
+          "bleu4_char": 0.34823528327578535,
+          "rouge_l_char_f1": 0.5925925925925927
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.6989307622784944,
+          "rouge_l_char_f1": 0.8000000000000002
+        },
+        "delta": {
+          "bleu4_char": 0.35069547900270903,
+          "rouge_l_char_f1": 0.20740740740740748
+        },
+        "gold_response_length_bucket": "7-20",
+        "gold_response_stripped_length": 10,
+        "baseline_response_stripped_length": 17,
+        "candidate_response_stripped_length": 10,
+        "emotion": "relaxed",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000658\",47,5]",
+        "conversation_id": "val_conv_000658",
+        "gold_response": "好，今天先不盯邮箱了，让脑子暂时停一会儿。你不用现在就确认哪条路能走通，先到这里也可以。",
+        "baseline_response": "好，今天先不盯邮箱，也不用继续想下一步。你就停在这里，让脑子歇一会儿。",
+        "candidate_response": "好，今天先不盯邮箱，让脑子停一会儿。你已经知道自己还有路可选，不必现在决定哪条走通。",
+        "baseline_metrics": {
+          "bleu4_char": 0.34554689128949395,
+          "rouge_l_char_f1": 0.4303797468354431
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.4040238608704026,
+          "rouge_l_char_f1": 0.6279069767441862
+        },
+        "delta": {
+          "bleu4_char": 0.058476969580908644,
+          "rouge_l_char_f1": 0.19752722990874305
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 44,
+        "baseline_response_stripped_length": 35,
+        "candidate_response_stripped_length": 42,
+        "emotion": "mixed",
+        "history_slice": "long_16_plus",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000596\",15,3]",
+        "conversation_id": "val_conv_000596",
+        "gold_response": "这个安排很稳：先固定一个能执行的版本，不提前为未知情况反复重排。之后如果宠物的照护需求真的变化，再根据实际情况调整就好。你不需要现在就把所有可能的未来都安排妥当。",
+        "baseline_response": "这就够了：先把15分钟守住，再看后续如何调整。哪怕只保留一点连续性，也是你在为自己争取空间。",
+        "candidate_response": "这就够了：先把15分钟守住，再看实际执行情况。宠物状况会变化，但你可以根据实际情况调整，不需要一次把规则定死。",
+        "baseline_metrics": {
+          "bleu4_char": 0.030330650484291583,
+          "rouge_l_char_f1": 0.1889763779527559
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.15423337532462353,
+          "rouge_l_char_f1": 0.3823529411764705
+        },
+        "delta": {
+          "bleu4_char": 0.12390272484033195,
+          "rouge_l_char_f1": 0.1933765632237146
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 81,
+        "baseline_response_stripped_length": 46,
+        "candidate_response_stripped_length": 55,
+        "emotion": "mixed",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000638\",3,1]",
+        "conversation_id": "val_conv_000638",
+        "gold_response": "好，先不分析，也不替你做判断。你已经在认真准备备选方案了，今天就聊到这里。",
+        "baseline_response": "好，那就先不分析，也不急着做决定。你已经把自己的选择从“被动适应”变成了“主动准备”，这本身就是一种很清晰的进展。今天就到这里，祝你接下来能顺利地探索这条新的路。",
+        "candidate_response": "好，那就先不分析。你已经准备好了一个新的方向，今天就到这里也可以。",
+        "baseline_metrics": {
+          "bleu4_char": 0.15907551162629324,
+          "rouge_l_char_f1": 0.4067796610169491
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.2777182540447784,
+          "rouge_l_char_f1": 0.6000000000000001
+        },
+        "delta": {
+          "bleu4_char": 0.11864274241848516,
+          "rouge_l_char_f1": 0.19322033898305097
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 37,
+        "baseline_response_stripped_length": 81,
+        "candidate_response_stripped_length": 33,
+        "emotion": "neutral",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000580\",7,1]",
+        "conversation_id": "val_conv_000580",
+        "gold_response": "明白，你还没决定退考，只是被反复打断后，脑子会冒出“干脆别考了”的念头。先别在烦躁的时候做这个决定，把退考流程先放一边，今天只处理一个小复习目标；等情绪平下来，再单独评估要不要考、怎么调整。",
+        "baseline_response": "听到你这么说，我担心你现在是不是真的已经在考虑退考了？请先告诉我：你现在是否安全？身边有没有可能伤害自己的念头？",
+        "candidate_response": "听起来你并不是真的决定退考，而是复习被打断后，那种“万一考不上怎么办”的念头冒出来，让你更难安心。先别急着做这个决定，给自己留点余地：如果这次复习明显卡住了，可以先暂停几天，找老师确认一下具体原因；如果只是暂时跟不上节奏，也可以调整目标，比如只完成一部分内容。",
+        "baseline_metrics": {
+          "bleu4_char": 0.03334482800419284,
+          "rouge_l_char_f1": 0.11920529801324505
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.15151599038245933,
+          "rouge_l_char_f1": 0.3111111111111111
+        },
+        "delta": {
+          "bleu4_char": 0.1181711623782665,
+          "rouge_l_char_f1": 0.19190581309786608
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 95,
+        "baseline_response_stripped_length": 56,
+        "candidate_response_stripped_length": 130,
+        "emotion": "anxiety",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000900\",11,2]",
+        "conversation_id": "val_conv_000900",
+        "gold_response": "先说到这儿就行。\n\n连自己都觉得夸张、不好意思开口，这层我记下了。你不往下说也完全可以。",
+        "baseline_response": "好，先到这儿。你说到这儿就够了。",
+        "candidate_response": "好，先到这儿。你不想再往下说也可以。",
+        "baseline_metrics": {
+          "bleu4_char": 0.07458925126011431,
+          "rouge_l_char_f1": 0.27586206896551724
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.10143772024579308,
+          "rouge_l_char_f1": 0.4666666666666666
+        },
+        "delta": {
+          "bleu4_char": 0.02684846898567876,
+          "rouge_l_char_f1": 0.19080459770114938
+        },
+        "gold_response_length_bucket": "21-50",
+        "gold_response_stripped_length": 44,
+        "baseline_response_stripped_length": 16,
+        "candidate_response_stripped_length": 18,
+        "emotion": "shame",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000745\",3,1]",
+        "conversation_id": "val_conv_000745",
+        "gold_response": "好，先这样。",
+        "baseline_response": "明白，那就当是换个环境适应一下。不想深究也行，先轻松一点就好。",
+        "candidate_response": "好，那就先这样。不用急着想清楚，也不用逼自己马上找到人。",
+        "baseline_metrics": {
+          "bleu4_char": 0.05834347180338519,
+          "rouge_l_char_f1": 0.16216216216216214
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.1385420272734473,
+          "rouge_l_char_f1": 0.35294117647058826
+        },
+        "delta": {
+          "bleu4_char": 0.0801985554700621,
+          "rouge_l_char_f1": 0.19077901430842611
+        },
+        "gold_response_length_bucket": "<=6",
+        "gold_response_stripped_length": 6,
+        "baseline_response_stripped_length": 31,
+        "candidate_response_stripped_length": 28,
+        "emotion": "anxiety",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000772\",3,2]",
+        "conversation_id": "val_conv_000772",
+        "gold_response": "好，先到这儿。这事没那么重，轻一点就行。",
+        "baseline_response": "明白，那就先不深挖。你愿意说的时候再说就好。",
+        "candidate_response": "好，那就先不深挖了。轻一点聊也行，先到这里。",
+        "baseline_metrics": {
+          "bleu4_char": 0.07832899330004497,
+          "rouge_l_char_f1": 0.23809523809523808
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.250737833894674,
+          "rouge_l_char_f1": 0.4285714285714286
+        },
+        "delta": {
+          "bleu4_char": 0.17240884059462905,
+          "rouge_l_char_f1": 0.19047619047619052
+        },
+        "gold_response_length_bucket": "7-20",
+        "gold_response_stripped_length": 20,
+        "baseline_response_stripped_length": 22,
+        "candidate_response_stripped_length": 22,
+        "emotion": "mixed",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      },
+      {
+        "sample_id": "pp:[\"val_conv_000831\",9,1]",
+        "conversation_id": "val_conv_000831",
+        "gold_response": "怕的是追问会把掉了多少一次性摊开，第一次带的小项目可能被抽走，摊不摊开就更动不了——这不是空嘀咕，是真怕一说就完蛋。\n\n你继续倒也行，说到这儿停也行。",
+        "baseline_response": "怕的是一个问头一下就把小项目抽走，后面摊不开的决定也跟着悬着。你怕的不是“说了会不会完蛋”，而是一旦开口，风险一下子显在眼前。\n\n空下来嘀咕的那句还在，但你现在更紧的是“万一他一问就没了”。这块你一直拖着，说明它对你来说确实比别的更重要，也比“以后再说”要重。\n\n你继续说就行，我不支招。",
+        "candidate_response": "怕的是一个问头一下就把掉的那块全摊开，小项目可能直接被抽走，后面那个摊不开的决定也就跟着悬了。一说就完蛋的感觉，比空下来嘀咕更沉。\n\n你继续说就行。",
+        "baseline_metrics": {
+          "bleu4_char": 0.07204266737890876,
+          "rouge_l_char_f1": 0.3004694835680751
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.2416632609178526,
+          "rouge_l_char_f1": 0.4827586206896552
+        },
+        "delta": {
+          "bleu4_char": 0.16962059353894382,
+          "rouge_l_char_f1": 0.18228913712158007
+        },
+        "gold_response_length_bucket": "51-100",
+        "gold_response_stripped_length": 75,
+        "baseline_response_stripped_length": 144,
+        "candidate_response_stripped_length": 74,
+        "emotion": "fear",
+        "history_slice": "medium_6_15",
+        "baseline_format_flags": [],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": []
+      }
+    ],
+    "long_gt200": {
+      "n": 528,
+      "paired_rouge": {
+        "candidate_better": 273,
+        "tie": 7,
+        "candidate_worse": 248
+      },
+      "maximum_regression": {
+        "sample_id": "pp:[\"val_conv_000373\",5,2]",
+        "conversation_id": "val_conv_000373",
+        "gold_response": "这种反复对照会让注意力不断扫描身体，细小变化也可能被放大；但“感觉哪里都不对”不等于病情正在朝家人当年的方向发展。\n\n你可以先只做一次简短记录，分成两栏：\n\n- **事实**：具体出现了什么、何时出现、是否加重、有没有客观检查结果。\n- **担心**：你联想到的最坏情况，以及目前支持它的证据。\n\n暂时减少反复搜索，把观察限定为每天固定一次；如果症状持续、明显加重或影响正常生活，安排正规就诊，比继续自行对照更可靠。若出现突然严重恶化、呼吸困难、胸痛、晕厥或意识异常，应及时就医。",
+        "baseline_response": "这很能理解——你不是在否定自己，而是在用过去一次经历重新评估现在的情况。对照不会让事情变得更清楚，反而容易把“可能”变成“必须如此”。\n\n可以先做两件事：\n\n1. 把“对照”改成“记录”。写下**已经发生的**：症状何时开始、频率、程度、是否有变化、有没有诱发因素；**未发生的**：是否出现新的严重症状、是否影响日常生活、是否需要紧急就医。  \n2. 每天只记一件最重要的事：今天症状有没有变化、是否影响睡眠或日常活动。其余都归类为“不确定”。\n\n同时，把“我是不是拖到了那个阶段”的担心，单独写下来，不把它当作诊断。若症状突然加重、出现呼吸困难、胸痛、晕厥、意识异常、持续高热或大量出血，立即联系急诊或就医。",
+        "candidate_response": "这很常见：一个人经历过一次严重后果，大脑会自动放大类似的警报，即使现在没有证据也很难停下来。你不必立刻得出“一定是”或“绝对没事”的结论，可以先做三件事：\n\n1. 把“一定会发生”改成“可能会发生”。例如：“我担心自己也会住院，不是已经确定。”  \n2. 检查是否有新的、明显的危险信号：呼吸困难、胸痛、意识异常、持续高烧、大量出血、剧烈疼痛、无法平躺。如果有，立即联系急诊或就医。  \n3. 将注意力从“会不会发生”拉回到“这几天症状如何变化”，并记下具体细节。若症状持续加重，及时就医即可。\n\n你不需要现在就解决所有疑虑，先让这些念头不再替你决定下一步就好。",
+        "baseline_metrics": {
+          "bleu4_char": 0.1185158145637172,
+          "rouge_l_char_f1": 0.28136882129277563
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.10964136601389132,
+          "rouge_l_char_f1": 0.1603206412825651
+        },
+        "delta": {
+          "bleu4_char": -0.008874448549825872,
+          "rouge_l_char_f1": -0.12104818001021053
+        },
+        "gold_response_length_bucket": ">200",
+        "gold_response_stripped_length": 240,
+        "baseline_response_stripped_length": 306,
+        "candidate_response_stripped_length": 281,
+        "emotion": "anxiety",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [
+          "markdown:bold"
+        ],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": [
+          "markdown:bold"
+        ]
+      },
+      "maximum_improvement": {
+        "sample_id": "pp:[\"val_conv_000255\",3,1]",
+        "conversation_id": "val_conv_000255",
+        "gold_response": "门一关，那个安静确实容易把人一下子拽进那种空落落的感觉里。\n\n刚把压了三个月的大事啃下来，紧绷的弦突然松了，那种“没了着落”的空虚感其实挺常见的。你刚才说的那份底气，和此刻这种面对空房间的恐惧，其实是两件事。前者是你对自己能力的确认，后者更像是长期一个人扛事、独自消化情绪后，身体和心里积攒的疲惫突然找上门来了。\n\n这种“一个人扛完所有事然后面对空荡荡的房间”的状态，确实会让人觉得孤单，甚至让人害怕它变成常态。但你现在能感觉到它，并且把它说出来，这本身就是在给那个空荡荡的房间添点人气。\n\n不用急着去消化下周的面试，也不用逼自己马上振作起来。就让自己在这个安静里待一会儿，感受一下那种空落落的，不用急着给它贴标签，也不用急着找解法。",
+        "baseline_response": "我在听。",
+        "candidate_response": "那种“交出报告后就彻底没了着落”的感觉，确实比单纯的忙碌更让人窒息。明明手里攥着东西，心里却像掉进了黑洞，这种悬空感最耗神。\n\n你提到的“害怕变成常态”这个念头，听起来像是在预演一种长期孤独的生活模式。这种恐惧往往比事情本身更消耗人，因为它让你意识到：如果现在不解决它，未来可能就会这样一直下去。\n\n既然你现在不想被问，那就先不用急着给下周面试找理由。你愿意多说说当时那种“空落落”的具体感受吗？是觉得时间不够用，还是某种情绪上的疏离感？",
+        "baseline_metrics": {
+          "bleu4_char": 1.850902389492222e-34,
+          "rouge_l_char_f1": 0.012698412698412697
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.08690646431486762,
+          "rouge_l_char_f1": 0.23193916349809887
+        },
+        "delta": {
+          "bleu4_char": 0.08690646431486762,
+          "rouge_l_char_f1": 0.21924075079968616
+        },
+        "gold_response_length_bucket": ">200",
+        "gold_response_stripped_length": 317,
+        "baseline_response_stripped_length": 4,
+        "candidate_response_stripped_length": 219,
+        "emotion": "loneliness",
+        "history_slice": "short_1_5",
+        "baseline_format_flags": [
+          "near_empty"
+        ],
+        "candidate_format_flags": [],
+        "introduced_format_flags": [],
+        "resolved_format_flags": [
+          "near_empty"
+        ]
+      },
+      "concentration": {
+        "conversations": 329,
+        "net_positive_conversations": 166,
+        "net_negative_conversations": 161,
+        "net_tie_conversations": 2,
+        "sample_rouge_outcome": {
+          "candidate_better": 273,
+          "tie": 7,
+          "candidate_worse": 248
+        },
+        "gross_improvement_sum": 5.865372389494697,
+        "gross_regression_magnitude": 5.586502193670039,
+        "top20_conversations_share_of_gross_improvement": 0.3085866776148739,
+        "top20_conversations_share_of_gross_regression": 0.3069685729740582,
+        "top20_net_improvement_conversations": [
+          {
+            "conversation_id": "val_conv_000255",
+            "samples": 1,
+            "delta_sum": 0.21924075079968616,
+            "mean_delta": 0.21924075079968616,
+            "gross_improvement_sum": 0.21924075079968616,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000293",
+            "samples": 3,
+            "delta_sum": 0.14997750891089537,
+            "mean_delta": 0.049992502970298454,
+            "gross_improvement_sum": 0.14997750891089537,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000418",
+            "samples": 2,
+            "delta_sum": 0.10940824380565883,
+            "mean_delta": 0.05470412190282942,
+            "gross_improvement_sum": 0.10940824380565883,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000710",
+            "samples": 1,
+            "delta_sum": 0.10643939393939389,
+            "mean_delta": 0.10643939393939389,
+            "gross_improvement_sum": 0.10643939393939389,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000691",
+            "samples": 2,
+            "delta_sum": 0.10622634159868882,
+            "mean_delta": 0.05311317079934441,
+            "gross_improvement_sum": 0.10622634159868882,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000796",
+            "samples": 2,
+            "delta_sum": 0.09935507682245107,
+            "mean_delta": 0.04967753841122553,
+            "gross_improvement_sum": 0.09935507682245107,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000824",
+            "samples": 2,
+            "delta_sum": 0.09648193879942607,
+            "mean_delta": 0.048240969399713035,
+            "gross_improvement_sum": 0.09867492125556637,
+            "gross_regression_magnitude": 0.002192982456140302
+          },
+          {
+            "conversation_id": "val_conv_000317",
+            "samples": 1,
+            "delta_sum": 0.08708378456277616,
+            "mean_delta": 0.08708378456277616,
+            "gross_improvement_sum": 0.08708378456277616,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000143",
+            "samples": 1,
+            "delta_sum": 0.07426837172955653,
+            "mean_delta": 0.07426837172955653,
+            "gross_improvement_sum": 0.07426837172955653,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000177",
+            "samples": 1,
+            "delta_sum": 0.07401080747774136,
+            "mean_delta": 0.07401080747774136,
+            "gross_improvement_sum": 0.07401080747774136,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000267",
+            "samples": 1,
+            "delta_sum": 0.07362463806264807,
+            "mean_delta": 0.07362463806264807,
+            "gross_improvement_sum": 0.07362463806264807,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000304",
+            "samples": 3,
+            "delta_sum": 0.06990711433001436,
+            "mean_delta": 0.02330237144333812,
+            "gross_improvement_sum": 0.06990711433001436,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000288",
+            "samples": 1,
+            "delta_sum": 0.06886082408470467,
+            "mean_delta": 0.06886082408470467,
+            "gross_improvement_sum": 0.06886082408470467,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000292",
+            "samples": 3,
+            "delta_sum": 0.066724642729901,
+            "mean_delta": 0.02224154757663367,
+            "gross_improvement_sum": 0.07774871041254908,
+            "gross_regression_magnitude": 0.011024067682648075
+          },
+          {
+            "conversation_id": "val_conv_000690",
+            "samples": 2,
+            "delta_sum": 0.06570807976025503,
+            "mean_delta": 0.032854039880127514,
+            "gross_improvement_sum": 0.06570807976025503,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000336",
+            "samples": 2,
+            "delta_sum": 0.06504547470420133,
+            "mean_delta": 0.032522737352100664,
+            "gross_improvement_sum": 0.06504547470420133,
+            "gross_regression_magnitude": -0.0
+          },
+          {
+            "conversation_id": "val_conv_000681",
+            "samples": 4,
+            "delta_sum": 0.06375224329248944,
+            "mean_delta": 0.01593806082312236,
+            "gross_improvement_sum": 0.07503736535605462,
+            "gross_regression_magnitude": 0.01128512206356519
+          },
+          {
+            "conversation_id": "val_conv_000355",
+            "samples": 3,
+            "delta_sum": 0.05939060060463827,
+            "mean_delta": 0.01979686686821276,
+            "gross_improvement_sum": 0.06970941325722735,
+            "gross_regression_magnitude": 0.010318812652589077
+          },
+          {
+            "conversation_id": "val_conv_000212",
+            "samples": 3,
+            "delta_sum": 0.05867450605023705,
+            "mean_delta": 0.019558168683412352,
+            "gross_improvement_sum": 0.05989759802675368,
+            "gross_regression_magnitude": 0.001223091976516627
+          },
+          {
+            "conversation_id": "val_conv_000142",
+            "samples": 1,
+            "delta_sum": 0.05684067549548208,
+            "mean_delta": 0.05684067549548208,
+            "gross_improvement_sum": 0.05684067549548208,
+            "gross_regression_magnitude": -0.0
+          }
+        ],
+        "top20_net_regression_conversations": [
+          {
+            "conversation_id": "val_conv_000373",
+            "samples": 2,
+            "delta_sum": -0.16147510826830178,
+            "mean_delta": -0.08073755413415089,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.16147510826830178
+          },
+          {
+            "conversation_id": "val_conv_000348",
+            "samples": 4,
+            "delta_sum": -0.10545188989406584,
+            "mean_delta": -0.02636297247351646,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.10545188989406584
+          },
+          {
+            "conversation_id": "val_conv_000174",
+            "samples": 2,
+            "delta_sum": -0.10168185094359616,
+            "mean_delta": -0.05084092547179808,
+            "gross_improvement_sum": 0.003868171190091335,
+            "gross_regression_magnitude": 0.1055500221336875
+          },
+          {
+            "conversation_id": "val_conv_000266",
+            "samples": 3,
+            "delta_sum": -0.08598984473806714,
+            "mean_delta": -0.028663281579355715,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.08598984473806714
+          },
+          {
+            "conversation_id": "val_conv_000250",
+            "samples": 1,
+            "delta_sum": -0.08525397808038343,
+            "mean_delta": -0.08525397808038343,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.08525397808038343
+          },
+          {
+            "conversation_id": "val_conv_000235",
+            "samples": 2,
+            "delta_sum": -0.08069647347120792,
+            "mean_delta": -0.04034823673560396,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.08069647347120792
+          },
+          {
+            "conversation_id": "val_conv_000168",
+            "samples": 2,
+            "delta_sum": -0.07566495461694223,
+            "mean_delta": -0.03783247730847111,
+            "gross_improvement_sum": 0.023845059178785877,
+            "gross_regression_magnitude": 0.0995100137957281
+          },
+          {
+            "conversation_id": "val_conv_000149",
+            "samples": 2,
+            "delta_sum": -0.07565210849498274,
+            "mean_delta": -0.03782605424749137,
+            "gross_improvement_sum": 0.02072836731002764,
+            "gross_regression_magnitude": 0.09638047580501038
+          },
+          {
+            "conversation_id": "val_conv_000852",
+            "samples": 2,
+            "delta_sum": -0.07523598377230531,
+            "mean_delta": -0.037617991886152655,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.07523598377230531
+          },
+          {
+            "conversation_id": "val_conv_000502",
+            "samples": 1,
+            "delta_sum": -0.07444222292906799,
+            "mean_delta": -0.07444222292906799,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.07444222292906799
+          },
+          {
+            "conversation_id": "val_conv_000342",
+            "samples": 1,
+            "delta_sum": -0.07185980211303036,
+            "mean_delta": -0.07185980211303036,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.07185980211303036
+          },
+          {
+            "conversation_id": "val_conv_000306",
+            "samples": 3,
+            "delta_sum": -0.07174839043576126,
+            "mean_delta": -0.02391613014525375,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.07174839043576126
+          },
+          {
+            "conversation_id": "val_conv_000369",
+            "samples": 2,
+            "delta_sum": -0.06874637067108835,
+            "mean_delta": -0.034373185335544176,
+            "gross_improvement_sum": 0.0041344026548671975,
+            "gross_regression_magnitude": 0.07288077332595555
+          },
+          {
+            "conversation_id": "val_conv_000096",
+            "samples": 2,
+            "delta_sum": -0.06806390556052153,
+            "mean_delta": -0.03403195278026076,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.06806390556052153
+          },
+          {
+            "conversation_id": "val_conv_000286",
+            "samples": 2,
+            "delta_sum": -0.06435067173243281,
+            "mean_delta": -0.032175335866216404,
+            "gross_improvement_sum": 0.025877501760032257,
+            "gross_regression_magnitude": 0.09022817349246506
+          },
+          {
+            "conversation_id": "val_conv_000736",
+            "samples": 3,
+            "delta_sum": -0.060749923657515886,
+            "mean_delta": -0.020249974552505295,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.060749923657515886
+          },
+          {
+            "conversation_id": "val_conv_000337",
+            "samples": 2,
+            "delta_sum": -0.06050168658250127,
+            "mean_delta": -0.030250843291250634,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.06050168658250127
+          },
+          {
+            "conversation_id": "val_conv_000055",
+            "samples": 1,
+            "delta_sum": -0.058448996092170885,
+            "mean_delta": -0.058448996092170885,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.058448996092170885
+          },
+          {
+            "conversation_id": "val_conv_000245",
+            "samples": 3,
+            "delta_sum": -0.0569902740821123,
+            "mean_delta": -0.018996758027370764,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.0569902740821123
+          },
+          {
+            "conversation_id": "val_conv_000866",
+            "samples": 2,
+            "delta_sum": -0.05509803279716982,
+            "mean_delta": -0.02754901639858491,
+            "gross_improvement_sum": 0.0,
+            "gross_regression_magnitude": 0.05509803279716982
+          }
+        ],
+        "leave_one_conversation_out_delta_range": [
+          0.00011314885203979222,
+          0.0008371583728003012
+        ],
+        "leave_largest_net_improvement_conversation_out_delta": 0.00011314885203979222,
+        "note": "Top20 fixed descriptive summaries and leave-one-out sensitivity; no new selection gate or new slice."
+      }
+    },
+    "overall_concentration": {
+      "conversations": 900,
+      "net_positive_conversations": 444,
+      "net_negative_conversations": 420,
+      "net_tie_conversations": 36,
+      "sample_rouge_outcome": {
+        "candidate_better": 1038,
+        "tie": 300,
+        "candidate_worse": 1016
+      },
+      "gross_improvement_sum": 36.571754576305,
+      "gross_regression_magnitude": 36.062383690002754,
+      "top20_conversations_share_of_gross_improvement": 0.15060962462141816,
+      "top20_conversations_share_of_gross_regression": 0.16761899209422756,
+      "top20_net_improvement_conversations": [
+        {
+          "conversation_id": "val_conv_000555",
+          "samples": 4,
+          "delta_sum": 0.6230973485585519,
+          "mean_delta": 0.15577433713963798,
+          "gross_improvement_sum": 0.6230973485585519,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000381",
+          "samples": 4,
+          "delta_sum": 0.4356233467599251,
+          "mean_delta": 0.10890583668998127,
+          "gross_improvement_sum": 0.4378379136890589,
+          "gross_regression_magnitude": 0.0022145669291338543
+        },
+        {
+          "conversation_id": "val_conv_000573",
+          "samples": 4,
+          "delta_sum": 0.2946195070849321,
+          "mean_delta": 0.07365487677123303,
+          "gross_improvement_sum": 0.3101423829019256,
+          "gross_regression_magnitude": 0.015522875816993464
+        },
+        {
+          "conversation_id": "val_conv_000801",
+          "samples": 2,
+          "delta_sum": 0.28209085573555975,
+          "mean_delta": 0.14104542786777988,
+          "gross_improvement_sum": 0.28209085573555975,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000884",
+          "samples": 4,
+          "delta_sum": 0.28132119903431113,
+          "mean_delta": 0.07033029975857778,
+          "gross_improvement_sum": 0.33468686018547383,
+          "gross_regression_magnitude": 0.0533656611511627
+        },
+        {
+          "conversation_id": "val_conv_000582",
+          "samples": 4,
+          "delta_sum": 0.27530874717519005,
+          "mean_delta": 0.06882718679379751,
+          "gross_improvement_sum": 0.27612574063924233,
+          "gross_regression_magnitude": 0.0008169934640522847
+        },
+        {
+          "conversation_id": "val_conv_000490",
+          "samples": 3,
+          "delta_sum": 0.27120003170713436,
+          "mean_delta": 0.09040001056904479,
+          "gross_improvement_sum": 0.27120003170713436,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000855",
+          "samples": 5,
+          "delta_sum": 0.2529470553387983,
+          "mean_delta": 0.05058941106775966,
+          "gross_improvement_sum": 0.2780626102817265,
+          "gross_regression_magnitude": 0.02511555494292822
+        },
+        {
+          "conversation_id": "val_conv_000658",
+          "samples": 5,
+          "delta_sum": 0.2484024656382634,
+          "mean_delta": 0.04968049312765268,
+          "gross_improvement_sum": 0.28428032823368327,
+          "gross_regression_magnitude": 0.03587786259541986
+        },
+        {
+          "conversation_id": "val_conv_000175",
+          "samples": 1,
+          "delta_sum": 0.23809523809523797,
+          "mean_delta": 0.23809523809523797,
+          "gross_improvement_sum": 0.23809523809523797,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000747",
+          "samples": 3,
+          "delta_sum": 0.22879042927702148,
+          "mean_delta": 0.07626347642567383,
+          "gross_improvement_sum": 0.26154333143290864,
+          "gross_regression_magnitude": 0.032752902155887165
+        },
+        {
+          "conversation_id": "val_conv_000387",
+          "samples": 4,
+          "delta_sum": 0.22175458090342318,
+          "mean_delta": 0.055438645225855794,
+          "gross_improvement_sum": 0.22175458090342318,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000255",
+          "samples": 1,
+          "delta_sum": 0.21924075079968616,
+          "mean_delta": 0.21924075079968616,
+          "gross_improvement_sum": 0.21924075079968616,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000733",
+          "samples": 3,
+          "delta_sum": 0.21007336350391317,
+          "mean_delta": 0.07002445450130439,
+          "gross_improvement_sum": 0.21007336350391317,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000757",
+          "samples": 3,
+          "delta_sum": 0.20973290374340142,
+          "mean_delta": 0.06991096791446715,
+          "gross_improvement_sum": 0.21003655699567958,
+          "gross_regression_magnitude": 0.00030365325227815765
+        },
+        {
+          "conversation_id": "val_conv_000824",
+          "samples": 3,
+          "delta_sum": 0.19820293622421098,
+          "mean_delta": 0.06606764540807032,
+          "gross_improvement_sum": 0.20039591868035128,
+          "gross_regression_magnitude": 0.002192982456140302
+        },
+        {
+          "conversation_id": "val_conv_000638",
+          "samples": 1,
+          "delta_sum": 0.19322033898305097,
+          "mean_delta": 0.19322033898305097,
+          "gross_improvement_sum": 0.19322033898305097,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000772",
+          "samples": 2,
+          "delta_sum": 0.19150531469148332,
+          "mean_delta": 0.09575265734574166,
+          "gross_improvement_sum": 0.19150531469148332,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000745",
+          "samples": 1,
+          "delta_sum": 0.19077901430842611,
+          "mean_delta": 0.19077901430842611,
+          "gross_improvement_sum": 0.19077901430842611,
+          "gross_regression_magnitude": -0.0
+        },
+        {
+          "conversation_id": "val_conv_000596",
+          "samples": 3,
+          "delta_sum": 0.18523103579494282,
+          "mean_delta": 0.061743678598314276,
+          "gross_improvement_sum": 0.19831501503123664,
+          "gross_regression_magnitude": 0.013083979236293813
+        }
+      ],
+      "top20_net_regression_conversations": [
+        {
+          "conversation_id": "val_conv_000047",
+          "samples": 2,
+          "delta_sum": -0.5247810215227495,
+          "mean_delta": -0.26239051076137476,
+          "gross_improvement_sum": 0.0,
+          "gross_regression_magnitude": 0.5247810215227495
+        },
+        {
+          "conversation_id": "val_conv_000856",
+          "samples": 8,
+          "delta_sum": -0.4228443228073779,
+          "mean_delta": -0.052855540350922235,
+          "gross_improvement_sum": 0.001782046635254303,
+          "gross_regression_magnitude": 0.4246263694426322
+        },
+        {
+          "conversation_id": "val_conv_000768",
+          "samples": 2,
+          "delta_sum": -0.39466839798828107,
+          "mean_delta": -0.19733419899414054,
+          "gross_improvement_sum": 0.00024685624900711023,
+          "gross_regression_magnitude": 0.3949152542372882
+        },
+        {
+          "conversation_id": "val_conv_000735",
+          "samples": 3,
+          "delta_sum": -0.35005415234572135,
+          "mean_delta": -0.11668471744857378,
+          "gross_improvement_sum": 0.0,
+          "gross_regression_magnitude": 0.35005415234572135
+        },
+        {
+          "conversation_id": "val_conv_000622",
+          "samples": 3,
+          "delta_sum": -0.34754152655356235,
+          "mean_delta": -0.11584717551785412,
+          "gross_improvement_sum": 0.1145932379067835,
+          "gross_regression_magnitude": 0.46213476446034585
+        },
+        {
+          "conversation_id": "val_conv_000483",
+          "samples": 4,
+          "delta_sum": -0.3209893868080732,
+          "mean_delta": -0.0802473467020183,
+          "gross_improvement_sum": 0.08616383616383619,
+          "gross_regression_magnitude": 0.4071532229719094
+        },
+        {
+          "conversation_id": "val_conv_000416",
+          "samples": 4,
+          "delta_sum": -0.25541152652556787,
+          "mean_delta": -0.06385288163139197,
+          "gross_improvement_sum": 0.0,
+          "gross_regression_magnitude": 0.25541152652556787
+        },
+        {
+          "conversation_id": "val_conv_000462",
+          "samples": 1,
+          "delta_sum": -0.249107598164202,
+          "mean_delta": -0.249107598164202,
+          "gross_improvement_sum": 0.0,
+          "gross_regression_magnitude": 0.249107598164202
+        },
+        {
+          "conversation_id": "val_conv_000574",
+          "samples": 2,
+          "delta_sum": -0.24650722235377695,
+          "mean_delta": -0.12325361117688848,
+          "gross_improvement_sum": 0.0,
+          "gross_regression_magnitude": 0.24650722235377695
+        },
+        {
+          "conversation_id": "val_conv_000686",
+          "samples": 3,
+          "delta_sum": -0.24481529902873367,
+          "mean_delta": -0.08160509967624456,
+          "gross_improvement_sum": 0.0016623787848802363,
+          "gross_regression_magnitude": 0.2464776778136139
+        },
+        {
+          "conversation_id": "val_conv_000740",
+          "samples": 3,
+          "delta_sum": -0.2411651427806319,
+          "mean_delta": -0.08038838092687729,
+          "gross_improvement_sum": 0.06663754418013579,
+          "gross_regression_magnitude": 0.3078026869607677
+        },
+        {
+          "conversation_id": "val_conv_000744",
+          "samples": 1,
+          "delta_sum": -0.22819767441860472,
+          "mean_delta": -0.22819767441860472,
+          "gross_improvement_sum": 0.0,
+          "gross_regression_magnitude": 0.22819767441860472
+        },
+        {
+          "conversation_id": "val_conv_000447",
+          "samples": 4,
+          "delta_sum": -0.22376111773022833,
+          "mean_delta": -0.05594027943255708,
+          "gross_improvement_sum": 0.008763693270735534,
+          "gross_regression_magnitude": 0.23252481100096387
+        },
+        {
+          "conversation_id": "val_conv_000294",
+          "samples": 3,
+          "delta_sum": -0.21638044362216652,
+          "mean_delta": -0.07212681454072217,
+          "gross_improvement_sum": 0.02242000065772981,
+          "gross_regression_magnitude": 0.23880044427989633
+        },
+        {
+          "conversation_id": "val_conv_000395",
+          "samples": 3,
+          "delta_sum": -0.21115614208397704,
+          "mean_delta": -0.07038538069465901,
+          "gross_improvement_sum": 0.018041237113402053,
+          "gross_regression_magnitude": 0.2291973791973791
+        },
+        {
+          "conversation_id": "val_conv_000727",
+          "samples": 2,
+          "delta_sum": -0.20468895669124512,
+          "mean_delta": -0.10234447834562256,
+          "gross_improvement_sum": 0.0,
+          "gross_regression_magnitude": 0.20468895669124512
+        },
+        {
+          "conversation_id": "val_conv_000655",
+          "samples": 4,
+          "delta_sum": -0.20462207100312285,
+          "mean_delta": -0.05115551775078071,
+          "gross_improvement_sum": 0.009865716634694432,
+          "gross_regression_magnitude": 0.21448778763781728
+        },
+        {
+          "conversation_id": "val_conv_000251",
+          "samples": 3,
+          "delta_sum": -0.19501355991911842,
+          "mean_delta": -0.06500451997303948,
+          "gross_improvement_sum": 0.0,
+          "gross_regression_magnitude": 0.19501355991911842
+        },
+        {
+          "conversation_id": "val_conv_000883",
+          "samples": 5,
+          "delta_sum": -0.18730707239679736,
+          "mean_delta": -0.037461414479359474,
+          "gross_improvement_sum": 0.029121270746359867,
+          "gross_regression_magnitude": 0.21642834314315723
+        },
+        {
+          "conversation_id": "val_conv_000283",
+          "samples": 2,
+          "delta_sum": -0.18721399064720853,
+          "mean_delta": -0.09360699532360427,
+          "gross_improvement_sum": 0.014184610751392879,
+          "gross_regression_magnitude": 0.2013986013986014
+        }
+      ],
+      "leave_one_conversation_out_delta_range": [
+        -4.8394239258003076e-05,
+        0.0004396904370004228
+      ],
+      "leave_largest_net_improvement_conversation_out_delta": -4.8394239258003076e-05,
+      "note": "Top20 fixed descriptive summaries and leave-one-out sensitivity; no new selection gate or new slice."
+    },
+    "format_analysis_inherited": {
+      "support": 2354,
+      "direction": "historical T4 minus selected D4v2",
+      "rouge_metric_regression_count": 1016,
+      "rouge_metric_improvement_count": 1038,
+      "rouge_metric_tie_count": 300,
+      "mean_regressing_delta": -0.035494472135829486,
+      "mean_improving_delta": 0.035232904216093444,
+      "new_issue_counts_in_t4": {
+        "markdown:blockquote": 10,
+        "markdown:list_marker": 69,
+        "markdown:bold": 62,
+        "repeated_sentence": 7,
+        "markdown:heading": 13,
+        "repeated_ngram": 19,
+        "markdown:table_row": 5,
+        "low_cjk": 3,
+        "markdown:link": 1,
+        "near_empty": 1
+      },
+      "resolved_issue_counts_in_t4": {
+        "markdown:bold": 60,
+        "markdown:blockquote": 13,
+        "markdown:list_marker": 47,
+        "markdown:heading": 13,
+        "repeated_ngram": 21,
+        "repeated_sentence": 5,
+        "low_cjk": 1,
+        "near_empty": 5
+      },
+      "interpretation": "Metric/format diagnostics; not human quality judgements or causal attribution."
+    },
+    "review_notes": {
+      "scope": "All fixed Top20 regression and Top20 improvement responses inspected; observations compare only gold/output text, without source conversation context or blind human annotation.",
+      "top20_regression_length_change": {
+        "longer": 11,
+        "shorter": 9,
+        "same": 0
+      },
+      "observed_patterns": [
+        {
+          "sample_ids": [
+            "pp:[\"val_conv_000047\",5,1]",
+            "pp:[\"val_conv_000243\",3,1]"
+          ],
+          "observation": "T4 expands a short listening/closure reference, lowering character overlap; the latter grows from baseline26 to candidate165 stripped characters for gold17. This is not independently a human quality verdict."
+        },
+        {
+          "sample_ids": [
+            "pp:[\"val_conv_000483\",7,1]",
+            "pp:[\"val_conv_000777\",5,1]",
+            "pp:[\"val_conv_000686\",5,1]"
+          ],
+          "observation": "T4 shortens reflective detail to generic listening responses; specific gold themes receive less overlap."
+        },
+        {
+          "sample_ids": [
+            "pp:[\"val_conv_000255\",3,1]"
+          ],
+          "observation": "Largest >200 gain replaces baseline near-empty four-character response with candidate219 characters; a real fixed-text diagnostic gain, insufficient to generalize to the whole long slice."
+        },
+        {
+          "sample_ids": [
+            "pp:[\"val_conv_000373\",5,2]"
+          ],
+          "observation": "Largest >200 regression retains a substantial candidate response (281 vs baseline306 chars) but changes framing/checklist relative to the gold record-versus-worry structure. More length alone does not guarantee overlap improvement."
+        },
+        {
+          "sample_ids": [
+            "pp:[\"val_conv_000555\",5,1]",
+            "pp:[\"val_conv_000381\",19,4]"
+          ],
+          "observation": "Largest improvements also include shorter, reference-aligned listening/closure responses; gains are not uniformly produced by making responses longer."
+        }
+      ],
+      "not_claimed": "No exhaustive semantic taxonomy, hallucination/safety verdict, or causal training explanation from these reference/output triples."
+    }
+  },
+  "slice_stability": {
+    "history_slices": {
+      "short_1_5": {
+        "n": 903,
+        "conversations": 672,
+        "baseline_metrics": {
+          "bleu4_char": 0.10571723887041844,
+          "rouge_l_char_f1": 0.25110268723729046
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.10582081573771596,
+          "rouge_l_char_f1": 0.25086674327707775
+        },
+        "delta": {
+          "bleu4_char": 0.00010357686729751958,
+          "rouge_l_char_f1": -0.00023594396021270336
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 392,
+            "tie": 98,
+            "candidate_worse": 413
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 402,
+            "tie": 101,
+            "candidate_worse": 400
+          }
+        }
+      },
+      "medium_6_15": {
+        "n": 1098,
+        "conversations": 572,
+        "baseline_metrics": {
+          "bleu4_char": 0.11337852544398387,
+          "rouge_l_char_f1": 0.2632454279110739
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.11565079315263761,
+          "rouge_l_char_f1": 0.2640435063278356
+        },
+        "delta": {
+          "bleu4_char": 0.0022722677086537413,
+          "rouge_l_char_f1": 0.0007980784167616606
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 486,
+            "tie": 135,
+            "candidate_worse": 477
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 483,
+            "tie": 148,
+            "candidate_worse": 467
+          }
+        }
+      },
+      "long_16_plus": {
+        "n": 353,
+        "conversations": 185,
+        "baseline_metrics": {
+          "bleu4_char": 0.12538689013684853,
+          "rouge_l_char_f1": 0.2747668611952527
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.12352610945156568,
+          "rouge_l_char_f1": 0.2743309920189637
+        },
+        "delta": {
+          "bleu4_char": -0.0018607806852828507,
+          "rouge_l_char_f1": -0.00043586917628896105
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 148,
+            "tie": 47,
+            "candidate_worse": 158
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 153,
+            "tie": 51,
+            "candidate_worse": 149
+          }
+        }
+      }
+    },
+    "emotion_slices": {
+      "anger": {
+        "n": 115,
+        "conversations": 99,
+        "baseline_metrics": {
+          "bleu4_char": 0.10594832538678318,
+          "rouge_l_char_f1": 0.2519707575334572
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.11077135964226821,
+          "rouge_l_char_f1": 0.25452073804910236
+        },
+        "delta": {
+          "bleu4_char": 0.004823034255485026,
+          "rouge_l_char_f1": 0.002549980515645145
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 53,
+            "tie": 21,
+            "candidate_worse": 41
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 50,
+            "tie": 22,
+            "candidate_worse": 43
+          }
+        }
+      },
+      "anxiety": {
+        "n": 751,
+        "conversations": 504,
+        "baseline_metrics": {
+          "bleu4_char": 0.08947569303740946,
+          "rouge_l_char_f1": 0.22648551074175396
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.09088448407280622,
+          "rouge_l_char_f1": 0.22690605111248022
+        },
+        "delta": {
+          "bleu4_char": 0.0014087910353967614,
+          "rouge_l_char_f1": 0.0004205403707262523
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 349,
+            "tie": 58,
+            "candidate_worse": 344
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 352,
+            "tie": 59,
+            "candidate_worse": 340
+          }
+        }
+      },
+      "care": {
+        "n": 11,
+        "conversations": 10,
+        "baseline_metrics": {
+          "bleu4_char": 0.08647456508762777,
+          "rouge_l_char_f1": 0.2277312435448035
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.08491213156313165,
+          "rouge_l_char_f1": 0.23791726399330593
+        },
+        "delta": {
+          "bleu4_char": -0.0015624335244961152,
+          "rouge_l_char_f1": 0.01018602044850242
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 4,
+            "tie": 2,
+            "candidate_worse": 5
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 7,
+            "tie": 2,
+            "candidate_worse": 2
+          }
+        }
+      },
+      "disgust": {
+        "n": 21,
+        "conversations": 19,
+        "baseline_metrics": {
+          "bleu4_char": 0.0981922089446784,
+          "rouge_l_char_f1": 0.2370288201936925
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.0839627734821564,
+          "rouge_l_char_f1": 0.22064192469001617
+        },
+        "delta": {
+          "bleu4_char": -0.014229435462521992,
+          "rouge_l_char_f1": -0.016386895503676335
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 7,
+            "tie": 1,
+            "candidate_worse": 13
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 7,
+            "tie": 1,
+            "candidate_worse": 13
+          }
+        }
+      },
+      "fear": {
+        "n": 124,
+        "conversations": 112,
+        "baseline_metrics": {
+          "bleu4_char": 0.10333249939006446,
+          "rouge_l_char_f1": 0.2425292674883009
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.10261059372651472,
+          "rouge_l_char_f1": 0.23974452733502896
+        },
+        "delta": {
+          "bleu4_char": -0.0007219056635497378,
+          "rouge_l_char_f1": -0.0027847401532719307
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 51,
+            "tie": 12,
+            "candidate_worse": 61
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 53,
+            "tie": 14,
+            "candidate_worse": 57
+          }
+        }
+      },
+      "gratitude": {
+        "n": 118,
+        "conversations": 105,
+        "baseline_metrics": {
+          "bleu4_char": 0.1475665995364478,
+          "rouge_l_char_f1": 0.32389830728764907
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.1493968979904833,
+          "rouge_l_char_f1": 0.32542760874035853
+        },
+        "delta": {
+          "bleu4_char": 0.0018302984540355116,
+          "rouge_l_char_f1": 0.001529301452709464
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 39,
+            "tie": 33,
+            "candidate_worse": 46
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 39,
+            "tie": 33,
+            "candidate_worse": 46
+          }
+        }
+      },
+      "helplessness": {
+        "n": 142,
+        "conversations": 125,
+        "baseline_metrics": {
+          "bleu4_char": 0.0984584338658659,
+          "rouge_l_char_f1": 0.24582954759281486
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.10355359810426235,
+          "rouge_l_char_f1": 0.25127215078673415
+        },
+        "delta": {
+          "bleu4_char": 0.005095164238396441,
+          "rouge_l_char_f1": 0.005442603193919288
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 69,
+            "tie": 12,
+            "candidate_worse": 61
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 69,
+            "tie": 12,
+            "candidate_worse": 61
+          }
+        }
+      },
+      "joy": {
+        "n": 20,
+        "conversations": 19,
+        "baseline_metrics": {
+          "bleu4_char": 0.07654915911274117,
+          "rouge_l_char_f1": 0.2279561717809205
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.07979023119163405,
+          "rouge_l_char_f1": 0.22712788514192422
+        },
+        "delta": {
+          "bleu4_char": 0.003241072078892876,
+          "rouge_l_char_f1": -0.000828286638996284
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 9,
+            "tie": 0,
+            "candidate_worse": 11
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 10,
+            "tie": 0,
+            "candidate_worse": 10
+          }
+        }
+      },
+      "loneliness": {
+        "n": 115,
+        "conversations": 90,
+        "baseline_metrics": {
+          "bleu4_char": 0.09742333183113794,
+          "rouge_l_char_f1": 0.2337563112816094
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.09188681450212376,
+          "rouge_l_char_f1": 0.23571701917412094
+        },
+        "delta": {
+          "bleu4_char": -0.005536517329014182,
+          "rouge_l_char_f1": 0.001960707892511543
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 46,
+            "tie": 6,
+            "candidate_worse": 63
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 56,
+            "tie": 7,
+            "candidate_worse": 52
+          }
+        }
+      },
+      "mixed": {
+        "n": 177,
+        "conversations": 161,
+        "baseline_metrics": {
+          "bleu4_char": 0.13112729059935554,
+          "rouge_l_char_f1": 0.28011900718274607
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.12691584891023083,
+          "rouge_l_char_f1": 0.27552332021402315
+        },
+        "delta": {
+          "bleu4_char": -0.004211441689124712,
+          "rouge_l_char_f1": -0.004595686968722923
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 72,
+            "tie": 20,
+            "candidate_worse": 85
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 74,
+            "tie": 22,
+            "candidate_worse": 81
+          }
+        }
+      },
+      "neutral": {
+        "n": 53,
+        "conversations": 53,
+        "baseline_metrics": {
+          "bleu4_char": 0.17836272106000622,
+          "rouge_l_char_f1": 0.35616535543816574
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.1834868228433532,
+          "rouge_l_char_f1": 0.35977000547591825
+        },
+        "delta": {
+          "bleu4_char": 0.005124101783346963,
+          "rouge_l_char_f1": 0.0036046500377525104
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 22,
+            "tie": 19,
+            "candidate_worse": 12
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 19,
+            "tie": 20,
+            "candidate_worse": 14
+          }
+        }
+      },
+      "pride": {
+        "n": 40,
+        "conversations": 32,
+        "baseline_metrics": {
+          "bleu4_char": 0.11988913522018203,
+          "rouge_l_char_f1": 0.28491781088193235
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.11278974166889158,
+          "rouge_l_char_f1": 0.26407463393085207
+        },
+        "delta": {
+          "bleu4_char": -0.007099393551290453,
+          "rouge_l_char_f1": -0.02084317695108029
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 13,
+            "tie": 3,
+            "candidate_worse": 24
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 10,
+            "tie": 4,
+            "candidate_worse": 26
+          }
+        }
+      },
+      "relaxed": {
+        "n": 409,
+        "conversations": 353,
+        "baseline_metrics": {
+          "bleu4_char": 0.14571438753137247,
+          "rouge_l_char_f1": 0.3125380637006196
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.14832306871306108,
+          "rouge_l_char_f1": 0.3139343696261343
+        },
+        "delta": {
+          "bleu4_char": 0.00260868118168861,
+          "rouge_l_char_f1": 0.001396305925514707
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 177,
+            "tie": 69,
+            "candidate_worse": 163
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 170,
+            "tie": 77,
+            "candidate_worse": 162
+          }
+        }
+      },
+      "sadness": {
+        "n": 131,
+        "conversations": 111,
+        "baseline_metrics": {
+          "bleu4_char": 0.11516404716362101,
+          "rouge_l_char_f1": 0.25545028160010697
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.11828268504345874,
+          "rouge_l_char_f1": 0.2582081937436328
+        },
+        "delta": {
+          "bleu4_char": 0.003118637879837724,
+          "rouge_l_char_f1": 0.0027579121435258314
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 55,
+            "tie": 13,
+            "candidate_worse": 63
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 61,
+            "tie": 15,
+            "candidate_worse": 55
+          }
+        }
+      },
+      "shame": {
+        "n": 118,
+        "conversations": 90,
+        "baseline_metrics": {
+          "bleu4_char": 0.10199895157625684,
+          "rouge_l_char_f1": 0.24253813666813206
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.09791383575633193,
+          "rouge_l_char_f1": 0.24099206897062111
+        },
+        "delta": {
+          "bleu4_char": -0.004085115819924906,
+          "rouge_l_char_f1": -0.00154606769751095
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 54,
+            "tie": 11,
+            "candidate_worse": 53
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 57,
+            "tie": 12,
+            "candidate_worse": 49
+          }
+        }
+      },
+      "surprise": {
+        "n": 9,
+        "conversations": 8,
+        "baseline_metrics": {
+          "bleu4_char": 0.07784185712421499,
+          "rouge_l_char_f1": 0.20259820028480455
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.09131508175608022,
+          "rouge_l_char_f1": 0.20500246271780775
+        },
+        "delta": {
+          "bleu4_char": 0.013473224631865233,
+          "rouge_l_char_f1": 0.002404262433003207
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 6,
+            "tie": 0,
+            "candidate_worse": 3
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 4,
+            "tie": 0,
+            "candidate_worse": 5
+          }
+        }
+      }
+    },
+    "gold_response_length_slices": {
+      "<=6": {
+        "n": 15,
+        "conversations": 15,
+        "baseline_metrics": {
+          "bleu4_char": 0.34961221643135704,
+          "rouge_l_char_f1": 0.5419432573116783
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.33943776764532146,
+          "rouge_l_char_f1": 0.5334710892775978
+        },
+        "delta": {
+          "bleu4_char": -0.010174448786035573,
+          "rouge_l_char_f1": -0.008472168034080463
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 3,
+            "tie": 10,
+            "candidate_worse": 2
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 4,
+            "tie": 10,
+            "candidate_worse": 1
+          }
+        }
+      },
+      "7-20": {
+        "n": 65,
+        "conversations": 64,
+        "baseline_metrics": {
+          "bleu4_char": 0.3036907458501413,
+          "rouge_l_char_f1": 0.5157584800087299
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.3080655050381468,
+          "rouge_l_char_f1": 0.5141290168865584
+        },
+        "delta": {
+          "bleu4_char": 0.004374759188005506,
+          "rouge_l_char_f1": -0.0016294631221714928
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 14,
+            "tie": 39,
+            "candidate_worse": 12
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 15,
+            "tie": 39,
+            "candidate_worse": 11
+          }
+        }
+      },
+      "21-50": {
+        "n": 298,
+        "conversations": 258,
+        "baseline_metrics": {
+          "bleu4_char": 0.1976534077974109,
+          "rouge_l_char_f1": 0.3965123564103177
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.20167397605523102,
+          "rouge_l_char_f1": 0.4009562321270692
+        },
+        "delta": {
+          "bleu4_char": 0.0040205682578201285,
+          "rouge_l_char_f1": 0.004443875716751533
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 98,
+            "tie": 107,
+            "candidate_worse": 93
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 91,
+            "tie": 108,
+            "candidate_worse": 99
+          }
+        }
+      },
+      "51-100": {
+        "n": 822,
+        "conversations": 492,
+        "baseline_metrics": {
+          "bleu4_char": 0.10720040716846954,
+          "rouge_l_char_f1": 0.26287050979214627
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.1060580724416651,
+          "rouge_l_char_f1": 0.2605185069559111
+        },
+        "delta": {
+          "bleu4_char": -0.0011423347268044448,
+          "rouge_l_char_f1": -0.0023520028362351564
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 334,
+            "tie": 93,
+            "candidate_worse": 395
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 354,
+            "tie": 107,
+            "candidate_worse": 361
+          }
+        }
+      },
+      "101-200": {
+        "n": 626,
+        "conversations": 458,
+        "baseline_metrics": {
+          "bleu4_char": 0.08178382321450706,
+          "rouge_l_char_f1": 0.21390102507152034
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.08261877257135064,
+          "rouge_l_char_f1": 0.21561439517011985
+        },
+        "delta": {
+          "bleu4_char": 0.000834949356843584,
+          "rouge_l_char_f1": 0.0017133700985995093
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 298,
+            "tie": 25,
+            "candidate_worse": 303
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 301,
+            "tie": 29,
+            "candidate_worse": 296
+          }
+        }
+      },
+      ">200": {
+        "n": 528,
+        "conversations": 329,
+        "baseline_metrics": {
+          "bleu4_char": 0.07767737609975058,
+          "rouge_l_char_f1": 0.1950495746384913
+        },
+        "candidate_metrics": {
+          "bleu4_char": 0.07960554497315127,
+          "rouge_l_char_f1": 0.1955777378881592
+        },
+        "delta": {
+          "bleu4_char": 0.001928168873400693,
+          "rouge_l_char_f1": 0.0005281632496678956
+        },
+        "paired": {
+          "bleu4_char": {
+            "candidate_better": 279,
+            "tie": 6,
+            "candidate_worse": 243
+          },
+          "rouge_l_char_f1": {
+            "candidate_better": 273,
+            "tie": 7,
+            "candidate_worse": 248
+          }
+        }
+      }
+    }
+  },
+  "decision": {
+    "effect_direction": "NO_CLEAR_SIGNAL",
+    "adoption_verdict": "NO_GO",
+    "engineering_selection": "KEEP_D4V2",
+    "selection_stability": "SELECTION_STABLE",
+    "reason": "Primary preregistered long-response point estimate remains below +0.01; bootstrap never replaces the gate. Fixed pair shows offsetting improvements/regressions; selection stability is not proof of D4v2 superiority or equivalence.",
+    "new_candidate_selected": false,
+    "thresholds_changed": false
+  },
+  "final_selection_basis": {
+    "emotion": "KEEP_DAY5: reuse T6 independently checked fixed labels; T4 C candidate per-ID comparison remains unavailable in this baseline.",
+    "response": "KEEP_D4V2: historical T4 fails primary adoption gate; retain existing model rather than infer equivalence.",
+    "condition": "OFF: inherited frozen T5 decision; no new condition model or inference in T7.",
+    "profile": "empty: inherited deployment choice; profile v1 internal-only caveat retained, no new profile validation in T7.",
+    "max_new_tokens": "256: inherited matching manifest/report and fixed choice; not a new generation run."
+  },
+  "follow_up_questions": [
+    "Why do longweight gains and regressions offset within and across conversations, leaving the >200 gain far below +0.01?",
+    "Can the next preregistered intervention reduce the fixed top regression patterns and pride/disgust/mixed weaknesses without losing gains elsewhere?",
+    "Can C hand over fixed candidate per-ID predictions/probabilities to permit an independent joint model decision?",
+    "For future strict replay, can the next run archive effective generation_config, tokenizer/template file identities and targeted base preflight evidence at generation time?"
+  ],
+  "provenance_caveats": {
+    "prediction_integrity": "PASS_INHERITED_AND_INPUT_HASHES_MATCHED",
+    "adapter_identity": {
+      "status": "PARTIALLY_CONFIRMED",
+      "adapter_inventory": {
+        "status": "INDEPENDENTLY_VERIFIED_PER_USER_CONFIRMED_FACT",
+        "source": "User confirmed facts in current task; corroborated by historical D T7 freeze check."
+      },
+      "adapter_weights_sha256": {
+        "value": "6b75245a4eddff63da77d260a509028ce85a89c73bef58bda4e33934ca7b767e",
+        "status": "MATCHED_PER_USER_CONFIRMED_FACT",
+        "locally_rehashed_this_run": false
+      },
+      "base_weights_sha256": {
+        "value": "dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee",
+        "status": "HISTORICAL_PREFLIGHT_RECORDED_PER_USER_CONFIRMED_FACT",
+        "local_actual_preflight_file_available": false
+      },
+      "historical_code_fingerprint": "MATCHED_AT_64be735",
+      "full_runtime_base_directory_mapping": "UNRESOLVED_NON_BLOCKING_FOR_TEXT_EVALUATION",
+      "runtime_tokenizer_chat_template": "PARTIAL_HISTORICAL_CORROBORATION; exact generation-time base mapping not independently established",
+      "full_identity_acceptance": "NOT_VERIFIED"
+    },
+    "base_historical_preflight": "AVAILABLE_PER_T6_CONFIRMED_FACT",
+    "full_base_tree": "UNRECOVERABLE_IN_EXISTING_EVIDENCE",
+    "repetition_penalty": null,
+    "repetition_penalty_status": "UNKNOWN",
+    "tokenizer_template_binding": "PARTIALLY_CONFIRMED",
+    "generation_reproducibility": "NOT_FULLY_VERIFIED",
+    "formal_frozen_configuration_acceptance": {
+      "status": "BLOCKED",
+      "blocker": "HISTORICAL_RUNTIME_CONFIG_NOT_FULLY_VERIFIED",
+      "scope": "Unqualified acceptance that archived generation exactly implements all frozen tokenizer/template and effective decoding settings.",
+      "minimum_remaining_evidence": "Targeted existing tokenizer/template/config identity evidence and effective repetition_penalty source, or explicit owner acceptance of those reproducibility caveats; full directory inventory is not a universal prerequisite.",
+      "classification_freeze": "PENDING_SEPARATE_C_T6_HANDOFF",
+      "blocks_prediction_evaluation": false,
+      "policy": "Resume fingerprint rules remain enforced for generation/resume. They do not forbid descriptive scoring of immutable archived predictions."
+    },
+    "impact": "Does not change archived text metrics or T7 completion; limits strict historical replay, causal attribution and unqualified configuration acceptance."
+  },
+  "input_fingerprints": {
+    "results/response_gen/d4v2_val_newcard.jsonl": {
+      "path": "results/response_gen/d4v2_val_newcard.jsonl",
+      "raw_sha256": "a55274d3d3792dc1df28a2fb797a6b10b18e8688ce6c01eb1cfb24a94acf2b34",
+      "lf_sha256": "1cfd430149c31d89a827dacb7e75e3e0eb6cab05a2abb8863f74871bd7520ce2",
+      "bytes": 1054052
+    },
+    "results/response_gen/t4_longweight_val_newcard.jsonl": {
+      "path": "results/response_gen/t4_longweight_val_newcard.jsonl",
+      "raw_sha256": "f0d2cbd7426bb7aa42f0e58ac40e3c9675812fcf01ec0b81dcc6e9f65cb377bd",
+      "lf_sha256": "e55c2c17b826b67489e15827ad29f0add4bbd5b823512ef58753f3411bf5d19f",
+      "bytes": 1073544
+    },
+    "data/processed/b1_full_v1/response_val.jsonl": {
+      "path": "data/processed/b1_full_v1/response_val.jsonl",
+      "raw_sha256": "ddf76588ee2be4912b7c7bd5e9070ef1a9bc967e59378b911f13cf2cfc3078e2",
+      "lf_sha256": "ddf76588ee2be4912b7c7bd5e9070ef1a9bc967e59378b911f13cf2cfc3078e2",
+      "bytes": 18822219
+    },
+    "data/processed/b1_full_v1/classification_val.jsonl": {
+      "path": "data/processed/b1_full_v1/classification_val.jsonl",
+      "raw_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+      "lf_sha256": "30159857e5e65614fcde6f236f1c1b1a51ab6b1f6d8b7ffcd4fbf807f5f07201",
+      "bytes": 17646483
+    },
+    "reports/B_T5_INDEPENDENT_REVIEW.md": {
+      "path": "reports/B_T5_INDEPENDENT_REVIEW.md",
+      "raw_sha256": "f382bedd9d3b0fb08de94e228772b325266f780014afc58a955a8f61f06bccbe",
+      "lf_sha256": "fafb30a39c9f85cdeef22821eda7017906f4bc6c28f100806eb54af7ca39a865",
+      "bytes": 19182
+    },
+    "reports/b_t5_independent_review.json": {
+      "path": "reports/b_t5_independent_review.json",
+      "raw_sha256": "2baf747c09ce6351949ac93985a0d7ddaecfded57f431ead1c86d829e50735c3",
+      "lf_sha256": "ba7ba58bd1fa363b99179f87b13a74e38bf0eaa20f93e5370e599a8f4d0cca1d",
+      "bytes": 112296
+    },
+    "reports/B_T6_INDEPENDENT_REVIEW.md": {
+      "path": "reports/B_T6_INDEPENDENT_REVIEW.md",
+      "raw_sha256": "bc5bd0dfdf40683ef4d2536c95ba88d7bef07dd0a73780b6d4162400028dbe72",
+      "lf_sha256": "866f1eb66f4bbfe253ce8b25a8118416bfa26142bbe449fd632c59fd7c950373",
+      "bytes": 13395
+    },
+    "reports/b_t6_independent_review.json": {
+      "path": "reports/b_t6_independent_review.json",
+      "raw_sha256": "9cca50eb5e179a2712d8d47dc6bebda3f2ea99acf4e9265af94e3e2e3b6bb314",
+      "lf_sha256": "c85274a95bea551a3581d1a33e21ead1e91a7fe10b36a76a3d778e2e8e0fd869",
+      "bytes": 116627
+    },
+    "src/evaluation/metrics.py": {
+      "path": "src/evaluation/metrics.py",
+      "raw_sha256": "acd2ca1f4a0ef4ea7db445d6bbf46f88272a5adaf2ced48cf8b018ea6353c064",
+      "lf_sha256": "c2d65475820844e42f0b9d50a2681840c1a209fc71addcab2a7ea52e91f84724",
+      "bytes": 1927
+    },
+    "src/response/error_analysis.py": {
+      "path": "src/response/error_analysis.py",
+      "raw_sha256": "75c91a84f38a776e4a863f5982a1c56b050c5eee27f70b661d6ece6849c27cc4",
+      "lf_sha256": "2ff10b9a1a0d23f9cb9489773870e64bd5eae0e9b081b82002fb652eae86d768",
+      "bytes": 2844
+    },
+    "scripts/b_t1_profile_diagnostics.py": {
+      "path": "scripts/b_t1_profile_diagnostics.py",
+      "raw_sha256": "0e989f8d8707ff13a7c329a42811597f61afb3a53235f9a8473324eda42500ef",
+      "lf_sha256": "ed905b6f450bd6656aa21d9bb16aeadced9fb39c77b912c185ebe457bd2deb2e",
+      "bytes": 47632
+    }
+  },
+  "execution_source": {
+    "path": ".codex_tmp/acceptance/cycle2/b_t7_20261104/evaluate.py",
+    "raw_sha256": "498638d24077fe8af0ea24cee96cd06ffb20dc6fca396e6484cdcd66f3582e80",
+    "lf_sha256": "498638d24077fe8af0ea24cee96cd06ffb20dc6fca396e6484cdcd66f3582e80",
+    "bytes": 20224
+  },
+  "local_evidence": {
+    "per_sample_scores": ".codex_tmp/acceptance/cycle2/b_t7_20261104/per_sample_scores.json",
+    "bootstrap_replicates": {
+      "path": ".codex_tmp/acceptance/cycle2/b_t7_20261104/bootstrap_replicates.json",
+      "raw_sha256": "0a55214fe2897a032eb2286e8c69c8e559098da47687ed8a495aeb07d5d22f34",
+      "lf_sha256": "c4ccd324da918e7ff439f0aed2ce9987f2d4f190a2541c959f8f9b7ee7d637ff",
+      "bytes": 668597
+    }
+  },
+  "operations": {
+    "CPU_only": true,
+    "training": false,
+    "GPU": false,
+    "prediction_generation": false,
+    "prediction_modification": false,
+    "T5_T6_report_modification": false,
+    "git_writes": false
+  },
+  "slice_stability_assessment": {
+    "history": "Medium history small positive; short/long history small negative. No uniform improvement.",
+    "emotion_regression": [
+      "pride n40 delta -0.0208431770 W/T/L10/4/26",
+      "disgust n21 delta -0.0163868955 W/T/L7/1/13",
+      "mixed n177 delta -0.0045956870 W/T/L74/22/81"
+    ],
+    "emotion_improvement": [
+      "helplessness n142 delta +0.0054426032 W/T/L69/12/61",
+      "care n11 delta +0.0101860204 W/T/L7/2/2; too small to override gate"
+    ],
+    "gold_length": "21-50 and 101-200 improve on average; 51-100 regresses; >200 gain remains very small with near-balanced paired outcomes.",
+    "scope": "Descriptive T6 slices only, no per-slice bootstrap significance claim or multiplicity-controlled hypothesis tests.",
+    "changes_shortlist": false
+  },
+  "validation": {
+    "new_T7_tests": {
+      "status": "PASS",
+      "count": 7,
+      "log": ".codex_tmp/acceptance/cycle2/b_t7_20261104/t7_tests.log"
+    },
+    "related_tests": {
+      "status": "PASS",
+      "count": 33,
+      "log": ".codex_tmp/acceptance/cycle2/b_t7_20261104/related_tests.log"
+    },
+    "compileall": {
+      "status": "PASS",
+      "log": ".codex_tmp/acceptance/cycle2/b_t7_20261104/compileall.log"
+    },
+    "CI_smoke": {
+      "status": "PASS",
+      "log": ".codex_tmp/acceptance/cycle2/b_t7_20261104/ci_smoke.log"
+    },
+    "JSON_parse": "PASS",
+    "Markdown_JSON_consistency": "PASS",
+    "git_diff_check": "PASS",
+    "protected_input_hashes": "PASS",
+    "T5_T6_unchanged": "PASS",
+    "known_full_suite": "Prior full suite has Windows Bash/Unix environment/dependency failures and skips; not rerun, not represented as passing.",
+    "bootstrap_tests": "Unequal cluster sizes and mixed long/nonlong clusters match expanded-raw-text metric oracle; fixed seed/order, identical-arm zero, sign/ID rankings, percentile/probability and empty-long draw handling tested."
+  },
+  "supporting_code": [
+    {
+      "path": ".codex_tmp/acceptance/cycle2/b_t7_20261104/evaluate.py",
+      "sha256": "498638d24077fe8af0ea24cee96cd06ffb20dc6fca396e6484cdcd66f3582e80"
+    },
+    {
+      "path": ".codex_tmp/acceptance/cycle2/b_t7_20261104/test_t7.py",
+      "sha256": "3b7f61669a6bdd5d8fd56d96371a4457eda7ab85d957324e638419cf028f8e21"
+    },
+    {
+      "path": ".codex_tmp/acceptance/cycle2/b_t7_20261104/write_reports.py",
+      "sha256": "08010c1ee227f896a4d4c81eb12339091c619f9aaa06e44ce5038d8b3b30f7e1"
+    }
+  ]
+}
